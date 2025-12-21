@@ -8,6 +8,7 @@ import ThemeToggle from "./themeToggle/ThemeToggle";
 
 function App() {
   const { theme, setTheme } = useTheme();
+  console.log("API_BASE:", import.meta.env.VITE_API_BASE);
 
   return (
     <div className="app-layout">

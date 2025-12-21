@@ -1,3 +1,4 @@
+// src/api/documentsClient.ts
 import { apiUrl } from "./base";
 
 export type DocumentItem = {
@@ -11,9 +12,26 @@ export type DocumentItem = {
 export type DocumentInput = Omit<DocumentItem, "id">;
 
 async function readJson<T>(res: Response): Promise<T> {
-  if (res.ok) return (await res.json()) as T;
-  const text = await res.text();
-  throw new Error(text || `Request failed: ${res.status}`);
+  // DELETE 204 (No Content) or empty body
+  if (res.status === 204) return undefined as T;
+
+  const contentType = res.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
+
+  if (res.ok) {
+    if (!isJson) {
+      // if backend ever returns plain text successfully
+      const text = await res.text();
+      return text as unknown as T;
+    }
+    return (await res.json()) as T;
+  }
+
+  // error branch
+  const errorText = isJson
+    ? JSON.stringify(await res.json())
+    : await res.text();
+  throw new Error(errorText || `Request failed: ${res.status}`);
 }
 
 export async function listDocuments(): Promise<DocumentItem[]> {
@@ -51,7 +69,9 @@ export async function updateDocument(
 
 export async function deleteDocument(id: number): Promise<{ ok: true }> {
   const res = await fetch(apiUrl(`/api/documents/${id}`), { method: "DELETE" });
-  return readJson<{ ok: true }>(res);
+  if (res.status === 204) return { ok: true };
+  await readJson<unknown>(res); // will throw if not ok
+  return { ok: true };
 }
 
 export async function exportDocuments(): Promise<unknown> {
@@ -62,7 +82,7 @@ export async function exportDocuments(): Promise<unknown> {
 export async function importDocumentsBulk(
   mode: "merge" | "replace",
   documents: unknown
-) {
+): Promise<unknown> {
   const res = await fetch(apiUrl("/api/documents/import-bulk"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },

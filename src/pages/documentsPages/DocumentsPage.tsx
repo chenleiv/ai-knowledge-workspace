@@ -78,14 +78,18 @@ export default function DocumentsPage() {
 
   const load = useCallback(async () => {
     setError(null);
+
     try {
       const data = await listDocuments();
       setDocs(data);
 
-      const nextOrder = normalizeOrder(order, data);
-      setOrder(nextOrder);
-      saveJson(ORDER_KEY, nextOrder);
+      setOrder((prev) => {
+        const nextOrder = normalizeOrder(prev, data);
+        saveJson(ORDER_KEY, nextOrder);
+        return nextOrder;
+      });
 
+      // favorites נשאר כמו שזה (זה בסדר)
       const ids = new Set(data.map((d) => d.id));
       setFavorites((prev) => {
         const next: Record<number, boolean> = {};
@@ -99,7 +103,7 @@ export default function DocumentsPage() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load documents");
     }
-  }, [order]);
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

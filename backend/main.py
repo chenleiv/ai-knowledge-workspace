@@ -1,26 +1,36 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Literal, Optional, Dict
-from lib.retrieval import retrieve_top_docs
-from lib.persistence import load_documents, save_documents
-from fastapi.responses import JSONResponse
-
+from typing import List, Literal, Optional, Dict, Any
 from pathlib import Path
-from fastapi.responses import FileResponse
+import os
+import json
+
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+
+from lib.retrieval import retrieve_top_docs
+from lib.persistence import load_documents, save_documents, seed_documents_if_empty
+
 
 app = FastAPI()
 
+# ---- CORS ----
+frontend_url = os.getenv("FRONTEND_URL")  # e.g. https://your-frontend.onrender.com
+allow_origins = ["http://localhost:5173"]
+if frontend_url:
+    allow_origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
+# ---- Models ----
 class ChatMessage(BaseModel):
     role: Literal["user", "assistant"]
     text: str
@@ -54,16 +64,43 @@ class Document(DocumentBase):
     id: int
 
 
-class ImportRequest(BaseModel):
-    filename: str
-    category: str
-    content: str
+class BulkImportBody(BaseModel):
+    mode: Literal["merge", "replace"]
+    documents: List[Dict[str, Any]]
 
 
-class BulkImportRequest(BaseModel):
-    documents: list[Document]
+# ---- Seed on startup ----
+SEED_FILE = Path(__file__).resolve().parent / "data" / "seed_documents.json"
 
 
+@app.on_event("startup")
+def seed_on_startup():
+    if SEED_FILE.exists():
+        try:
+            seed = json.loads(SEED_FILE.read_text(encoding="utf-8"))
+            if isinstance(seed, list):
+                seeded = seed_documents_if_empty(seed)
+                if seeded:
+                    print("✅ Seeded initial documents from seed_documents.json")
+        except Exception as e:
+            print(f"⚠️ Failed to seed: {e}")
+
+
+# ---- Helpers ----
+def _load_db() -> Dict[int, Document]:
+    docs = load_documents()
+    return {d.id: Document(**d.model_dump()) for d in docs}
+
+
+def _save_db(db: Dict[int, Document]) -> None:
+    save_documents([Document(**d.model_dump()) for d in db.values()])
+
+
+def _next_id(db: Dict[int, Document]) -> int:
+    return (max(db.keys()) + 1) if db else 1
+
+
+# ---- Documents API ----
 @app.get("/api/documents/export")
 def export_documents():
     db = _load_db()
@@ -72,25 +109,40 @@ def export_documents():
     return JSONResponse(content=payload)
 
 
-@app.post("/api/documents/import-bulk", response_model=list[Document])
-def import_documents_bulk(payload: list[Document]):
-    # Replace mode only: overwrite everything with the uploaded list
-    db: Dict[int, Document] = {doc.id: doc for doc in payload}
+@app.post("/api/documents/import-bulk", response_model=List[Document])
+def import_documents_bulk(body: BulkImportBody):
+    db = _load_db()
+
+    if body.mode == "replace":
+        db = {}
+
+    next_id = _next_id(db)
+
+    for raw in body.documents:
+        # allow files with or without id
+        raw_id = raw.get("id")
+        try:
+            base = DocumentBase(**raw)
+        except Exception:
+            # skip invalid items silently (or raise if you prefer)
+            continue
+
+        if (
+            isinstance(raw_id, int)
+            and raw_id > 0
+            and raw_id not in db
+            and body.mode == "replace"
+        ):
+            doc_id = raw_id
+        else:
+            # merge mode or collisions -> allocate fresh ids
+            doc_id = next_id
+            next_id += 1
+
+        db[doc_id] = Document(id=doc_id, **base.model_dump())
+
     _save_db(db)
     return list(db.values())
-
-
-def _load_db() -> Dict[int, Document]:
-    docs = load_documents()
-    return {d.id: d for d in docs}
-
-
-def _save_db(db: Dict[int, Document]) -> None:
-    save_documents(list(db.values()))
-
-
-def _next_id(db: Dict[int, Document]) -> int:
-    return (max(db.keys()) + 1) if db else 1
 
 
 @app.get("/api/documents", response_model=List[Document])
@@ -158,6 +210,7 @@ def delete_document(doc_id: int):
     return
 
 
+# ---- Chat API ----
 @app.post("/api/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
     hits = retrieve_top_docs(req.question, top_k=3)
@@ -181,7 +234,6 @@ def chat(req: ChatRequest):
 
     lines.append("")
     lines.append("Short snippets from sources:")
-
     for h in hits:
         lines.append(f"- {h['snippet']}")
 
@@ -192,6 +244,7 @@ def chat(req: ChatRequest):
     }
 
 
+# ---- Serve SPA (optional) ----
 DIST_DIR = Path(__file__).resolve().parent.parent / "dist"
 INDEX_FILE = DIST_DIR / "index.html"
 

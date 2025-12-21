@@ -16,7 +16,10 @@ from lib.persistence import load_documents, save_documents, seed_documents_if_em
 app = FastAPI()
 
 # ---- CORS ----
-frontend_url = os.getenv("FRONTEND_URL")  # e.g. https://your-frontend.onrender.com
+frontend_url = (
+    os.getenv("FRONTEND_URL") or ""
+).strip()  # e.g. https://your-frontend.onrender.com
+
 allow_origins = ["http://localhost:5173"]
 if frontend_url:
     allow_origins.append(frontend_url)
@@ -24,7 +27,7 @@ if frontend_url:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
-    allow_credentials=True,
+    allow_credentials=False,  # ✅ more secure for tokenless / cookie-less setup
     allow_methods=["*"],
     allow_headers=["*"],
 )

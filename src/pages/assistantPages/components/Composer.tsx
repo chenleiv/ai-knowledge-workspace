@@ -28,7 +28,7 @@ export default function Composer({ value, disabled, onChange, onSend }: Props) {
       />
       <button
         type="button"
-        className="primery-btn"
+        className="send-btn"
         onClick={onSend}
         disabled={disabled}
       >

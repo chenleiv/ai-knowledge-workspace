@@ -27,43 +27,19 @@ export default function PageActionsMenu({
         ⋯
       </button>
 
-      <Menu open={open} onClose={onClose}>
-        <button
-          className="menu-item"
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            onExport();
-            onClose();
-          }}
-        >
-          Export JSON
-        </button>
-
-        <button
-          className="menu-item"
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            onImport("merge");
-            onClose();
-          }}
-        >
-          Import JSON (Merge)
-        </button>
-
-        <button
-          className="menu-item danger"
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            onImport("replace");
-            onClose();
-          }}
-        >
-          Import JSON (Replace)
-        </button>
-      </Menu>
+      <Menu
+        open={open}
+        onClose={onClose}
+        items={[
+          { label: "Export JSON", onClick: onExport },
+          { label: "Import JSON (Merge)", onClick: () => onImport("merge") },
+          {
+            label: "Import JSON (Replace)",
+            danger: true,
+            onClick: () => onImport("replace"),
+          },
+        ]}
+      />
     </div>
   );
 }

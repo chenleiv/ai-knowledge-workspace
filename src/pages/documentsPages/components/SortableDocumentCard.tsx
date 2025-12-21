@@ -94,19 +94,17 @@ export default function SortableDocumentCard({
               ⋯
             </button>
 
-            <Menu open={isMenuOpen} onClose={onCloseMenu}>
-              <button
-                type="button"
-                className="menu-item danger"
-                role="menuitem"
-                onClick={() => {
-                  onCloseMenu();
-                  onDelete(doc);
-                }}
-              >
-                Delete
-              </button>
-            </Menu>
+            <Menu
+              open={isMenuOpen}
+              onClose={onCloseMenu}
+              items={[
+                {
+                  label: "Delete",
+                  danger: true,
+                  onClick: () => onDelete(doc),
+                },
+              ]}
+            />
           </div>
         </div>
       </div>

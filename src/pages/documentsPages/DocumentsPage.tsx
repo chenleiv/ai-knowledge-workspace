@@ -106,11 +106,6 @@ export default function DocumentsPage() {
     void load(); // initial data fetch
   }, [load]);
 
-  function closeAllMenus() {
-    setOpenMenuId(null);
-    setPageMenuOpen(false);
-  }
-
   function openDoc(doc: DocumentItem) {
     navigate(`/documents/${doc.id}`);
   }
@@ -265,7 +260,7 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="documents-page" onClick={closeAllMenus} role="presentation">
+    <div className="documents-page" role="presentation">
       <DocumentsHeader
         onNew={openCreate}
         pageMenuOpen={pageMenuOpen}

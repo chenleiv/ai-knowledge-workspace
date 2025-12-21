@@ -38,7 +38,7 @@
 .meta {
     margin-top: 6px;
     color: var(--muted);
-    font-size: 0.95rem;
+    font-size: 14px;
 }
 
 .section {
@@ -46,22 +46,18 @@
 }
 
 .label {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-bottom: 6px;
+    font-size: 16px;
+    color: var(--text);
+    font-weight: 500;
 }
 
 .text {
     white-space: pre-wrap;
     line-height: 1.55;
-    color: var(--text);
+    color: var(--secondery-text);
 
-    &.content {
-        padding: 12px;
-        border-radius: 14px;
-        background: var(--soft);
-        border: 1px solid var(--border);
-    }
+    padding: 2px 8px;
+    border-radius: 14px;
 }
 
 .form {

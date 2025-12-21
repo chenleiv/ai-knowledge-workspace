@@ -55,6 +55,7 @@ export default function DocumentDetailsPage() {
 
     if (!Number.isFinite(docId)) {
       setError("Invalid document id.");
+      setLoading(false);
       return;
     }
 

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import "./menu.scss";
 
 export type MenuItem = {
@@ -24,10 +25,40 @@ export default function Menu({
   align = "right",
   minWidth = 180,
 }: Props) {
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+
+    const onPointerDown = (e: MouseEvent | PointerEvent) => {
+      const el = menuRef.current;
+      if (!el) return;
+
+      // click outside closes
+      if (!el.contains(e.target as Node)) onClose();
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
     <div
+      ref={menuRef}
       className={`menu ${align === "left" ? "left" : "right"}`}
       role="menu"
       style={{ minWidth }}

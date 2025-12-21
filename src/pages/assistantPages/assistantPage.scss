@@ -236,16 +236,25 @@
     }
   }
 
-  .primery-btn {
-    padding: 0.6rem 1rem;
+  .send-btn {
+    background: var(--soft-2);
+    color: var(--secondery-text);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
     border-radius: 999px;
-    border: 1px solid transparent;
     cursor: pointer;
 
-    &:disabled {
-      opacity: 0.6;
-      cursor: default;
+    &:hover:not(:disabled) {
+      background: var(--primary);
+      border-color: var(--border);
     }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+
   }
 }
 

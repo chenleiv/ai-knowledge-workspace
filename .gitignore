@@ -21,7 +21,9 @@ backend/storage/documents.json
 
 .env
 .env.*
-!.env.example
+!.env.example\
+.env.local
+.env.*.local
 
 .vscode/*
 !.vscode/extensions.json

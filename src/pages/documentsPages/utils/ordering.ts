@@ -36,3 +36,12 @@ export function makePreview(doc: DocumentItem, max = 160) {
   if (!base) return "";
   return base.length > max ? base.slice(0, max) + "…" : base;
 }
+
+export function sameArray(a: number[], b: number[]): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}

@@ -29,7 +29,12 @@ import { DragOverlay } from "@dnd-kit/core";
 
 import DocumentsHeader from "./components/DocumentsHeader";
 import SortableDocumentCard from "./components/SortableDocumentCard";
-import { applyOrder, normalizeOrder, makePreview } from "./utils/ordering";
+import {
+  applyOrder,
+  normalizeOrder,
+  makePreview,
+  sameArray,
+} from "./utils/ordering";
 import { loadJson, saveJson } from "./utils/storage";
 
 const ORDER_KEY = "documentsOrder";
@@ -78,32 +83,19 @@ export default function DocumentsPage() {
 
   const load = useCallback(async () => {
     setError(null);
-
     try {
       const data = await listDocuments();
       setDocs(data);
 
-      setOrder((prev) => {
-        const nextOrder = normalizeOrder(prev, data);
+      const nextOrder = normalizeOrder(order, data);
+      if (!sameArray(nextOrder, order)) {
+        setOrder(nextOrder);
         saveJson(ORDER_KEY, nextOrder);
-        return nextOrder;
-      });
-
-      // favorites נשאר כמו שזה (זה בסדר)
-      const ids = new Set(data.map((d) => d.id));
-      setFavorites((prev) => {
-        const next: Record<number, boolean> = {};
-        for (const idStr of Object.keys(prev)) {
-          const id = Number(idStr);
-          if (ids.has(id) && prev[id]) next[id] = true;
-        }
-        saveJson(FAVORITES_KEY, next);
-        return next;
-      });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load documents");
     }
-  }, []);
+  }, [order]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

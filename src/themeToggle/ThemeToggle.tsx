@@ -1,5 +1,5 @@
 import { type Theme } from "../hooks/useTheme";
-import "./ThemeToggle.scss";
+import "./themeToggle.scss";
 
 interface Props {
   value: Theme;

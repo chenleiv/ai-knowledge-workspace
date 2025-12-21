@@ -1,0 +1,50 @@
+:root {
+    --bg: #f7f7f8;
+    --panel: #ffffff;
+    --card: #ffffff;
+
+    --soft: #f1f1f2;
+    --soft-2: #e9e9eb;
+
+    --soft-3: #111113c8;
+
+    --text: #111113;
+    --secondery-text: #f2f2f3;
+    --muted: #6b6b73;
+
+    --border: #e3e3e6;
+    --shadow: rgba(0, 0, 0, 0.08);
+    --overlay: rgba(0, 0, 0, 0.35);
+
+    --focus: rgba(0, 0, 0, 0.12);
+
+    --danger-bg: rgba(220, 38, 38, 0.08);
+    --danger-border: rgba(220, 38, 38, 0.18);
+    --danger-text: #991b1b;
+
+    /* Keep existing primary for links if needed */
+    --primary: #007aff;
+}
+
+[data-theme="dark"] {
+    --bg: #1f1f1f;
+    --panel: #161616c9;
+    --card: #171719;
+
+    --soft: #1f1f22;
+    --soft-2: #26262a;
+    --soft-3: #f2f2f3ba;
+
+    --text: #f2f2f3;
+    --secondery-text: #f2f2f3;
+    --muted: #a1a1aa;
+    --border: #2a2a2f;
+    --shadow: rgba(0, 0, 0, 0.55);
+    --overlay: rgba(0, 0, 0, 0.65);
+
+    --focus: rgba(255, 255, 255, 0.14);
+
+    --danger-bg: rgba(255, 80, 80, 0.12);
+    --danger-border: rgba(255, 80, 80, 0.25);
+    --danger-text: #ffb4b4;
+}

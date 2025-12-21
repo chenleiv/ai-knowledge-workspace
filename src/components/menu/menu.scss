@@ -1,0 +1,53 @@
+.menu-wrap {
+    position: relative;
+}
+
+.menu {
+    position: absolute;
+    top: 100%;
+    margin-top: 0.35rem;
+
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 10px 28px var(--shadow);
+    padding: 0.25rem;
+    z-index: 50;
+}
+
+.menu.right {
+    right: 0;
+}
+
+.menu.left {
+    left: 0;
+}
+
+.menu-item {
+    width: 100%;
+    text-align: left;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.menu-item:hover {
+    background: var(--soft);
+}
+
+.menu-item:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.menu-item.danger {
+    color: var(--danger-text);
+}
+
+.menu-item.danger:hover {
+    background: var(--danger-bg);
+}

@@ -1,0 +1,23 @@
+.documents-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.documents-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.documents-header .subtitle {
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

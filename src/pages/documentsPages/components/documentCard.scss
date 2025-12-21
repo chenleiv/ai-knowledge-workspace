@@ -1,0 +1,97 @@
+.doc-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease,
+        transform 0.15s ease, background 0.15s ease;
+}
+
+.doc-card:hover {
+    border-color: rgba(127, 127, 127, 0.3);
+    background: var(--soft);
+    box-shadow: 0 10px 24px var(--shadow);
+}
+
+.doc-card.is-dragging {
+    opacity: 0.7;
+}
+
+.doc-card.is-overlay {
+    box-shadow: 0 18px 36px var(--shadow);
+}
+
+/* Header */
+.doc-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.drag-handle {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: grab;
+    font-size: 1rem;
+    padding: 0 0.25rem;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.doc-header-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.doc-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.doc-meta {
+    font-size: 0.7rem;
+    color: var(--muted);
+}
+
+/* Actions (favorite + ⋯) */
+.doc-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* tiny icon buttons inside cards */
+.doc-actions .icon-btn {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.2rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.doc-actions .icon-btn:hover {
+    background: var(--soft-2);
+}
+
+.doc-actions .icon-btn.active {
+    color: var(--text);
+}
+
+.doc-preview {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.4;
+}

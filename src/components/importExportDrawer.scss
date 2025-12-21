@@ -1,0 +1,144 @@
+.drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--overlay);
+    display: flex;
+    justify-content: flex-end;
+    z-index: 999;
+}
+
+.drawer {
+    width: min(560px, 95vw);
+    height: 100%;
+    background: var(--panel);
+    color: var(--text);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    overflow: auto;
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+
+    h3 {
+        margin: 0;
+    }
+
+    .subtitle {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+}
+
+.icon-close {
+    border: 1px solid var(--border);
+    background: var(--soft);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.drawer-section {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+
+    h4 {
+        margin: 0 0 6px;
+    }
+
+    .hint {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+}
+
+.drawer-error {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    color: var(--danger-text);
+}
+
+.mode-row {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0 10px;
+}
+
+.mode-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 8px 12px;
+    cursor: pointer;
+    user-select: none;
+
+    input {
+        width: 16px;
+        height: 16px;
+    }
+
+    &.active {
+        background: var(--soft);
+    }
+
+    &.danger.active {
+        border-color: var(--danger-border);
+    }
+}
+
+.danger-note {
+    border: 1px solid var(--danger-border);
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+}
+
+.file-pick {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    background: var(--soft);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 8px 12px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.drawer textarea {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    padding: 10px 12px;
+    outline: none;
+    resize: vertical;
+
+    &::placeholder {
+        color: var(--muted);
+    }
+}
+
+.import-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}

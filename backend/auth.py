@@ -1,50 +1,31 @@
-# auth.py
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from jose import jwt
-from passlib.context import CryptContext
 from pydantic import BaseModel
+
+from lib.users import (
+    seed_users_if_empty,
+    load_users,
+    find_by_email,
+    verify_password,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-# -------------------------
-# Config
-# -------------------------
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret-change-me")
 JWT_ALG = "HS256"
 ACCESS_TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_MINUTES", "60"))
 
-ENV = os.getenv("ENV", "dev")  # set "prod" on Render
+ENV = os.getenv("ENV", "dev")  # set to "prod" on Render
 COOKIE_NAME = "access_token"
-COOKIE_SECURE = ENV == "prod"  # True on HTTPS (Render)
-COOKIE_SAMESITE: Literal["lax", "strict"] = "lax"
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# -------------------------
-# Demo Users (env-based) - recommended
-# -------------------------
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@demo.com")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
-VIEWER_EMAIL = os.getenv("VIEWER_EMAIL", "viewer@demo.com")
-VIEWER_PASSWORD = os.getenv("VIEWER_PASSWORD", "viewer123")
-
-# NOTE: These hashes are created at runtime.
-DEMO_USERS = {
-    ADMIN_EMAIL: {"password_hash": pwd_context.hash(ADMIN_PASSWORD), "role": "admin"},
-    VIEWER_EMAIL: {
-        "password_hash": pwd_context.hash(VIEWER_PASSWORD),
-        "role": "viewer",
-    },
-}
+COOKIE_SECURE = ENV == "prod"
+COOKIE_SAMESITE: Literal["lax", "none"] = "none" if ENV == "prod" else "lax"
 
 
-# -------------------------
-# Models
-# -------------------------
 class LoginBody(BaseModel):
     email: str
     password: str
@@ -59,9 +40,6 @@ class LoginResponse(BaseModel):
     user: AuthUser
 
 
-# -------------------------
-# Helpers
-# -------------------------
 def _create_access_token(email: str, role: str) -> str:
     now = datetime.now(timezone.utc)
     exp = now + timedelta(minutes=ACCESS_TOKEN_MINUTES)
@@ -72,15 +50,6 @@ def _create_access_token(email: str, role: str) -> str:
         "exp": exp,
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
-
-
-def _verify_user(email: str, password: str) -> Optional[AuthUser]:
-    u = DEMO_USERS.get(email)
-    if not u:
-        return None
-    if not pwd_context.verify(password, u["password_hash"]):
-        return None
-    return AuthUser(email=email, role=u["role"])
 
 
 def get_current_user(request: Request) -> AuthUser:
@@ -107,17 +76,21 @@ def require_admin(user: AuthUser = Depends(get_current_user)) -> AuthUser:
     return user
 
 
-# -------------------------
-# Routes
-# -------------------------
+@router.on_event("startup")
+def _seed_users():
+    # creates storage/users.json if missing + seeds demo users from env
+    seed_users_if_empty()
+
+
 @router.post("/login", response_model=LoginResponse)
 def login(body: LoginBody, response: Response):
     email = body.email.strip().lower()
-    user = _verify_user(email, body.password)
-    if not user:
+    users = load_users()
+    u = find_by_email(users, email)
+    if not u or not verify_password(body.password, u.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = _create_access_token(user.email, user.role)
+    token = _create_access_token(u.email, u.role)
 
     response.set_cookie(
         key=COOKIE_NAME,
@@ -128,7 +101,7 @@ def login(body: LoginBody, response: Response):
         path="/",
         max_age=ACCESS_TOKEN_MINUTES * 60,
     )
-    return {"user": user}
+    return {"user": AuthUser(email=u.email, role=u.role)}
 
 
 @router.post("/logout")

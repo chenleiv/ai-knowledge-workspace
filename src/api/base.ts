@@ -1,4 +1,3 @@
-// src/api/base.ts
 import { getApiBase } from "./config";
 
 export class ApiError extends Error {
@@ -12,10 +11,6 @@ export class ApiError extends Error {
   }
 }
 
-function readToken(): string | null {
-  return localStorage.getItem("authToken"); // חייב להתאים ל-AuthProvider
-}
-
 export async function apiFetch<T>(
   path: string,
   init: RequestInit = {}
@@ -26,14 +21,16 @@ export async function apiFetch<T>(
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
 
+  // set Content-Type only when there is a body (FormData-safe)
   if (init.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
-  const token = readToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-
-  const res = await fetch(url, { ...init, headers, credentials: "include" });
+  const res = await fetch(url, {
+    ...init,
+    headers,
+    credentials: "include", // <-- IMPORTANT for HttpOnly cookies
+  });
 
   if (res.status === 204) {
     return undefined as T;

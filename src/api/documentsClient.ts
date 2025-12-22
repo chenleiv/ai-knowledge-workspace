@@ -1,4 +1,3 @@
-// src/api/documentsClient.ts
 import { apiFetch } from "./base";
 
 export type DocumentItem = {
@@ -19,6 +18,7 @@ export function getDocument(id: number) {
   return apiFetch<DocumentItem>(`/api/documents/${id}`);
 }
 
+// admin only
 export function createDocument(input: DocumentInput) {
   return apiFetch<DocumentItem>("/api/documents", {
     method: "POST",

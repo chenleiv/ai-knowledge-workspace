@@ -1,7 +1,8 @@
 from typing import List, Dict, Any
-from data.documents import DOCUMENTS, DocumentItem
+from lib.persistence import load_documents, Document
 
-def _score_doc(doc: DocumentItem, query: str) -> int:
+
+def _score_doc(doc: Document, query: str) -> int:
     q = query.lower().strip()
     if not q:
         return 0
@@ -23,11 +24,13 @@ def _score_doc(doc: DocumentItem, query: str) -> int:
 
 
 def retrieve_top_docs(query: str, top_k: int = 3) -> List[Dict[str, Any]]:
-    scored = []
-    for doc in DOCUMENTS:
+    docs = load_documents()
+    scored: List[Dict[str, Any]] = []
+
+    for doc in docs:
         s = _score_doc(doc, query)
         if s > 0:
-            snippet = doc.content[:140] + ("…" if len(doc.content) > 140 else "")
+            snippet = doc.content[:160] + ("…" if len(doc.content) > 160 else "")
             scored.append({"doc": doc, "score": s, "snippet": snippet})
 
     scored.sort(key=lambda x: x["score"], reverse=True)

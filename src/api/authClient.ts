@@ -2,7 +2,6 @@ import { apiFetch } from "./base";
 import type { AuthUser } from "../auth/Auth";
 
 export type LoginResponse = {
-  access_token: string;
   user: AuthUser;
 };
 
@@ -11,6 +10,10 @@ export async function login(email: string, password: string) {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
+}
+
+export async function logout() {
+  return apiFetch<{ ok: true }>("/api/auth/logout", { method: "POST" });
 }
 
 export async function me() {

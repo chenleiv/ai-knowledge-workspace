@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../api/authClient";
 import { useAuth } from "../../auth/Auth";
 
 export default function LoginPage() {
   const nav = useNavigate();
-  const { token, login: saveAuth } = useAuth();
+  const { isReady, isAuthed, loginSuccess } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,10 +13,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (token) {
-      nav("/documents", { replace: true });
-    }
-  }, [token, nav]);
+    if (isReady && isAuthed) nav("/documents", { replace: true });
+  }, [isReady, isAuthed, nav]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,8 +23,7 @@ export default function LoginPage() {
 
     try {
       const res = await login(email.trim(), password);
-
-      saveAuth(res.access_token, res.user);
+      loginSuccess(res.user);
       nav("/documents", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -38,9 +35,6 @@ export default function LoginPage() {
   return (
     <div className="panel" style={{ maxWidth: 520, margin: "0 auto" }}>
       <h2 style={{ marginTop: 0 }}>Login</h2>
-      <p style={{ color: "var(--muted)", marginTop: 6 }}>
-        Demo roles: admin / viewer
-      </p>
 
       <form className="form" onSubmit={onSubmit}>
         <label>

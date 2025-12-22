@@ -1,45 +1,75 @@
-// src/auth/Auth.tsx
-import React, { createContext, useContext, useMemo, useState } from "react";
-import { clearToken, getToken, setToken } from "../api/auth";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { me, logout as apiLogout } from "../api/authClient";
 
 export type Role = "admin" | "viewer";
 export type AuthUser = { email: string; role: Role };
-type AuthState = { token: string | null; user: AuthUser | null };
-type AuthContextValue = AuthState & {
-  login: (token: string, user: AuthUser) => void;
-  logout: () => void;
+
+type AuthContextValue = {
+  user: AuthUser | null;
+  isReady: boolean; // finished initial /me check
+  isAuthed: boolean;
+  loginSuccess: (user: AuthUser) => void;
+  logout: () => Promise<void>;
 };
 
-const AUTH_USER_KEY = "authUser";
+const AUTH_USER_KEY = "authUser"; // optional: only for UI (NOT secret)
+
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function loadAuth(): AuthState {
-  const token = getToken();
-  const userRaw = localStorage.getItem(AUTH_USER_KEY);
-  const user = userRaw ? (JSON.parse(userRaw) as AuthUser) : null;
-  return { token, user };
+function loadUserFromStorage(): AuthUser | null {
+  try {
+    const raw = localStorage.getItem(AUTH_USER_KEY);
+    return raw ? (JSON.parse(raw) as AuthUser) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const initial = useMemo(() => loadAuth(), []);
-  const [token, setTokenState] = useState<string | null>(initial.token);
-  const [user, setUser] = useState<AuthUser | null>(initial.user);
+  const initialUser = useMemo(() => loadUserFromStorage(), []);
+  const [user, setUser] = useState<AuthUser | null>(initialUser);
+  const [isReady, setIsReady] = useState(false);
 
-  const value: AuthContextValue = {
-    token,
-    user,
-    login: (nextToken, nextUser) => {
-      setTokenState(nextToken);
-      setToken(nextToken);
-      setUser(nextUser);
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(nextUser));
-    },
-    logout: () => {
-      clearToken(); // ✅ חשוב
-      setTokenState(null);
+  useEffect(() => {
+    // On refresh: validate cookie session via /me
+    (async () => {
+      try {
+        const u = await me();
+        setUser(u);
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u));
+      } catch {
+        setUser(null);
+        localStorage.removeItem(AUTH_USER_KEY);
+      } finally {
+        setIsReady(true);
+      }
+    })();
+  }, []);
+
+  async function doLogout() {
+    try {
+      await apiLogout();
+    } finally {
       setUser(null);
       localStorage.removeItem(AUTH_USER_KEY);
+    }
+  }
+
+  const value: AuthContextValue = {
+    user,
+    isReady,
+    isAuthed: !!user,
+    loginSuccess: (u) => {
+      setUser(u);
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u)); // optional
     },
+    logout: doLogout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

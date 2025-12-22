@@ -71,6 +71,7 @@ def next_id(users: List[User]) -> int:
 
 def seed_users_if_empty() -> None:
     users = load_users()
+
     if users:
         return
 
@@ -78,6 +79,12 @@ def seed_users_if_empty() -> None:
     admin_pass = os.getenv("ADMIN_PASSWORD", "Admin123!demo")
     viewer_email = os.getenv("VIEWER_EMAIL", "viewer@demo.com")
     viewer_pass = os.getenv("VIEWER_PASSWORD", "Viewer123!demo")
+
+    print("ADMIN_PASSWORD len:", len(admin_pass.encode("utf-8")))
+    print("ADMIN_PASSWORD preview:", admin_pass[:20])
+
+    print("VIEWER_PASSWORD len:", len(viewer_pass.encode("utf-8")))
+    print("VIEWER_PASSWORD preview:", viewer_pass[:20])
 
     seeded = [
         User(

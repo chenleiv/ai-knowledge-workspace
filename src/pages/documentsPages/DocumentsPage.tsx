@@ -287,8 +287,6 @@ export default function DocumentsPage() {
           />
           Favorites only
         </label>
-
-        <div className="count">{filteredDocs.length} items</div>
       </div>
 
       <div className="section">

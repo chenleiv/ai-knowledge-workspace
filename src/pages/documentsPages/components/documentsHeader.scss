@@ -1,8 +1,8 @@
 .documents-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
+    align-items: center;
+    gap: 16px;
 }
 
 .documents-header h2 {
@@ -19,5 +19,28 @@
 .top-actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 16px;
+}
+
+@media (max-width: 640px) {
+    .documents-header {
+        // flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .top-actions {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+    }
+
+    .primary-btn,
+    .icon-btn {
+        height: 38px;
+    }
+
+    .primary-btn {
+        width: 100%;
+    }
 }

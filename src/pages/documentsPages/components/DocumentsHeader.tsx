@@ -21,10 +21,6 @@ export default function DocumentsHeader({
     <div className="documents-header" onClick={(e) => e.stopPropagation()}>
       <div>
         <h2>Documents</h2>
-        <p className="subtitle">
-          Click a card to open a full page. Use ⋯ for actions. Reorder with drag
-          & drop.
-        </p>
       </div>
 
       <div className="top-actions">

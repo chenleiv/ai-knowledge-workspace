@@ -248,12 +248,12 @@ export default function DocumentDetailsPage() {
             <h2 className="title">{doc.title}</h2>
             <div className="meta">{doc.category}</div>
 
-            <div className="section">
+            <div className="section summary">
               <div className="label">Summary</div>
               <div className="text">{doc.summary}</div>
             </div>
 
-            <div className="section">
+            <div className="section content">
               <div className="label">Content</div>
               <div className="text content">{doc.content}</div>
             </div>

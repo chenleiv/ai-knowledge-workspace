@@ -1,57 +1,53 @@
-# auth.py
 import os
-import time
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from passlib.context import CryptContext
 from jose import jwt
+from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret")
-JWT_ALG = "HS256"
-JWT_EXP_SECONDS = 60 * 60 * 24  # 24 שעות
+JWT_SECRET = os.getenv("JWT_SECRET")
+if not JWT_SECRET:
+    raise RuntimeError("JWT_SECRET is not set")
 
-DEMO_USERS = {
-    "admin@demo.com": {
-        "password": "admin123",
-        "role": "admin",
-    },
-    "viewer@demo.com": {
-        "password": "viewer123",
-        "role": "viewer",
-    },
-}
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@demo.com")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
+
+VIEWER_EMAIL = os.getenv("VIEWER_EMAIL", "viewer@demo.com")
+VIEWER_PASSWORD = os.getenv("VIEWER_PASSWORD", "viewer123")
 
 
-class LoginInput(BaseModel):
-    email: str
-    password: str
+def verify_password(plain, expected):
+    return plain == expected
 
 
-class LoginResponse(BaseModel):
-    access_token: str
-    user: dict
+@router.post("/login")
+def login(data: dict):
+    email = data.get("email")
+    password = data.get("password")
 
-
-@router.post("/login", response_model=LoginResponse)
-def login(data: LoginInput):
-    user = DEMO_USERS.get(data.email)
-
-    if not user or user["password"] != data.password:
+    if email == ADMIN_EMAIL and verify_password(password, ADMIN_PASSWORD):
+        role = "admin"
+    elif email == VIEWER_EMAIL and verify_password(password, VIEWER_PASSWORD):
+        role = "viewer"
+    else:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     payload = {
-        "sub": data.email,
-        "role": user["role"],
-        "exp": int(time.time()) + JWT_EXP_SECONDS,
+        "sub": email,
+        "role": role,
+        "exp": datetime.utcnow() + timedelta(hours=8),
     }
 
-    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
+    token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
     return {
         "access_token": token,
+        "token_type": "bearer",
         "user": {
-            "email": data.email,
-            "role": user["role"],
+            "email": email,
+            "role": role,
         },
     }

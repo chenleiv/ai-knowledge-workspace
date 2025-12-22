@@ -19,12 +19,16 @@ JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret-change-me")
 JWT_ALG = "HS256"
 ACCESS_TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_MINUTES", "60"))
 
-ENV = os.getenv("ENV", "dev").lower()  # "prod" on Render
-COOKIE_NAME = "access_token"
-COOKIE_SECURE = True
 # IMPORTANT: cross-origin SPA <-> API works best with None+Secure in prod
-COOKIE_SAMESITE = "none" if ENV == "prod" else "lax"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+ENV = os.getenv("ENV", "dev")  # set "prod" on Render
+COOKIE_NAME = "access_token"
+COOKIE_SECURE = ENV == "prod"
+
+# חשוב: ב-Render זה חייב להיות none כדי לאפשר cross-site
+COOKIE_SAMESITE: Literal["lax", "none"] = "none" if ENV == "prod" else "lax"
 
 
 # -------------------------

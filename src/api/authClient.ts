@@ -12,10 +12,10 @@ export async function login(email: string, password: string) {
   });
 }
 
-export async function logout() {
-  return apiFetch<{ ok: true }>("/api/auth/logout", { method: "POST" });
-}
-
 export async function me() {
   return apiFetch<AuthUser>("/api/auth/me");
+}
+
+export async function logout() {
+  return apiFetch<{ ok: true }>("/api/auth/logout", { method: "POST" });
 }

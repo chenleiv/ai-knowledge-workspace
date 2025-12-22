@@ -76,9 +76,9 @@ def seed_users_if_empty() -> None:
         return
 
     admin_email = os.getenv("ADMIN_EMAIL", "admin@demo.com")
-    admin_pass = os.getenv("ADMIN_PASSWORD", "Admin123!demo")
+    admin_pass = os.getenv("ADMIN_PASSWORD", "admin123")
     viewer_email = os.getenv("VIEWER_EMAIL", "viewer@demo.com")
-    viewer_pass = os.getenv("VIEWER_PASSWORD", "Viewer123!demo")
+    viewer_pass = os.getenv("VIEWER_PASSWORD", "viewer123")
 
     print("ADMIN_PASSWORD len:", len(admin_pass.encode("utf-8")))
     print("ADMIN_PASSWORD preview:", admin_pass[:20])

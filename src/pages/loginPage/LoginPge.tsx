@@ -1,26 +1,20 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { login } from "../../api/authClient";
 import { useAuth } from "../../auth/Auth";
 
 export default function LoginPage() {
   const nav = useNavigate();
-  const location = useLocation();
-  const { isReady, isAuthed, loginSuccess } = useAuth();
+  const { isAuthed, isReady, loginSuccess } = useAuth();
 
-  const [email, setEmail] = useState("admin@demo.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // if already authed, go where user tried to go
   useEffect(() => {
-    if (!isReady) return;
-    if (isAuthed) {
-      const to = (location.state as any)?.from?.pathname ?? "/documents";
-      nav(to, { replace: true });
-    }
-  }, [isReady, isAuthed, nav, location.state]);
+    if (isReady && isAuthed) nav("/documents", { replace: true });
+  }, [isReady, isAuthed, nav]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,7 +23,6 @@ export default function LoginPage() {
 
     try {
       const res = await login(email.trim().toLowerCase(), password);
-      // login sets HttpOnly cookie; response gives user only
       loginSuccess(res.user);
       nav("/documents", { replace: true });
     } catch (err) {
@@ -61,11 +54,7 @@ export default function LoginPage() {
           />
         </label>
 
-        <button
-          className="primary-btn"
-          type="submit"
-          disabled={loading || !isReady}
-        >
+        <button className="primary-btn" type="submit" disabled={loading}>
           {loading ? "Signing in..." : "Sign in"}
         </button>
 

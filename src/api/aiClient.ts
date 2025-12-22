@@ -1,16 +1,21 @@
-import { apiFetch } from "./base";
+import { getApiBase } from "./config";
 
 export type ChatMessage = { role: "user" | "assistant"; content: string };
 
-export type ChatResponse = {
-  role: "assistant";
-  text: string;
-  sources?: Array<{ id: number; title: string; snippet: string }>;
-};
+export async function chat(messages: ChatMessage[], contextDocIds: number[]) {
+  const base = getApiBase();
 
-export function chat(messages: ChatMessage[], contextDocIds: number[]) {
-  return apiFetch<ChatResponse>("/api/chat", {
+  const res = await fetch(`${base}/api/chat`, {
     method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ messages, contextDocIds }),
   });
+
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(t || `Chat failed: ${res.status}`);
+  }
+
+  return res.json();
 }

@@ -21,7 +21,6 @@ export async function apiFetch<T>(
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
 
-  // set Content-Type only when there is a body (FormData-safe)
   if (init.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
@@ -29,15 +28,12 @@ export async function apiFetch<T>(
   const res = await fetch(url, {
     ...init,
     headers,
-    credentials: "include", // <-- IMPORTANT for HttpOnly cookies
+    credentials: "include",
   });
 
-  if (res.status === 204) {
-    return undefined as T;
-  }
+  if (res.status === 204) return undefined as T;
 
   const text = await res.text();
-
   if (!res.ok) {
     throw new ApiError(
       `Request failed: ${res.status}`,

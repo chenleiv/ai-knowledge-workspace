@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { me, logout as apiLogout } from "../api/authClient";
 
 export type Role = "admin" | "viewer";
@@ -12,14 +6,13 @@ export type AuthUser = { email: string; role: Role };
 
 type AuthContextValue = {
   user: AuthUser | null;
-  isReady: boolean; // finished initial /me check
+  isReady: boolean;
   isAuthed: boolean;
   loginSuccess: (user: AuthUser) => void;
   logout: () => Promise<void>;
 };
 
-const AUTH_USER_KEY = "authUser"; // optional: only for UI (NOT secret)
-
+const AUTH_USER_KEY = "authUser"; // UI only (not secret)
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 function loadUserFromStorage(): AuthUser | null {
@@ -32,15 +25,15 @@ function loadUserFromStorage(): AuthUser | null {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const initialUser = useMemo(() => loadUserFromStorage(), []);
-  const [user, setUser] = useState<AuthUser | null>(initialUser);
+  const [user, setUser] = useState<AuthUser | null>(() =>
+    loadUserFromStorage()
+  );
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // On refresh: validate cookie session via /me
     (async () => {
       try {
-        const u = await me();
+        const u = await me(); // cookie session validation
         setUser(u);
         localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u));
       } catch {
@@ -61,18 +54,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const value: AuthContextValue = {
-    user,
-    isReady,
-    isAuthed: !!user,
-    loginSuccess: (u) => {
-      setUser(u);
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u)); // optional
-    },
-    logout: doLogout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isReady,
+        isAuthed: !!user,
+        loginSuccess: (u) => {
+          setUser(u);
+          localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u));
+        },
+        logout: doLogout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

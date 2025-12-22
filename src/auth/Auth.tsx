@@ -1,16 +1,10 @@
 // src/auth/Auth.tsx
 import React, { createContext, useContext, useMemo, useState } from "react";
-import {
-  setToken as setSessionToken,
-  clearToken as clearSessionToken,
-  getToken,
-} from "../api/auth";
+import { clearToken, getToken, setToken } from "../api/auth";
 
 export type Role = "admin" | "viewer";
 export type AuthUser = { email: string; role: Role };
-
 type AuthState = { token: string | null; user: AuthUser | null };
-
 type AuthContextValue = AuthState & {
   login: (token: string, user: AuthUser) => void;
   logout: () => void;
@@ -20,7 +14,7 @@ const AUTH_USER_KEY = "authUser";
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 function loadAuth(): AuthState {
-  const token = getToken(); // <-- from sessionStorage auth_token
+  const token = getToken();
   const userRaw = localStorage.getItem(AUTH_USER_KEY);
   const user = userRaw ? (JSON.parse(userRaw) as AuthUser) : null;
   return { token, user };
@@ -28,26 +22,22 @@ function loadAuth(): AuthState {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initial = useMemo(() => loadAuth(), []);
-  const [token, setToken] = useState<string | null>(initial.token);
+  const [token, setTokenState] = useState<string | null>(initial.token);
   const [user, setUser] = useState<AuthUser | null>(initial.user);
 
   const value: AuthContextValue = {
     token,
     user,
     login: (nextToken, nextUser) => {
-      console.log("SAVING TOKEN:", nextToken);
-
+      setTokenState(nextToken);
       setToken(nextToken);
       setUser(nextUser);
-
-      setSessionToken(nextToken); // ✅ sessionStorage auth_token
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(nextUser)); // user אפשר להשאיר בלוקאל
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(nextUser));
     },
     logout: () => {
-      setToken(null);
+      clearToken(); // ✅ חשוב
+      setTokenState(null);
       setUser(null);
-
-      clearSessionToken(); // ✅ removes auth_token
       localStorage.removeItem(AUTH_USER_KEY);
     },
   };

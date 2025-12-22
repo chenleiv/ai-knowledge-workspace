@@ -1,10 +1,5 @@
+// src/api/base.ts
 import { getApiBase } from "./config";
-
-export const API_BASE = (import.meta.env.VITE_API_BASE ?? "").trim();
-
-export function apiUrl(path: string) {
-  return `${API_BASE}${path}`;
-}
 
 export class ApiError extends Error {
   status: number;
@@ -18,7 +13,7 @@ export class ApiError extends Error {
 }
 
 function readToken(): string | null {
-  return localStorage.getItem("authToken");
+  return localStorage.getItem("authToken"); // חייב להתאים ל-AuthProvider
 }
 
 export async function apiFetch<T>(
@@ -31,7 +26,6 @@ export async function apiFetch<T>(
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
 
-  // Only set Content-Type when there's a body (avoid issues with FormData later)
   if (init.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
@@ -39,17 +33,14 @@ export async function apiFetch<T>(
   const token = readToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const res = await fetch(url, {
-    ...init,
-    headers,
-  });
+  const res = await fetch(url, { ...init, headers, credentials: "include" });
 
   if (res.status === 204) {
-    // @ts-expect-error - caller expects T, but 204 has no body
-    return undefined;
+    return undefined as T;
   }
 
   const text = await res.text();
+
   if (!res.ok) {
     throw new ApiError(
       `Request failed: ${res.status}`,

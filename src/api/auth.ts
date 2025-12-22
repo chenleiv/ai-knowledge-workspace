@@ -1,18 +1,15 @@
-// src/api/auth.ts
-const TOKEN_KEY = "authToken"; // MUST match AuthProvider
-const USER_KEY = "authUser";
+const AUTH_TOKEN_KEY = "authToken";
 
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(AUTH_TOKEN_KEY);
 }
 
 export function setToken(token: string) {
-  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
 }
 
 export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(AUTH_TOKEN_KEY);
 }
 
 export function authHeaders(): Record<string, string> {

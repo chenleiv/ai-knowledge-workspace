@@ -1,12 +1,13 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth, type Role } from "./Auth";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "./Auth";
 
-export default function RequireAuth({ role }: { role?: Role }) {
-  const { token, user } = useAuth();
+export default function RequireAuth() {
+  const { token } = useAuth();
+  const location = useLocation();
 
-  if (!token || !user) return <Navigate to="/login" replace />;
-
-  if (role && user.role !== role) return <Navigate to="/documents" replace />;
+  if (!token) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
 
   return <Outlet />;
 }

@@ -35,6 +35,7 @@ function App() {
             <Route path="/assistant" element={<AssistantPage />} />
             <Route path="/users" element={<UsersPage />} />
           </Route>
+
           <Route path="*" element={<LoginPage />} />
         </Routes>
       </main>

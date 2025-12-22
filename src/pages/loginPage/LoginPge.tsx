@@ -1,16 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../api/authClient";
 import { useAuth } from "../../auth/Auth";
 
 export default function LoginPage() {
   const nav = useNavigate();
-  const { login: saveAuth } = useAuth();
+  const { token, login: saveAuth } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (token) {
+      nav("/documents", { replace: true });
+    }
+  }, [token, nav]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,7 +25,6 @@ export default function LoginPage() {
 
     try {
       const res = await login(email.trim(), password);
-      console.log("LOGIN RES:", res);
 
       saveAuth(res.access_token, res.user);
       nav("/documents", { replace: true });

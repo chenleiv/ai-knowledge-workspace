@@ -6,13 +6,16 @@ import "./styles/globals.scss";
 import "./styles/theme.scss";
 import "./styles/layout.scss";
 import { ConfirmProvider } from "./components/confirmModal/ConfirmProvider.tsx";
+import { AuthProvider } from "./auth/Auth.tsx";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ConfirmProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ConfirmProvider>
+    <AuthProvider>
+      <ConfirmProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ConfirmProvider>
+    </AuthProvider>
   </React.StrictMode>
 );

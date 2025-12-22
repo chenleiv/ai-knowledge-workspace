@@ -11,21 +11,20 @@ from fastapi.staticfiles import StaticFiles
 
 from lib.retrieval import retrieve_top_docs
 from lib.persistence import load_documents, save_documents, seed_documents_if_empty
-
+from auth import router as auth_router
 
 app = FastAPI()
-
+app.include_router(auth_router)
 # ---- CORS ----
-frontend_url = os.getenv("FRONTEND_URL")
+frontend_url = os.getenv("FRONTEND_URL")  # e.g. https://your-frontend.onrender.com
 allow_origins = ["http://localhost:5173"]
-
 if frontend_url:
     allow_origins.append(frontend_url)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
-    allow_credentials=False,  # 👈 חשוב
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

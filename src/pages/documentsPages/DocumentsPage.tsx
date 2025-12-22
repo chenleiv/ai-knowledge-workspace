@@ -244,7 +244,7 @@ export default function DocumentsPage() {
           return;
         }
 
-        await importDocumentsBulk(mode, documents);
+        await importDocumentsBulk(mode, documents as DocumentItem[]);
         await load();
         setPageMenuOpen(false);
       } catch (e) {

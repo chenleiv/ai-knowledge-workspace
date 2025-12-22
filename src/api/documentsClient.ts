@@ -1,5 +1,6 @@
 // src/api/documentsClient.ts
 import { apiUrl } from "./base";
+import { authHeaders } from "./auth";
 
 export type DocumentItem = {
   id: number;
@@ -12,44 +13,57 @@ export type DocumentItem = {
 export type DocumentInput = Omit<DocumentItem, "id">;
 
 async function readJson<T>(res: Response): Promise<T> {
-  // DELETE 204 (No Content) or empty body
+  // 204 No Content
   if (res.status === 204) return undefined as T;
 
   const contentType = res.headers.get("content-type") ?? "";
   const isJson = contentType.includes("application/json");
 
-  if (res.ok) {
-    if (!isJson) {
-      // if backend ever returns plain text successfully
-      const text = await res.text();
-      return text as unknown as T;
+  const text = await res.text();
+
+  if (!res.ok) {
+    // try to show a useful error message
+    if (isJson && text) {
+      try {
+        const parsed = JSON.parse(text);
+        throw new Error(
+          typeof parsed === "string" ? parsed : JSON.stringify(parsed)
+        );
+      } catch {
+        // fallthrough
+      }
     }
-    return (await res.json()) as T;
+    throw new Error(text || `Request failed: ${res.status}`);
   }
 
-  // error branch
-  const errorText = isJson
-    ? JSON.stringify(await res.json())
-    : await res.text();
-  throw new Error(errorText || `Request failed: ${res.status}`);
+  if (!text) return undefined as T;
+  if (!isJson) return text as unknown as T;
+
+  return JSON.parse(text) as T;
 }
 
+// ---- READ (usually allowed for both admin+viewer) ----
 export async function listDocuments(): Promise<DocumentItem[]> {
-  const res = await fetch(apiUrl("/api/documents"));
+  const res = await fetch(apiUrl("/api/documents"), {
+    headers: { ...authHeaders() }, // <-- important if backend requires login
+  });
   return readJson<DocumentItem[]>(res);
 }
 
 export async function getDocument(id: number): Promise<DocumentItem> {
-  const res = await fetch(apiUrl(`/api/documents/${id}`));
+  const res = await fetch(apiUrl(`/api/documents/${id}`), {
+    headers: { ...authHeaders() },
+  });
   return readJson<DocumentItem>(res);
 }
 
+// ---- WRITE (admin only) ----
 export async function createDocument(
   input: DocumentInput
 ): Promise<DocumentItem> {
   const res = await fetch(apiUrl("/api/documents"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(input),
   });
   return readJson<DocumentItem>(res);
@@ -61,32 +75,40 @@ export async function updateDocument(
 ): Promise<DocumentItem> {
   const res = await fetch(apiUrl(`/api/documents/${id}`), {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(input),
   });
   return readJson<DocumentItem>(res);
 }
 
 export async function deleteDocument(id: number): Promise<{ ok: true }> {
-  const res = await fetch(apiUrl(`/api/documents/${id}`), { method: "DELETE" });
-  if (res.status === 204) return { ok: true };
-  await readJson<unknown>(res); // will throw if not ok
+  const res = await fetch(apiUrl(`/api/documents/${id}`), {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+
+  if (res.status === 204) return { ok: true }; // success
+
+  await readJson<unknown>(res);
   return { ok: true };
 }
 
-export async function exportDocuments(): Promise<unknown> {
-  const res = await fetch(apiUrl("/api/documents/export"));
-  return readJson<unknown>(res);
+// ---- Admin tools (usually admin only) ----
+export async function exportDocuments(): Promise<DocumentItem[]> {
+  const res = await fetch(apiUrl("/api/documents/export"), {
+    headers: { ...authHeaders() }, // <-- add if you want to restrict
+  });
+  return readJson<DocumentItem[]>(res);
 }
 
 export async function importDocumentsBulk(
   mode: "merge" | "replace",
-  documents: unknown
-): Promise<unknown> {
+  documents: DocumentItem[]
+): Promise<DocumentItem[]> {
   const res = await fetch(apiUrl("/api/documents/import-bulk"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ mode, documents }),
   });
-  return readJson<unknown>(res);
+  return readJson<DocumentItem[]>(res);
 }

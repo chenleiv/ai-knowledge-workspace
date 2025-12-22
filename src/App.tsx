@@ -5,6 +5,9 @@ import AssistantPage from "./pages/assistantPages/AssistantPage";
 import { useTheme } from "./hooks/useTheme";
 import "./components/confirmModal/confirmDialog.scss";
 import ThemeToggle from "./themeToggle/ThemeToggle";
+import RequireAuth from "./auth/RequireAuth";
+import LoginPage from "./pages/loginPage/LoginPge";
+import UsersPage from "./pages/loginPage/UsersPage";
 
 function App() {
   const { theme, setTheme } = useTheme();
@@ -24,9 +27,15 @@ function App() {
 
       <main>
         <Routes>
-          <Route path="/documents" element={<DocumentsPage />} />
-          <Route path="/documents/:id" element={<DocumentDetailsPage />} />
-          <Route path="/assistant" element={<AssistantPage />} />
+          <Route path="/login" element={<LoginPage />} />
+
+          <Route element={<RequireAuth />}>
+            <Route path="/documents" element={<DocumentsPage />} />
+            <Route path="/documents/:id" element={<DocumentDetailsPage />} />
+            <Route path="/assistant" element={<AssistantPage />} />
+            <Route path="/users" element={<UsersPage />} />
+          </Route>
+          <Route path="*" element={<LoginPage />} />
         </Routes>
       </main>
     </div>

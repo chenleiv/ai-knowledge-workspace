@@ -1,21 +1,16 @@
 import { apiFetch } from "./base";
 
-export type Role = "admin" | "viewer";
-export type AuthUser = { email: string; role: Role };
+export type ChatMessage = { role: "user" | "assistant"; content: string };
 
-export type LoginResponse = { user: AuthUser };
+export type ChatResponse = {
+  role: "assistant";
+  text: string;
+  sources?: Array<{ id: number; title: string; snippet: string }>;
+};
 
-export function login(email: string, password: string) {
-  return apiFetch<LoginResponse>("/api/auth/login", {
+export function chat(messages: ChatMessage[], contextDocIds: number[]) {
+  return apiFetch<ChatResponse>("/api/chat", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ messages, contextDocIds }),
   });
-}
-
-export function me() {
-  return apiFetch<AuthUser>("/api/auth/me");
-}
-
-export function logout() {
-  return apiFetch<{ ok: true }>("/api/auth/logout", { method: "POST" });
 }

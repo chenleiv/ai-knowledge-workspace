@@ -1,20 +1,26 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { login } from "../../api/authClient";
 import { useAuth } from "../../auth/Auth";
 
 export default function LoginPage() {
   const nav = useNavigate();
+  const location = useLocation();
   const { isReady, isAuthed, loginSuccess } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@demo.com");
+  const [password, setPassword] = useState("admin123");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // if already authed, go where user tried to go
   useEffect(() => {
-    if (isReady && isAuthed) nav("/documents", { replace: true });
-  }, [isReady, isAuthed, nav]);
+    if (!isReady) return;
+    if (isAuthed) {
+      const to = (location.state as any)?.from?.pathname ?? "/documents";
+      nav(to, { replace: true });
+    }
+  }, [isReady, isAuthed, nav, location.state]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -22,7 +28,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await login(email.trim(), password);
+      const res = await login(email.trim().toLowerCase(), password);
+      // login sets HttpOnly cookie; response gives user only
       loginSuccess(res.user);
       nav("/documents", { replace: true });
     } catch (err) {
@@ -35,6 +42,9 @@ export default function LoginPage() {
   return (
     <div className="panel" style={{ maxWidth: 520, margin: "0 auto" }}>
       <h2 style={{ marginTop: 0 }}>Login</h2>
+      <p style={{ color: "var(--muted)", marginTop: 6 }}>
+        Demo roles: admin / viewer
+      </p>
 
       <form className="form" onSubmit={onSubmit}>
         <label>
@@ -51,7 +61,11 @@ export default function LoginPage() {
           />
         </label>
 
-        <button className="primary-btn" type="submit" disabled={loading}>
+        <button
+          className="primary-btn"
+          type="submit"
+          disabled={loading || !isReady}
+        >
           {loading ? "Signing in..." : "Sign in"}
         </button>
 

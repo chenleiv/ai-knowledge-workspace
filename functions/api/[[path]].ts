@@ -1,25 +1,24 @@
-export const onRequest = async (ctx: any) => {
-  const { request } = ctx;
+export async function onRequest(ctx: any) {
+  const { request, env } = ctx;
 
-  if (request.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
+  const url = new URL(request.url);
+  const path = url.pathname.replace(/^\/api/, ""); // "/documents", "/auth/login" וכו'
+
+  // רק /documents כדי לוודא ש-D1 עובד
+  if (path === "/documents" && request.method === "GET") {
+    const { results } = await env.ai_workspace
+      .prepare(
+        `SELECT id, title, category, summary, content
+         FROM documents
+         ORDER BY id DESC
+         LIMIT 100`
+      )
+      .all();
+
+    return new Response(JSON.stringify(results ?? []), {
+      headers: { "Content-Type": "application/json" },
     });
   }
 
-  const url = new URL(request.url);
-
-  const target = `https://ai-knowledge-workspace.onrender.com${url.pathname}`;
-
-  const res = await fetch(target, {
-    method: request.method, // ⬅️ קריטי
-    headers: request.headers,
-    body: request.method !== "GET" ? await request.text() : undefined,
-  });
-
-  return new Response(res.body, res);
-};
+  return new Response("Not Found", { status: 404 });
+}

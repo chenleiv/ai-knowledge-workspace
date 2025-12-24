@@ -1,21 +1,39 @@
 export async function onRequest(ctx: any) {
   const { request, env } = ctx;
-
   const url = new URL(request.url);
-  const path = url.pathname.replace(/^\/api/, ""); // "/documents", "/auth/login" וכו'
+  const path = url.pathname.replace("/api/", "");
 
-  // רק /documents כדי לוודא ש-D1 עובד
-  if (path === "/documents" && request.method === "GET") {
-    const { results } = await env.ai_workspace
-      .prepare(
-        `SELECT id, title, category, summary, content
-         FROM documents
-         ORDER BY id DESC
-         LIMIT 100`
-      )
+  // LOGIN
+  if (path === "auth/login" && request.method === "POST") {
+    return new Response(
+      JSON.stringify({
+        user: { email: "admin@demo.com", role: "admin" },
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Set-Cookie":
+            "access_token=dummy; HttpOnly; Path=/; SameSite=None; Secure",
+        },
+      }
+    );
+  }
+
+  // ME
+  if (path === "auth/me") {
+    return new Response(
+      JSON.stringify({ email: "admin@demo.com", role: "admin" }),
+      { headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  // DOCUMENTS
+  if (path === "documents") {
+    const rows = await env.ai_workspace
+      .prepare("SELECT * FROM documents")
       .all();
 
-    return new Response(JSON.stringify(results ?? []), {
+    return new Response(JSON.stringify(rows.results), {
       headers: { "Content-Type": "application/json" },
     });
   }

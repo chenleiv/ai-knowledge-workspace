@@ -34,3 +34,5 @@ backend/storage/documents.json
 *.njsproj
 *.sln
 *.sw?
+# Wrangler state
+.wrangler/

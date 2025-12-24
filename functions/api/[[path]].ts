@@ -1,18 +1,25 @@
-export default {
-  async fetch(request: Request, env: any, ctx: any): Promise<Response> {
-    const url = new URL(request.url);
+export const onRequest = async (ctx: any) => {
+  const { request } = ctx;
 
-    const target =
-      "https://ai-knowledge-workspace.onrender.com" +
-      url.pathname.replace("/api", "");
-
-    const req = new Request(target, {
-      method: request.method,
-      headers: request.headers,
-      body: request.body,
-      redirect: "manual",
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
     });
+  }
 
-    return fetch(req);
-  },
+  const url = new URL(request.url);
+
+  const target = `https://ai-knowledge-workspace.onrender.com${url.pathname}`;
+
+  const res = await fetch(target, {
+    method: request.method, // ⬅️ קריטי
+    headers: request.headers,
+    body: request.method !== "GET" ? await request.text() : undefined,
+  });
+
+  return new Response(res.body, res);
 };

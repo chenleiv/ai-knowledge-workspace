@@ -112,6 +112,12 @@
         }
       }
     }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 48px;
+    }
   }
 
   main {
@@ -127,6 +133,7 @@
     main {
       padding: 18px;
     }
+
   }
 
   .app-layout header {

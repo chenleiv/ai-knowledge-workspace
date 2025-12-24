@@ -9,83 +9,99 @@ interface DocumentBody {
   content?: string;
 }
 
+type LoginBody = { email?: string; password?: string };
+
 export const onRequest: PagesFunction<Env> = async (ctx) => {
   const { request, env } = ctx;
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
 
-  // strip /api prefix
-  const path = url.pathname.replace(/^\/api/, "") || "/";
+  // Normalize path (remove /api prefix)
+  const rawPath = url.pathname;
+  const path = rawPath
+    .replace(/^\/api(?=\/|$)/, "") // remove /api only if it is a prefix
+    .replace(/\/+$/, ""); // trim trailing slashes
 
-  const origin = request.headers.get("Origin") ?? "*";
+  // =========================
+  // CORS (IMPORTANT for cookies)
+  // =========================
+  const origin = request.headers.get("Origin") ?? "";
+
+  // ✅ Recommended: allowlist
+  const allowedOrigins = new Set<string>([
+    "https://ai-knowledge-workspace.pages.dev",
+    // add preview domains here if you use them
+    // "https://<your-preview>.ai-knowledge-workspace.pages.dev",
+    "http://localhost:5173",
+    "http://localhost:5174",
+  ]);
+
+  const allowOrigin = allowedOrigins.has(origin)
+    ? origin
+    : "https://ai-knowledge-workspace.pages.dev";
+
+  const corsHeaders: Record<string, string> = {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Accept",
+    Vary: "Origin",
+  };
 
   const json = (data: any, status = 200) =>
     new Response(JSON.stringify(data), {
       status,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": origin,
-        "Access-Control-Allow-Credentials": "true",
+        ...corsHeaders,
       },
     });
 
-  // --------------------
-  // CORS preflight
-  // --------------------
+  // Preflight
   if (method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": origin,
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
-    });
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
+  // DB binding
   const db = env.ai_workspace;
-  if (!db) {
-    return json({ detail: "D1 binding ai_workspace is missing" }, 500);
-  }
+  if (!db) return json({ detail: "D1 binding ai_workspace is missing" }, 500);
 
-  type LoginBody = { email?: string; password?: string };
+  // ======================================================
+  // AUTH
+  // ======================================================
 
-  // ----------------------------
   // POST /auth/login
-  // ----------------------------
   if (method === "POST" && path === "/auth/login") {
-    const body = (await ctx.request.json()) as LoginBody;
+    const body = (await request.json()) as LoginBody;
 
     const isAdmin =
       body?.email === "admin@demo.com" && body?.password === "admin123";
     const isViewer =
       body?.email === "viewer@demo.com" && body?.password === "viewer123";
 
-    if (!isAdmin && !isViewer)
+    if (!isAdmin && !isViewer) {
       return json({ detail: "Invalid credentials" }, 401);
+    }
 
     const user = {
       email: body.email!,
-      role: isAdmin ? "admin" : "viewer",
+      role: (isAdmin ? "admin" : "viewer") as "admin" | "viewer",
     };
 
     return new Response(JSON.stringify({ user }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        // Demo cookie. (מספיק כדי שה-UI ירגיש "מחובר")
+        ...corsHeaders,
+        // Demo cookie (HttpOnly)
         "Set-Cookie": `access_token=demo.${user.role}; HttpOnly; Path=/; Max-Age=3600; SameSite=None; Secure`,
       },
     });
   }
 
-  // ----------------------------
   // GET /auth/me
-  // ----------------------------
   if (method === "GET" && path === "/auth/me") {
-    const cookie = ctx.request.headers.get("Cookie") || "";
+    const cookie = request.headers.get("Cookie") || "";
     const m = cookie.match(/access_token=demo\.(admin|viewer)/);
     if (!m) return json({ detail: "Not authenticated" }, 401);
 
@@ -94,24 +110,23 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     return json({ email, role }, 200);
   }
 
-  // ----------------------------
   // POST /auth/logout
-  // ----------------------------
   if (method === "POST" && path === "/auth/logout") {
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        // מוחק cookie
+        ...corsHeaders,
         "Set-Cookie": `access_token=; HttpOnly; Path=/; Max-Age=0; SameSite=None; Secure`,
       },
     });
   }
 
   // ======================================================
-  // GET /documents
+  // DOCUMENTS
   // ======================================================
+
+  // GET /documents
   if (method === "GET" && path === "/documents") {
     const { results } = await db
       .prepare(
@@ -124,9 +139,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     return json(results);
   }
 
-  // ======================================================
   // POST /documents (create)
-  // ======================================================
   if (method === "POST" && path === "/documents") {
     const body = (await request.json()) as DocumentBody;
     const { title, category, summary, content } = body ?? {};
@@ -156,10 +169,8 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     return json({ id, title, category, summary, content }, 201);
   }
 
-  // ======================================================
   // POST /documents/import-bulk
   // Body: [{title,category,summary,content}, ...]
-  // ======================================================
   if (method === "POST" && path === "/documents/import-bulk") {
     const items = await request.json();
 
@@ -187,9 +198,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     return json({ inserted }, 200);
   }
 
-  // ======================================================
-  // /documents/:id  (GET / PUT / DELETE)
-  // ======================================================
+  // /documents/:id
   const match = path.match(/^\/documents\/(\d+)$/);
   if (match) {
     const id = Number(match[1]);
@@ -233,8 +242,5 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     }
   }
 
-  // ======================================================
-  // Fallback
-  // ======================================================
   return json({ detail: "Not found" }, 404);
 };

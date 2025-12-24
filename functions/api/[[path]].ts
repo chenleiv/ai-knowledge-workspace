@@ -49,6 +49,66 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     return json({ detail: "D1 binding ai_workspace is missing" }, 500);
   }
 
+  type LoginBody = { email?: string; password?: string };
+
+  // ----------------------------
+  // POST /auth/login
+  // ----------------------------
+  if (method === "POST" && path === "/auth/login") {
+    const body = (await ctx.request.json()) as LoginBody;
+
+    const isAdmin =
+      body?.email === "admin@demo.com" && body?.password === "admin123";
+    const isViewer =
+      body?.email === "viewer@demo.com" && body?.password === "viewer123";
+
+    if (!isAdmin && !isViewer)
+      return json({ detail: "Invalid credentials" }, 401);
+
+    const user = {
+      email: body.email!,
+      role: isAdmin ? "admin" : "viewer",
+    };
+
+    return new Response(JSON.stringify({ user }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        // Demo cookie. (מספיק כדי שה-UI ירגיש "מחובר")
+        "Set-Cookie": `access_token=demo.${user.role}; HttpOnly; Path=/; Max-Age=3600; SameSite=None; Secure`,
+      },
+    });
+  }
+
+  // ----------------------------
+  // GET /auth/me
+  // ----------------------------
+  if (method === "GET" && path === "/auth/me") {
+    const cookie = ctx.request.headers.get("Cookie") || "";
+    const m = cookie.match(/access_token=demo\.(admin|viewer)/);
+    if (!m) return json({ detail: "Not authenticated" }, 401);
+
+    const role = m[1] as "admin" | "viewer";
+    const email = role === "admin" ? "admin@demo.com" : "viewer@demo.com";
+    return json({ email, role }, 200);
+  }
+
+  // ----------------------------
+  // POST /auth/logout
+  // ----------------------------
+  if (method === "POST" && path === "/auth/logout") {
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        // מוחק cookie
+        "Set-Cookie": `access_token=; HttpOnly; Path=/; Max-Age=0; SameSite=None; Secure`,
+      },
+    });
+  }
+
   // ======================================================
   // GET /documents
   // ======================================================

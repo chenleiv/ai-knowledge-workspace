@@ -26,7 +26,7 @@ export default function UsersPage() {
                   <b>admin</b>: can create/update/delete/import/export
                 </li>
                 <li>
-                  <b>viewer</b>: read-only
+                  <b>viewer</b>: read-only/export
                 </li>
               </ul>
             </div>

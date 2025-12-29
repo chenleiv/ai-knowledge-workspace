@@ -212,8 +212,8 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   // GET /documents/export  (admin only)
   // ----------------------------
   if (method === "GET" && path === "/documents/export") {
-    const admin = requireAdmin(request);
-    if (!admin.ok) return admin.res;
+    // const admin = requireAdmin(request);
+    // if (!admin.ok) return admin.res;
 
     const { results } = await db
       .prepare(

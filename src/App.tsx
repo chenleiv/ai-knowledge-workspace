@@ -24,10 +24,12 @@ function App() {
       <header>
         <h1>Knowledge Workspace</h1>
 
-        <nav>
-          <Link to="/documents">Documents</Link>
-          <Link to="/assistant">AI Assistant</Link>
-        </nav>
+        {isAuthed && (
+          <nav>
+            <Link to="/documents">Documents</Link>
+            <Link to="/assistant">AI Assistant</Link>
+          </nav>
+        )}
 
         <div className="header-right">
           <ThemeToggle value={theme} onChange={setTheme} />

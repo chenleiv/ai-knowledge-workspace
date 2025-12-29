@@ -3,107 +3,29 @@ export interface Env {
 }
 
 type Role = "admin" | "viewer";
+type AuthUser = { email: string; role: Role };
 
-type AuthUser = {
-  email: string;
-  role: Role;
-};
-
-type LoginBody = {
-  email?: string;
-  password?: string;
-};
-
-type DocumentRow = {
-  id: number;
-  title: string;
-  category: string;
-  summary: string;
-  content: string;
-  created_at?: string;
-  updated_at?: string;
-};
-
-type DocumentBody = {
+interface DocumentBody {
   title?: string;
   category?: string;
   summary?: string;
   content?: string;
-};
-
-type ImportBulkBody =
-  | {
-      mode: "merge" | "replace";
-      documents: Array<{
-        id?: number;
-        title?: string;
-        category?: string;
-        summary?: string;
-        content?: string;
-      }>;
-    }
-  | Array<{
-      id?: number;
-      title?: string;
-      category?: string;
-      summary?: string;
-      content?: string;
-    }>;
-
-function parseCookie(cookieHeader: string | null): Record<string, string> {
-  const out: Record<string, string> = {};
-  if (!cookieHeader) return out;
-
-  const parts = cookieHeader.split(";").map((p) => p.trim());
-  for (const part of parts) {
-    const idx = part.indexOf("=");
-    if (idx === -1) continue;
-    const k = part.slice(0, idx).trim();
-    const v = part.slice(idx + 1).trim();
-    if (k) out[k] = v;
-  }
-  return out;
 }
 
-function isAuthed(req: Request): { ok: true; role: Role } | { ok: false } {
-  const cookies = parseCookie(req.headers.get("Cookie"));
-  const token = cookies["access_token"];
-  if (!token) return { ok: false };
+type LoginBody = { email?: string; password?: string };
 
-  const m = token.match(/^demo\.(admin|viewer)$/);
-  if (!m) return { ok: false };
+function parseAuthUserFromCookie(cookieHeader: string | null): AuthUser | null {
+  const cookie = cookieHeader ?? "";
+  const m = cookie.match(/access_token=demo\.(admin|viewer)/);
+  if (!m) return null;
 
-  return { ok: true, role: m[1] as Role };
-}
-
-function requireAdmin(
-  req: Request
-): { ok: true } | { ok: false; res: Response } {
-  const auth = isAuthed(req);
-  if (!auth.ok) {
-    return {
-      ok: false,
-      res: new Response(JSON.stringify({ detail: "Not authenticated" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      }),
-    };
-  }
-  if (auth.role !== "admin") {
-    return {
-      ok: false,
-      res: new Response(JSON.stringify({ detail: "Admin only" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json" },
-      }),
-    };
-  }
-  return { ok: true };
+  const role = m[1] as Role;
+  const email = role === "admin" ? "admin@demo.com" : "viewer@demo.com";
+  return { email, role };
 }
 
 export const onRequest: PagesFunction<Env> = async (ctx) => {
   const { request, env } = ctx;
-
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
 
@@ -111,13 +33,14 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   const path = rawPath.replace(/^\/api(?=\/|$)/, "").replace(/\/+$/, "");
 
   const origin = request.headers.get("Origin") ?? "";
+  const allowOrigin = origin || "*";
 
-  const corsHeaders: Record<string, string> = {
-    "Access-Control-Allow-Origin": origin,
+  const baseHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Credentials": "true",
     "Access-Control-Allow-Headers": "Content-Type, Accept",
     "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-    Vary: "Origin",
   };
 
   const json = (
@@ -127,22 +50,19 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   ) =>
     new Response(JSON.stringify(data), {
       status,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-        ...(extraHeaders ?? {}),
-      },
+      headers: { ...baseHeaders, ...(extraHeaders ?? {}) },
     });
 
+  // CORS preflight
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
+    return new Response(null, { status: 204, headers: baseHeaders });
   }
 
   const db = env.ai_workspace;
   if (!db) return json({ detail: "D1 binding ai_workspace is missing" }, 500);
 
   // ----------------------------
-  // AUTH
+  // AUTH: login/me/logout
   // ----------------------------
 
   // POST /auth/login
@@ -163,76 +83,69 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
       role: isAdmin ? "admin" : "viewer",
     };
 
-    // Cookie for demo auth (works on HTTPS + cross-origin if SameSite=None;Secure)
     return json({ user }, 200, {
-      "Set-Cookie":
-        `access_token=demo.${user.role}; ` +
-        "HttpOnly; Path=/; Max-Age=3600; SameSite=None; Secure",
+      // Demo cookie used only to identify role
+      "Set-Cookie": `access_token=demo.${user.role}; HttpOnly; Path=/; Max-Age=3600; SameSite=None; Secure`,
     });
   }
 
   // GET /auth/me
   if (method === "GET" && path === "/auth/me") {
-    const auth = isAuthed(request);
-    if (!auth.ok) return json({ detail: "Not authenticated" }, 401);
-
-    const email = auth.role === "admin" ? "admin@demo.com" : "viewer@demo.com";
-    return json({ email, role: auth.role }, 200);
+    const user = parseAuthUserFromCookie(request.headers.get("Cookie"));
+    if (!user) return json({ detail: "Not authenticated" }, 401);
+    return json(user, 200);
   }
 
   // POST /auth/logout
   if (method === "POST" && path === "/auth/logout") {
     return json({ ok: true }, 200, {
-      "Set-Cookie":
-        "access_token=; HttpOnly; Path=/; Max-Age=0; SameSite=None; Secure",
+      "Set-Cookie": `access_token=; HttpOnly; Path=/; Max-Age=0; SameSite=None; Secure`,
     });
   }
 
   // ----------------------------
-  // DOCUMENTS (list)
-  // GET /documents   (any logged-in user)
+  // AUTH GUARDS for documents
+  // ----------------------------
+  const authedUser = parseAuthUserFromCookie(request.headers.get("Cookie"));
+
+  const requireAuth = () => {
+    if (!authedUser) return json({ detail: "Not authenticated" }, 401);
+    return null;
+  };
+
+  const requireAdmin = () => {
+    if (!authedUser) return json({ detail: "Not authenticated" }, 401);
+    if (authedUser.role !== "admin") return json({ detail: "Forbidden" }, 403);
+    return null;
+  };
+
+  // Any /documents* endpoint requires auth
+  if (path === "/documents" || path.startsWith("/documents/")) {
+    const guard = requireAuth();
+    if (guard) return guard;
+  }
+
+  // ----------------------------
+  // GET /documents   (viewer/admin)
   // ----------------------------
   if (method === "GET" && path === "/documents") {
-    const auth = isAuthed(request);
-    if (!auth.ok) return json({ detail: "Not authenticated" }, 401);
-
     const { results } = await db
       .prepare(
         `SELECT id, title, category, summary, content, created_at, updated_at
          FROM documents
          ORDER BY id DESC`
       )
-      .all<DocumentRow>();
+      .all();
 
-    return json(results ?? []);
+    return json(results, 200);
   }
 
   // ----------------------------
-  // DOCUMENTS (export) ✅
-  // GET /documents/export  (admin only)
-  // ----------------------------
-  if (method === "GET" && path === "/documents/export") {
-    // const admin = requireAdmin(request);
-    // if (!admin.ok) return admin.res;
-
-    const { results } = await db
-      .prepare(
-        `SELECT id, title, category, summary, content, created_at, updated_at
-         FROM documents
-         ORDER BY id ASC`
-      )
-      .all<DocumentRow>();
-
-    return json(results ?? []);
-  }
-
-  // ----------------------------
-  // DOCUMENTS (create)
-  // POST /documents  (admin only)
+  // POST /documents (create)  (admin only)
   // ----------------------------
   if (method === "POST" && path === "/documents") {
-    const admin = requireAdmin(request);
-    if (!admin.ok) return admin.res;
+    const guard = requireAdmin();
+    if (guard) return guard;
 
     const body = (await request.json()) as DocumentBody;
     const { title, category, summary, content } = body ?? {};
@@ -241,93 +154,97 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
       return json({ detail: "Missing fields" }, 400);
     }
 
+    const now = new Date().toISOString();
+
     const res = await db
       .prepare(
-        `INSERT INTO documents (title, category, summary, content)
-         VALUES (?, ?, ?, ?)`
+        `INSERT INTO documents (title, category, summary, content, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?)`
       )
-      .bind(title, category, summary, content)
+      .bind(title, category, summary, content, now, now)
       .run();
 
     const id =
       (res as any)?.meta?.last_row_id ?? (res as any)?.meta?.lastRowId ?? null;
 
-    return json({ id, title, category, summary, content }, 201);
+    if (!id)
+      return json({ detail: "Insert succeeded but no id returned" }, 500);
+
+    return json(
+      {
+        id,
+        title,
+        category,
+        summary,
+        content,
+        created_at: now,
+        updated_at: now,
+      },
+      201
+    );
   }
 
   // ----------------------------
-  // DOCUMENTS (import bulk) ✅
   // POST /documents/import-bulk  (admin only)
-  // supports:
-  // 1) { mode: "merge"|"replace", documents: [...] }
-  // 2) [...]  (array only)
   // ----------------------------
   if (method === "POST" && path === "/documents/import-bulk") {
-    const admin = requireAdmin(request);
-    if (!admin.ok) return admin.res;
+    const guard = requireAdmin();
+    if (guard) return guard;
 
-    const payload = (await request.json()) as ImportBulkBody;
+    const items = await request.json();
+    if (!Array.isArray(items))
+      return json({ detail: "Expected an array" }, 400);
 
-    let mode: "merge" | "replace" = "merge";
-    let documents: Array<any> = [];
-
-    if (Array.isArray(payload)) {
-      documents = payload;
-    } else {
-      mode = payload.mode;
-      documents = payload.documents ?? [];
-    }
-
-    if (!Array.isArray(documents)) {
-      return json({ detail: "Invalid payload" }, 400);
-    }
-
-    if (mode === "replace") {
-      // Clear and re-insert
-      await db.prepare("DELETE FROM documents").run();
-    }
-
+    const now = new Date().toISOString();
     let inserted = 0;
 
-    for (const d of documents) {
-      const { title, category, summary, content } = d ?? {};
+    for (const it of items) {
+      const { title, category, summary, content } = it ?? {};
       if (!title || !category || !summary || !content) continue;
 
       await db
         .prepare(
-          `INSERT INTO documents (title, category, summary, content)
-           VALUES (?, ?, ?, ?)`
+          `INSERT INTO documents (title, category, summary, content, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)`
         )
-        .bind(title, category, summary, content)
+        .bind(title, category, summary, content, now, now)
         .run();
 
       inserted++;
     }
 
-    // Return the full list like your FastAPI did (helps the UI)
+    return json({ inserted }, 200);
+  }
+
+  // ----------------------------
+  // POST /documents/export  (viewer/admin)
+  // Returns JSON array of documents
+  // ----------------------------
+  if (method === "POST" && path === "/documents/export") {
     const { results } = await db
       .prepare(
         `SELECT id, title, category, summary, content, created_at, updated_at
          FROM documents
          ORDER BY id DESC`
       )
-      .all<DocumentRow>();
+      .all();
 
-    return json(results ?? [], 200, { "X-Inserted": String(inserted) });
+    return json(results, 200, {
+      "Content-Type": "application/json",
+      "Content-Disposition": `attachment; filename="documents-export.json"`,
+    });
   }
 
   // ----------------------------
-  // DOCUMENTS by id
-  // /documents/:id  (GET any authed, PUT/DELETE admin)
+  // /documents/:id (GET/PUT/DELETE)
+  // GET: viewer/admin
+  // PUT/DELETE: admin only
   // ----------------------------
   const match = path.match(/^\/documents\/(\d+)$/);
   if (match) {
     const id = Number(match[1]);
 
     if (method === "GET") {
-      const auth = isAuthed(request);
-      if (!auth.ok) return json({ detail: "Not authenticated" }, 401);
-
       const row = await db
         .prepare(
           `SELECT id, title, category, summary, content, created_at, updated_at
@@ -335,45 +252,41 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
            WHERE id = ?`
         )
         .bind(id)
-        .first<DocumentRow>();
+        .first();
 
       if (!row) return json({ detail: "Not found" }, 404);
       return json(row, 200);
     }
 
     if (method === "PUT") {
-      const admin = requireAdmin(request);
-      if (!admin.ok) return admin.res;
+      const guard = requireAdmin();
+      if (guard) return guard;
 
       const body = (await request.json()) as DocumentBody;
       const { title, category, summary, content } = body ?? {};
 
+      const now = new Date().toISOString();
+
       await db
         .prepare(
           `UPDATE documents
-           SET title = ?, category = ?, summary = ?, content = ?, updated_at = datetime('now')
+           SET title = ?, category = ?, summary = ?, content = ?, updated_at = ?
            WHERE id = ?`
         )
-        .bind(title, category, summary, content, id)
+        .bind(title, category, summary, content, now, id)
         .run();
 
-      const row = await db
-        .prepare(
-          `SELECT id, title, category, summary, content, created_at, updated_at
-           FROM documents
-           WHERE id = ?`
-        )
-        .bind(id)
-        .first<DocumentRow>();
-
-      return json(row ?? { id, title, category, summary, content }, 200);
+      return json(
+        { id, title, category, summary, content, updated_at: now },
+        200
+      );
     }
 
     if (method === "DELETE") {
-      const admin = requireAdmin(request);
-      if (!admin.ok) return admin.res;
+      const guard = requireAdmin();
+      if (guard) return guard;
 
-      await db.prepare("DELETE FROM documents WHERE id = ?").bind(id).run();
+      await db.prepare(`DELETE FROM documents WHERE id = ?`).bind(id).run();
       return json({ ok: true }, 200);
     }
   }

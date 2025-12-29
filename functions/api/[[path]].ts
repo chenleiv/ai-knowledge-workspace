@@ -53,7 +53,6 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
       headers: { ...baseHeaders, ...(extraHeaders ?? {}) },
     });
 
-  // CORS preflight
   if (method === "OPTIONS") {
     return new Response(null, { status: 204, headers: baseHeaders });
   }
@@ -65,7 +64,6 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   // AUTH: login/me/logout
   // ----------------------------
 
-  // POST /auth/login
   if (method === "POST" && path === "/auth/login") {
     const body = (await request.json()) as LoginBody;
 
@@ -84,19 +82,16 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     };
 
     return json({ user }, 200, {
-      // Demo cookie used only to identify role
       "Set-Cookie": `access_token=demo.${user.role}; HttpOnly; Path=/; Max-Age=3600; SameSite=None; Secure`,
     });
   }
 
-  // GET /auth/me
   if (method === "GET" && path === "/auth/me") {
     const user = parseAuthUserFromCookie(request.headers.get("Cookie"));
     if (!user) return json({ detail: "Not authenticated" }, 401);
     return json(user, 200);
   }
 
-  // POST /auth/logout
   if (method === "POST" && path === "/auth/logout") {
     return json({ ok: true }, 200, {
       "Set-Cookie": `access_token=; HttpOnly; Path=/; Max-Age=0; SameSite=None; Secure`,
@@ -119,14 +114,13 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     return null;
   };
 
-  // Any /documents* endpoint requires auth
   if (path === "/documents" || path.startsWith("/documents/")) {
     const guard = requireAuth();
     if (guard) return guard;
   }
 
   // ----------------------------
-  // GET /documents   (viewer/admin)
+  // GET /documents (viewer/admin)
   // ----------------------------
   if (method === "GET" && path === "/documents") {
     const { results } = await db
@@ -141,7 +135,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   }
 
   // ----------------------------
-  // POST /documents (create)  (admin only)
+  // POST /documents (admin only)
   // ----------------------------
   if (method === "POST" && path === "/documents") {
     const guard = requireAdmin();
@@ -185,7 +179,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   }
 
   // ----------------------------
-  // POST /documents/import-bulk  (admin only)
+  // POST /documents/import-bulk (admin only)
   // ----------------------------
   if (method === "POST" && path === "/documents/import-bulk") {
     const guard = requireAdmin();
@@ -217,10 +211,9 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   }
 
   // ----------------------------
-  // POST /documents/export  (viewer/admin)
-  // Returns JSON array of documents
+  // GET/POST /documents/export (viewer/admin)
   // ----------------------------
-  if (method === "POST" && path === "/documents/export") {
+  if ((method === "GET" || method === "POST") && path === "/documents/export") {
     const { results } = await db
       .prepare(
         `SELECT id, title, category, summary, content, created_at, updated_at
@@ -229,39 +222,12 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
       )
       .all();
 
-    return json(results, 200, {
-      "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="documents-export.json"`,
-    });
-  }
-  // ======================================================
-  // GET/POST /documents/export  (viewer allowed)
-  // ======================================================
-  if ((method === "GET" || method === "POST") && path === "/documents/export") {
-    const cookie = request.headers.get("Cookie") || "";
-    const m = cookie.match(/access_token=demo\.(admin|viewer)/);
-    if (!m) return json({ detail: "Not authenticated" }, 401);
-
-    const { results } = await db
-      .prepare(
-        `SELECT id, title, category, summary, content
-       FROM documents
-       ORDER BY id DESC`
-      )
-      .all();
-
     const filename = `documents-export-${new Date()
       .toISOString()
       .slice(0, 10)}.json`;
 
-    return new Response(JSON.stringify(results), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": "true",
-      },
+    return json(results, 200, {
+      "Content-Disposition": `attachment; filename="${filename}"`,
     });
   }
 

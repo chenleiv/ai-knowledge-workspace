@@ -5,7 +5,7 @@ import type { Role } from "./Auth";
 export default function RequireRole({ allow }: { allow: Role[] }) {
   const { user, isReady } = useAuth();
 
-  if (!isReady) return null;
+  if (!isReady) return <div />;
   if (!user) return <Navigate to="/login" replace />;
   if (!allow.includes(user.role)) return <Navigate to="/documents" replace />;
 

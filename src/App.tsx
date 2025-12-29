@@ -45,12 +45,17 @@ function App() {
             <Route path="/" element={<Navigate to="/documents" replace />} />
 
             <Route path="/documents" element={<DocumentsPage />} />
-            <Route path="/documents/:id" element={<DocumentDetailsPage />} />
-            <Route path="/assistant" element={<AssistantPage />} />
 
             <Route element={<RequireRole allow={["admin"]} />}>
+              <Route
+                path="/documents/new"
+                element={<Navigate to="/documents" replace />}
+              />
               <Route path="/users" element={<UsersPage />} />
             </Route>
+
+            <Route path="/documents/:id" element={<DocumentDetailsPage />} />
+            <Route path="/assistant" element={<AssistantPage />} />
           </Route>
 
           <Route

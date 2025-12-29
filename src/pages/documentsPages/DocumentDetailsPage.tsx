@@ -82,6 +82,10 @@ export default function DocumentDetailsPage() {
   }, [id]);
 
   async function onSave() {
+    if (!isAdmin) {
+      setError("Forbidden");
+      return;
+    }
     const title = form.title.trim();
     const category = form.category.trim();
     const summary = form.summary.trim();
@@ -192,13 +196,15 @@ export default function DocumentDetailsPage() {
 
         <div className="top-actions">
           {mode === "view" ? (
-            <button
-              className="primary-btn"
-              type="button"
-              onClick={() => setMode("edit")}
-            >
-              Edit
-            </button>
+            isAdmin ? (
+              <button
+                className="primary-btn"
+                type="button"
+                onClick={() => setMode("edit")}
+              >
+                Edit
+              </button>
+            ) : null
           ) : (
             <>
               <button

@@ -38,33 +38,25 @@ function App() {
       </header>
 
       <main>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
+        <Route element={<RequireAuth />}>
+          <Route path="/" element={<Navigate to="/documents" replace />} />
 
-          <Route element={<RequireAuth />}>
-            <Route path="/" element={<Navigate to="/documents" replace />} />
+          <Route path="/documents" element={<DocumentsPage />} />
 
-            <Route path="/documents" element={<DocumentsPage />} />
-
-            <Route element={<RequireRole allow={["admin"]} />}>
-              <Route
-                path="/documents/new"
-                element={<Navigate to="/documents" replace />}
-              />
-              <Route path="/users" element={<UsersPage />} />
-            </Route>
-
-            <Route path="/documents/:id" element={<DocumentDetailsPage />} />
-            <Route path="/assistant" element={<AssistantPage />} />
+          {/* Admin-only NEW */}
+          <Route element={<RequireRole allow={["admin"]} />}>
+            <Route path="/documents/new" element={<DocumentDetailsPage />} />
           </Route>
 
-          <Route
-            path="*"
-            element={
-              <Navigate to={isAuthed ? "/documents" : "/login"} replace />
-            }
-          />
-        </Routes>
+          {/* Everyone (viewer/admin) can view details */}
+          <Route path="/documents/:id" element={<DocumentDetailsPage />} />
+
+          <Route path="/assistant" element={<AssistantPage />} />
+
+          <Route element={<RequireRole allow={["admin"]} />}>
+            <Route path="/users" element={<UsersPage />} />
+          </Route>
+        </Route>
       </main>
     </div>
   );

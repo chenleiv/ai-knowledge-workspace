@@ -234,6 +234,36 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
       "Content-Disposition": `attachment; filename="documents-export.json"`,
     });
   }
+  // ======================================================
+  // GET/POST /documents/export  (viewer allowed)
+  // ======================================================
+  if ((method === "GET" || method === "POST") && path === "/documents/export") {
+    const cookie = request.headers.get("Cookie") || "";
+    const m = cookie.match(/access_token=demo\.(admin|viewer)/);
+    if (!m) return json({ detail: "Not authenticated" }, 401);
+
+    const { results } = await db
+      .prepare(
+        `SELECT id, title, category, summary, content
+       FROM documents
+       ORDER BY id DESC`
+      )
+      .all();
+
+    const filename = `documents-export-${new Date()
+      .toISOString()
+      .slice(0, 10)}.json`;
+
+    return new Response(JSON.stringify(results), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true",
+      },
+    });
+  }
 
   // ----------------------------
   // /documents/:id (GET/PUT/DELETE)

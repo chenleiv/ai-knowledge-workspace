@@ -1,8 +1,9 @@
-import { Link, Navigate, Route } from "react-router-dom";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
 
 import DocumentsPage from "./pages/documentsPages/DocumentsPage";
 import DocumentDetailsPage from "./pages/documentsPages/DocumentDetailsPage";
 import AssistantPage from "./pages/assistantPages/AssistantPage";
+import LoginPage from "./pages/loginPage/LoginPge";
 import UsersPage from "./pages/loginPage/UsersPage";
 
 import { useTheme } from "./hooks/useTheme";
@@ -37,25 +38,36 @@ function App() {
       </header>
 
       <main>
-        <Route element={<RequireAuth />}>
-          <Route path="/" element={<Navigate to="/documents" replace />} />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
 
-          <Route path="/documents" element={<DocumentsPage />} />
+          <Route element={<RequireAuth />}>
+            <Route path="/" element={<Navigate to="/documents" replace />} />
 
-          {/* Admin-only NEW */}
-          <Route element={<RequireRole allow={["admin"]} />}>
-            <Route path="/documents/new" element={<DocumentDetailsPage />} />
+            <Route path="/documents" element={<DocumentsPage />} />
+
+            {/* Admin-only NEW */}
+            <Route element={<RequireRole allow={["admin"]} />}>
+              <Route path="/documents/new" element={<DocumentDetailsPage />} />
+            </Route>
+
+            {/* Everyone (viewer/admin) can view details */}
+            <Route path="/documents/:id" element={<DocumentDetailsPage />} />
+
+            <Route path="/assistant" element={<AssistantPage />} />
+
+            <Route element={<RequireRole allow={["admin"]} />}>
+              <Route path="/users" element={<UsersPage />} />
+            </Route>
           </Route>
 
-          {/* Everyone (viewer/admin) can view details */}
-          <Route path="/documents/:id" element={<DocumentDetailsPage />} />
-
-          <Route path="/assistant" element={<AssistantPage />} />
-
-          <Route element={<RequireRole allow={["admin"]} />}>
-            <Route path="/users" element={<UsersPage />} />
-          </Route>
-        </Route>
+          <Route
+            path="*"
+            element={
+              <Navigate to={isAuthed ? "/documents" : "/login"} replace />
+            }
+          />
+        </Routes>
       </main>
     </div>
   );

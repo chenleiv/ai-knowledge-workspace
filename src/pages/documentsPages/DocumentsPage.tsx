@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import "./documentsPage.scss";
 import {
@@ -36,6 +36,8 @@ import {
   sameArray,
 } from "./utils/ordering";
 import { loadJson, saveJson } from "./utils/storage";
+import InlineBanner from "../../components/banners/InlineBanner";
+import { useAuth } from "../../auth/Auth";
 
 const ORDER_KEY = "documentsOrder";
 const FAVORITES_KEY = "documentsFavorites";
@@ -63,7 +65,6 @@ export default function DocumentsPage() {
   const [query, setQuery] = useState("");
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-
   const [order, setOrder] = useState<number[]>(
     loadJson<number[]>(ORDER_KEY, [])
   );
@@ -75,12 +76,16 @@ export default function DocumentsPage() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [pageMenuOpen, setPageMenuOpen] = useState(false);
+  const [showForbidden, setShowForbidden] = useState(false);
+  const { user } = useAuth();
+
+  const isAdmin = user?.role === "admin";
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-
+  const location = useLocation();
   const load = useCallback(async () => {
     setError(null);
     try {
@@ -102,6 +107,14 @@ export default function DocumentsPage() {
     void load(); // initial data fetch
   }, [load]);
 
+  useEffect(() => {
+    if (location.state?.forbidden) {
+      setShowForbidden(true);
+
+      // מנקה את ה-state כדי שלא יחזור ברענון
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location, navigate]);
   function openDoc(doc: DocumentItem) {
     navigate(`/documents/${doc.id}`);
   }
@@ -257,6 +270,14 @@ export default function DocumentsPage() {
 
   return (
     <div className="documents-page" role="presentation">
+      {showForbidden && (
+        <InlineBanner type="error">
+          <div className="banner">
+            <span>This section is available to admins only.</span>
+            <button onClick={() => setShowForbidden(false)}>✕</button>
+          </div>
+        </InlineBanner>
+      )}
       <DocumentsHeader
         onNew={openCreate}
         pageMenuOpen={pageMenuOpen}
@@ -317,6 +338,7 @@ export default function DocumentsPage() {
                   isMenuOpen={openMenuId === doc.id}
                   onToggleFavorite={toggleFavorite}
                   onOpen={openDoc}
+                  isAdmin={isAdmin}
                   onDelete={onDelete}
                   onToggleMenu={toggleCardMenu}
                   onCloseMenu={() => setOpenMenuId(null)}

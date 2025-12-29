@@ -1,7 +1,7 @@
 import { useAuth } from "../../auth/Auth";
 
 export default function UsersPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <div className="panel">
@@ -31,10 +31,6 @@ export default function UsersPage() {
               </ul>
             </div>
           </div>
-
-          <button className="secondary-btn" type="button" onClick={logout}>
-            Logout
-          </button>
         </>
       )}
     </div>

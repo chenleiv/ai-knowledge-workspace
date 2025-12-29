@@ -178,6 +178,11 @@
   font-size: 0.85rem;
 }
 
+.banner {
+  display: flex;
+  justify-Content: space-between;
+}
+
 /* Drag overlay wrapper */
 .drag-overlay {
   pointer-events: none;

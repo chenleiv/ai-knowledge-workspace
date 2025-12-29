@@ -12,6 +12,7 @@ import {
 } from "../../api/documentsClient";
 import useConfirm from "../../hooks/useConfirm";
 import Menu from "../../components/menu/Menu";
+import { useAuth } from "../../auth/Auth";
 
 function toInput(doc: DocumentItem): DocumentInput {
   return {
@@ -37,12 +38,13 @@ export default function DocumentDetailsPage() {
   const [doc, setDoc] = useState<DocumentItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [mode, setMode] = useState<"view" | "edit">(isNew ? "edit" : "view");
   const [form, setForm] = useState<DocumentInput>(emptyInput());
   const [isSaving, setIsSaving] = useState(false);
-
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useAuth();
+
+  const isAdmin = user?.role === "admin";
 
   async function load() {
     if (isNew) {
@@ -218,7 +220,7 @@ export default function DocumentDetailsPage() {
             </>
           )}
 
-          {!isNew && (
+          {!isNew && isAdmin && (
             <div className="menu-wrap" onClick={(e) => e.stopPropagation()}>
               <button
                 className="icon-btn"

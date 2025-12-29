@@ -1,20 +1,24 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { login } from "../../api/authClient";
 import { useAuth } from "../../auth/Auth";
 
 export default function LoginPage() {
   const nav = useNavigate();
-  const { isAuthed, isReady, loginSuccess } = useAuth();
+  const location = useLocation();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { isAuthed, loginSuccess } = useAuth();
+
+  const [email, setEmail] = useState("admin@demo.com");
+  const [password, setPassword] = useState("admin123");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isReady && isAuthed) nav("/documents", { replace: true });
-  }, [isReady, isAuthed, nav]);
+    if (isAuthed) {
+      nav("/documents", { replace: true });
+    }
+  }, [isAuthed, nav]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -22,9 +26,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await login(email.trim().toLowerCase(), password);
+      const res = await login(email.trim(), password);
+
       loginSuccess(res.user);
-      nav("/documents", { replace: true });
+
+      const to = (location.state as any)?.from?.pathname ?? "/documents";
+      nav(to, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -35,9 +42,6 @@ export default function LoginPage() {
   return (
     <div className="panel" style={{ maxWidth: 520, margin: "0 auto" }}>
       <h2 style={{ marginTop: 0 }}>Login</h2>
-      <p style={{ color: "var(--muted)", marginTop: 6 }}>
-        Demo roles: admin / viewer
-      </p>
 
       <form className="form" onSubmit={onSubmit}>
         <label>

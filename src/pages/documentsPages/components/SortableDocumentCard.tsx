@@ -13,6 +13,7 @@ type Props = {
   onDelete: (doc: DocumentItem) => void;
   onToggleMenu: (id: number) => void;
   onCloseMenu: () => void;
+  isAdmin: boolean;
 };
 
 export default function SortableDocumentCard({
@@ -24,6 +25,7 @@ export default function SortableDocumentCard({
   onDelete,
   onToggleMenu,
   onCloseMenu,
+  isAdmin,
 }: Props) {
   const {
     attributes,
@@ -83,29 +85,31 @@ export default function SortableDocumentCard({
             {isFavorite ? "★" : "☆"}
           </button>
 
-          <div className="menu-wrap" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="icon-btn"
-              type="button"
-              aria-label="Menu"
-              title="Menu"
-              onClick={() => onToggleMenu(doc.id)}
-            >
-              ⋯
-            </button>
+          {isAdmin && (
+            <div className="menu-wrap" onClick={(e) => e.stopPropagation()}>
+              <button
+                className="icon-btn"
+                type="button"
+                aria-label="Menu"
+                title="Menu"
+                onClick={() => onToggleMenu(doc.id)}
+              >
+                ⋯
+              </button>
 
-            <Menu
-              open={isMenuOpen}
-              onClose={onCloseMenu}
-              items={[
-                {
-                  label: "Delete",
-                  danger: true,
-                  onClick: () => onDelete(doc),
-                },
-              ]}
-            />
-          </div>
+              <Menu
+                open={isMenuOpen}
+                onClose={onCloseMenu}
+                items={[
+                  {
+                    label: "Delete",
+                    danger: true,
+                    onClick: () => onDelete(doc),
+                  },
+                ]}
+              />
+            </div>
+          )}
         </div>
       </div>
 

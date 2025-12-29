@@ -31,9 +31,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    // On refresh: validate cookie session via /me
     (async () => {
       try {
-        const u = await me(); // cookie session validation
+        const u = await me();
         setUser(u);
         localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u));
       } catch {
@@ -46,12 +47,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   async function doLogout() {
+    setUser(null);
+    localStorage.removeItem(AUTH_USER_KEY);
+
     try {
       await apiLogout();
-    } finally {
-      setUser(null);
-      localStorage.removeItem(AUTH_USER_KEY);
-    }
+    } catch {}
   }
 
   return (

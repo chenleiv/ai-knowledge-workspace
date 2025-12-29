@@ -1,0 +1,18 @@
+.inline-banner {
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+
+    &.error {
+        background: rgba(255, 80, 80, 0.12);
+        border: 1px solid rgba(255, 80, 80, 0.35);
+        color: #ffb3b3;
+    }
+
+    &.info {
+        background: rgba(120, 120, 255, 0.12);
+        border: 1px solid rgba(120, 120, 255, 0.35);
+        color: #cfcfff;
+    }
+}

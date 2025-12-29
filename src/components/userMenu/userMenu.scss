@@ -1,0 +1,106 @@
+.user-menu {
+    position: relative;
+    display: inline-flex;
+}
+
+.user-menu__trigger {
+    border: 1px solid var(--border);
+    background: var(--soft-2);
+    border-radius: 999px;
+    padding: 6px;
+    cursor: pointer;
+    transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.user-menu__trigger:active {
+    transform: scale(0.98);
+}
+
+.user-menu__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 12px;
+    background: var(--primary);
+    color: var(--white);
+}
+
+.user-menu__panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    width: 260px;
+    background: #161616;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    z-index: 50;
+}
+
+.user-menu__header {
+    padding: 12px 12px 8px 12px;
+    background-color: var(--panel);
+}
+
+.user-menu__email {
+    font-size: 13px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-menu__role {
+    display: inline-flex;
+    margin-top: 6px;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.user-menu__spacer {
+    border-bottom: 1px solid var(--soft-3);
+}
+
+.user-menu__items {
+    display: grid;
+
+}
+
+.user-menu__item {
+    width: 100%;
+    text-align: left;
+    border: 1px solid transparent;
+    background: var(--panel);
+    color: inherit;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    text-decoration: none;
+    transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+    border-bottom: 1px solid var(--soft-2);
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.user-menu__item:hover {
+    &:hover {
+        color: var(--text);
+        background: var(--soft);
+        border-color: var(--border);
+    }
+}
+
+.user-menu__item:active {
+    transform: scale(0.99);
+}

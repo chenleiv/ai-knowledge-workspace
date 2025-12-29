@@ -28,12 +28,13 @@ export async function apiFetch<T>(
   const res = await fetch(url, {
     ...init,
     headers,
-    credentials: "include",
+    credentials: "include", // ✅ cookies
   });
 
   if (res.status === 204) return undefined as T;
 
   const text = await res.text();
+
   if (!res.ok) {
     throw new ApiError(
       `Request failed: ${res.status}`,

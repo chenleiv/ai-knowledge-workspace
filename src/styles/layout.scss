@@ -93,7 +93,7 @@
 
       a {
         text-decoration: none;
-        color: var(--muted);
+        color: var(--soft-3);
         padding: 0.4rem 0.6rem;
         border-radius: 10px;
         border: 1px solid transparent;
@@ -116,7 +116,9 @@
     .header-right {
       display: flex;
       align-items: center;
-      gap: 48px;
+      gap: 28px;
+
+
     }
   }
 
@@ -124,6 +126,18 @@
     padding: 24px 32px;
     flex: 1;
     background: var(--bg);
+  }
+
+  .footer {
+    display: flex;
+    background: var(--panel);
+    justify-content: space-between;
+    padding: 12px 8px 8px 34px;
+
+    .secondary-btn {
+      border: none;
+      color: var(--muted);
+    }
   }
 }
 
@@ -133,7 +147,6 @@
     main {
       padding: 18px;
     }
-
   }
 
   .app-layout header {
@@ -159,6 +172,11 @@
     border-radius: 14px;
     font-size: 0.9rem;
   }
+}
+
+.page-loader {
+  padding: 24px;
+  opacity: 0.75;
 }
 
 @media (max-width: 640px) {

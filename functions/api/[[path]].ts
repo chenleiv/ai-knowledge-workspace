@@ -1,5 +1,3 @@
-// functions/api/[[path]].ts
-
 export interface Env {
   ai_workspace: D1Database;
 }

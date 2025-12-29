@@ -1,9 +1,8 @@
-import { Link, Navigate, Route, Routes } from "react-router-dom";
+import { Link, Navigate, Route } from "react-router-dom";
 
 import DocumentsPage from "./pages/documentsPages/DocumentsPage";
 import DocumentDetailsPage from "./pages/documentsPages/DocumentDetailsPage";
 import AssistantPage from "./pages/assistantPages/AssistantPage";
-import LoginPage from "./pages/loginPage/LoginPge";
 import UsersPage from "./pages/loginPage/UsersPage";
 
 import { useTheme } from "./hooks/useTheme";

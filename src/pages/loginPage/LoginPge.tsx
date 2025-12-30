@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { login } from "../../api/authClient";
-import { useAuth } from "../../auth/Auth";
+import { useAuth } from "../../auth/useAuth";
+import type { LoginLocationState } from "../../router/locationState";
 
 export default function LoginPage() {
   const nav = useNavigate();
@@ -14,26 +15,29 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const redirectTo = useMemo(() => {
+    const state = location.state as LoginLocationState | null;
+    return state?.from?.pathname ?? "/documents";
+  }, [location.state]);
+
   useEffect(() => {
     if (isAuthed) {
-      nav("/documents", { replace: true });
+      nav(redirectTo, { replace: true });
     }
-  }, [isAuthed, nav]);
+  }, [isAuthed, nav, redirectTo]);
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
       const res = await login(email.trim(), password);
-
       loginSuccess(res.user);
-
-      const to = (location.state as any)?.from?.pathname ?? "/documents";
-      nav(to, { replace: true });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      nav(redirectTo, { replace: true });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Login failed";
+      setError(message);
     } finally {
       setLoading(false);
     }

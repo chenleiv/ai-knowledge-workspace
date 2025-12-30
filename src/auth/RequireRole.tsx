@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "./Auth";
-import type { Role } from "./Auth";
+import { useAuth } from "./useAuth";
+import type { Role } from "./authTypes";
 
 export default function RequireRole({ allow }: { allow: Role[] }) {
   const { user, isReady } = useAuth();

@@ -6,7 +6,7 @@ import "./styles/globals.scss";
 import "./styles/theme.scss";
 import "./styles/layout.scss";
 import { ConfirmProvider } from "./components/confirmModal/ConfirmProvider.tsx";
-import { AuthProvider } from "./auth/Auth.tsx";
+import { AuthProvider } from "./auth/AuthProvider.tsx";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

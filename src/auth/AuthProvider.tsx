@@ -1,28 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { me, logout as apiLogout } from "../api/authClient";
-
-export type Role = "admin" | "viewer";
-export type AuthUser = { email: string; role: Role };
-
-type AuthContextValue = {
-  user: AuthUser | null;
-  isReady: boolean;
-  isAuthed: boolean;
-  loginSuccess: (user: AuthUser) => void;
-  logout: () => Promise<void>;
-};
-
-const AUTH_USER_KEY = "authUser"; // UI only (not secret)
-const AuthContext = createContext<AuthContextValue | null>(null);
-
-function loadUserFromStorage(): AuthUser | null {
-  try {
-    const raw = localStorage.getItem(AUTH_USER_KEY);
-    return raw ? (JSON.parse(raw) as AuthUser) : null;
-  } catch {
-    return null;
-  }
-}
+import type { AuthUser } from "./authTypes";
+import { AUTH_USER_KEY } from "./authTypes";
+import { loadUserFromStorage } from "./authStorage";
+import { AuthContext } from "./authContext";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() =>
@@ -31,7 +12,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // On refresh: validate cookie session via /me
     (async () => {
       try {
         const u = await me();
@@ -52,7 +32,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       await apiLogout();
-    } catch {}
+    } catch (err) {
+      console.warn("logout failed", err);
+    }
   }
 
   return (
@@ -71,10 +53,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
 }

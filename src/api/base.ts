@@ -2,7 +2,7 @@ import { getApiBase } from "./config";
 
 export class ApiError extends Error {
   status: number;
-  bodyText?: string;
+  bodyText: string | undefined;
 
   constructor(message: string, status: number, bodyText?: string) {
     super(message);

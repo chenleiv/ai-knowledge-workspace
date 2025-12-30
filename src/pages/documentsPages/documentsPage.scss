@@ -1,5 +1,5 @@
-@import "../documentsPages/components/documentsHeader.scss";
-@import "../documentsPages/components/documentCard.scss";
+@use "../documentsPages/components/documentsHeader";
+@use "../documentsPages/components/documentCard";
 
 .documents-page {
   display: flex;

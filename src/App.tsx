@@ -13,7 +13,7 @@ import "./components/confirmModal/confirmDialog.scss";
 import UserMenu from "./components/userMenu/UserMenu";
 import "./components/userMenu/userMenu.scss";
 
-import { useAuth } from "./auth/Auth";
+import { useAuth } from "./auth/useAuth";
 import RequireAuth from "./auth/RequireAuth";
 import RequireRole from "./auth/RequireRole";
 
@@ -47,14 +47,16 @@ function App() {
             <Route path="/" element={<Navigate to="/documents" replace />} />
             <Route path="/documents" element={<DocumentsPage />} />
 
-            {/* One route handles: /documents/123 AND /documents/new */}
+            {/* Admin-only: create */}
+            <Route element={<RequireRole allow={["admin"]} />}>
+              <Route path="/documents/new" element={<DocumentDetailsPage />} />
+              <Route path="/users" element={<UsersPage />} />
+            </Route>
+
+            {/* Everyone: view/edit existing by id */}
             <Route path="/documents/:id" element={<DocumentDetailsPage />} />
 
             <Route path="/assistant" element={<AssistantPage />} />
-
-            <Route element={<RequireRole allow={["admin"]} />}>
-              <Route path="/users" element={<UsersPage />} />
-            </Route>
           </Route>
 
           <Route

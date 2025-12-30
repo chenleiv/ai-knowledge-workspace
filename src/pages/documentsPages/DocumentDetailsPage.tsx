@@ -13,7 +13,7 @@ import {
 
 import useConfirm from "../../hooks/useConfirm";
 import Menu from "../../components/menu/Menu";
-import { useAuth } from "../../auth/Auth";
+import { useAuth } from "../../auth/useAuth";
 
 function toInput(doc: DocumentItem): DocumentInput {
   return {
@@ -28,10 +28,6 @@ function emptyInput(): DocumentInput {
   return { title: "", category: "", summary: "", content: "" };
 }
 
-function isNumericId(value: string) {
-  return /^\d+$/.test(value);
-}
-
 export default function DocumentDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -39,13 +35,9 @@ export default function DocumentDetailsPage() {
   const { user } = useAuth();
 
   const isAdmin = user?.role === "admin";
-  const isNew = id === "new";
+  const isNew = !id || id === "new";
 
-  const docId = useMemo(() => {
-    if (!id) return null;
-    if (!isNumericId(id)) return null;
-    return Number(id);
-  }, [id]);
+  const docId = useMemo(() => Number(id), [id]);
 
   const [doc, setDoc] = useState<DocumentItem | null>(null);
   const [loading, setLoading] = useState(false);

@@ -1,4 +1,4 @@
-import { useAuth } from "../../../auth/Auth";
+import { useState } from "react";
 import PageActionsMenu from "./PageActionsMenu";
 
 type Props = {
@@ -6,8 +6,9 @@ type Props = {
   pageMenuOpen: boolean;
   onTogglePageMenu: () => void;
   onClosePageMenu: () => void;
-  onExport: () => void;
+  onExport: () => Promise<void> | void;
   onImport: (mode: "merge" | "replace") => void;
+  isAdmin: boolean;
 };
 
 export default function DocumentsHeader({
@@ -17,9 +18,21 @@ export default function DocumentsHeader({
   onClosePageMenu,
   onExport,
   onImport,
+  isAdmin,
 }: Props) {
-  const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const [isExporting, setIsExporting] = useState(false);
+
+  async function handleExport() {
+    if (isExporting) return;
+
+    setIsExporting(true);
+    try {
+      await onExport();
+    } finally {
+      setIsExporting(false);
+      onClosePageMenu();
+    }
+  }
 
   return (
     <div className="documents-header" onClick={(e) => e.stopPropagation()}>
@@ -27,26 +40,32 @@ export default function DocumentsHeader({
         <h2>Documents</h2>
       </div>
 
-      {isAdmin && (
-        <div className="top-actions">
-          <button className="primary-btn" type="button" onClick={onNew}>
-            New Document
-          </button>
+      <div className="top-actions">
+        {isAdmin ? (
+          <>
+            <button className="primary-btn" type="button" onClick={onNew}>
+              New Document
+            </button>
 
-          <PageActionsMenu
-            open={pageMenuOpen}
-            onToggle={onTogglePageMenu}
-            onClose={onClosePageMenu}
-            onExport={onExport}
-            onImport={onImport}
-          />
-        </div>
-      )}
-      {!isAdmin && (
-        <button className="secondary-btn" type="button" onClick={onExport}>
-          Export json
-        </button>
-      )}
+            <PageActionsMenu
+              open={pageMenuOpen}
+              onToggle={onTogglePageMenu}
+              onClose={onClosePageMenu}
+              onExport={handleExport}
+              onImport={onImport}
+            />
+          </>
+        ) : (
+          <button
+            className="secondary-btn"
+            type="button"
+            onClick={handleExport}
+            disabled={isExporting}
+          >
+            {isExporting ? "Exporting..." : "Export JSON"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

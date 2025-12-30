@@ -1,4 +1,4 @@
-import { useAuth } from "../../auth/Auth";
+import { useAuth } from "../../auth/useAuth";
 
 export default function UsersPage() {
   const { user } = useAuth();

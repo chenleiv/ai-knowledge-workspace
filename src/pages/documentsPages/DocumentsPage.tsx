@@ -1,22 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import "./documentsPage.scss";
-import {
-  deleteDocument,
-  listDocuments,
-  type DocumentItem,
-  importDocumentsBulk,
-} from "../../api/documentsClient";
-import useConfirm from "../../hooks/useConfirm";
-
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   closestCenter,
   useSensor,
   useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -24,131 +17,114 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { DragOverlay } from "@dnd-kit/core";
 
+import "./documentsPage.scss";
+
+import {
+  deleteDocument,
+  importDocumentsBulk,
+  listDocuments,
+  type DocumentItem,
+} from "../../api/documentsClient";
+
+import useConfirm from "../../hooks/useConfirm";
 import DocumentsHeader from "./components/DocumentsHeader";
 import SortableDocumentCard from "./components/SortableDocumentCard";
+import InlineBanner from "../../components/banners/InlineBanner";
+import { useAuth } from "../../auth/useAuth";
+
+import { downloadExport } from "../../api/downloadExport";
+import { normalizeImportedDocuments } from "./utils/documentsPageHelpers";
 import {
   applyOrder,
-  normalizeOrder,
   makePreview,
+  normalizeOrder,
   sameArray,
 } from "./utils/ordering";
 import { loadJson, saveJson } from "./utils/storage";
-import InlineBanner from "../../components/banners/InlineBanner";
-import { useAuth } from "../../auth/Auth";
-import { downloadExport } from "../../api/downloadExport";
 
 const ORDER_KEY = "documentsOrder";
 const FAVORITES_KEY = "documentsFavorites";
 
-type AnyRecord = Record<string, unknown>;
-
-function isRecord(v: unknown): v is AnyRecord {
-  return typeof v === "object" && v !== null && !Array.isArray(v);
-}
-
-function asString(v: unknown): string | null {
-  return typeof v === "string" ? v : null;
-}
-
-function asNumber(v: unknown): number | null {
-  return typeof v === "number" && Number.isFinite(v) ? v : null;
-}
-
-export function normalizeImportedDocuments(parsed: unknown): DocumentItem[] {
-  const rawArray: unknown = Array.isArray(parsed)
-    ? parsed
-    : isRecord(parsed) && Array.isArray(parsed.documents)
-    ? parsed.documents
-    : [];
-
-  if (!Array.isArray(rawArray)) return [];
-
-  const out: DocumentItem[] = [];
-
-  for (const item of rawArray) {
-    if (!isRecord(item)) continue;
-
-    const title = asString(item.title);
-    const category = asString(item.category);
-    const summary = asString(item.summary);
-    const content = asString(item.content);
-
-    // allow missing id in imported JSON
-    const id = asNumber(item.id) ?? Date.now() + out.length;
-
-    if (!title || !category || !summary || !content) continue;
-
-    out.push({ id, title, category, summary, content });
-  }
-
-  return out;
-}
-
 export default function DocumentsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const confirm = useConfirm();
+
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const [query, setQuery] = useState("");
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [order, setOrder] = useState<number[]>(
+
+  const [order, setOrder] = useState<number[]>(() =>
     loadJson<number[]>(ORDER_KEY, [])
   );
-  const [favorites, setFavorites] = useState<Record<number, boolean>>(
+  const [favorites, setFavorites] = useState<Record<number, boolean>>(() =>
     loadJson<Record<number, boolean>>(FAVORITES_KEY, {})
   );
 
   const [activeDragId, setActiveDragId] = useState<number | null>(null);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [pageMenuOpen, setPageMenuOpen] = useState(false);
-  const [showForbidden, setShowForbidden] = useState(false);
-  const { user } = useAuth();
 
-  const isAdmin = user?.role === "admin";
+  const [showForbidden, setShowForbidden] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-  const location = useLocation();
+
   const load = useCallback(async () => {
     setError(null);
+
     try {
       const data = await listDocuments();
       setDocs(data);
 
-      const nextOrder = normalizeOrder(order, data);
-      if (!sameArray(nextOrder, order)) {
-        setOrder(nextOrder);
-        saveJson(ORDER_KEY, nextOrder);
-      }
+      setOrder((prev) => {
+        const next = normalizeOrder(prev, data);
+        if (!sameArray(next, prev)) saveJson(ORDER_KEY, next);
+        return next;
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load documents");
     }
-  }, [order]);
+  }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void load(); // initial data fetch
+    void load();
   }, [load]);
 
   useEffect(() => {
-    if (location.state?.forbidden) {
+    if ((location.state as { forbidden?: boolean } | null)?.forbidden) {
       setShowForbidden(true);
-
-      // מנקה את ה-state כדי שלא יחזור ברענון
       navigate(location.pathname, { replace: true, state: null });
     }
   }, [location, navigate]);
+
   function openDoc(doc: DocumentItem) {
     navigate(`/documents/${doc.id}`);
   }
 
   function openCreate() {
     navigate("/documents/new");
+  }
+
+  function toggleFavorite(id: number) {
+    setFavorites((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      if (!next[id]) delete next[id];
+      saveJson(FAVORITES_KEY, next);
+      return next;
+    });
+  }
+
+  function toggleCardMenu(id: number) {
+    setOpenMenuId((prev) => (prev === id ? null : id));
   }
 
   async function onDelete(doc: DocumentItem) {
@@ -183,20 +159,9 @@ export default function DocumentsPage() {
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Delete failed");
+    } finally {
+      setOpenMenuId(null);
     }
-  }
-
-  function toggleFavorite(id: number) {
-    setFavorites((prev) => {
-      const next = { ...prev, [id]: !prev[id] };
-      if (!next[id]) delete next[id];
-      saveJson(FAVORITES_KEY, next);
-      return next;
-    });
-  }
-
-  function toggleCardMenu(id: number) {
-    setOpenMenuId((prev) => (prev === id ? null : id));
   }
 
   const orderedDocs = useMemo(() => applyOrder(docs, order), [docs, order]);
@@ -236,6 +201,11 @@ export default function DocumentsPage() {
   }
 
   async function requestImport(mode: "merge" | "replace") {
+    if (!isAdmin) {
+      setError("Forbidden");
+      return;
+    }
+
     if (mode === "replace") {
       const ok = await confirm({
         title: "Replace all documents?",
@@ -281,7 +251,6 @@ export default function DocumentsPage() {
       } catch (e) {
         setError(e instanceof Error ? e.message : "Import failed");
       } finally {
-        // Allow selecting the same file again
         input.value = "";
       }
     };
@@ -295,10 +264,13 @@ export default function DocumentsPage() {
         <InlineBanner type="error">
           <div className="banner">
             <span>This section is available to admins only.</span>
-            <button onClick={() => setShowForbidden(false)}>✕</button>
+            <button onClick={() => setShowForbidden(false)} type="button">
+              ✕
+            </button>
           </div>
         </InlineBanner>
       )}
+
       <DocumentsHeader
         onNew={openCreate}
         pageMenuOpen={pageMenuOpen}
@@ -309,6 +281,7 @@ export default function DocumentsPage() {
         onClosePageMenu={() => setPageMenuOpen(false)}
         onExport={() => void onExport()}
         onImport={(mode) => void requestImport(mode)}
+        isAdmin={isAdmin}
       />
 
       {error && <div className="error">{error}</div>}
@@ -374,6 +347,7 @@ export default function DocumentsPage() {
                 {(() => {
                   const doc = docs.find((d) => d.id === activeDragId);
                   if (!doc) return null;
+
                   return (
                     <div className="doc-card is-overlay">
                       <div className="doc-card-header">

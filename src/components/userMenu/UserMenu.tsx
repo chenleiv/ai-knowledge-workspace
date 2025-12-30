@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/Auth";
+import { useAuth } from "../../auth/useAuth";
 
 type MenuItem =
   | { type: "link"; label: string; to: string; show?: boolean }

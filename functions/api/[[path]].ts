@@ -171,8 +171,15 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
       .bind(title, category, summary, content, now, now)
       .run();
 
-    const id =
-      (res as any)?.meta?.last_row_id ?? (res as any)?.meta?.lastRowId ?? null;
+    type D1RunResult = {
+      meta?: {
+        last_row_id?: number;
+        lastRowId?: number;
+      };
+    };
+
+    const runRes = res as D1RunResult;
+    const id = runRes.meta?.last_row_id ?? runRes.meta?.lastRowId ?? null;
 
     if (!id)
       return json({ detail: "Insert succeeded but no id returned" }, 500);

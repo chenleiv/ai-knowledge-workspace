@@ -43,16 +43,20 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(() => confirm, [confirm]);
 
+  const title = options.title ?? "Are you sure?";
+  const confirmLabel = options.confirmLabel ?? "Confirm";
+  const cancelLabel = options.cancelLabel ?? "Cancel";
+  const variant = options.variant ?? "primary";
   return (
     <ConfirmContext.Provider value={value}>
       {children}
       <ConfirmDialog
         open={open}
-        title={options.title ?? "Are you sure?"}
+        title={title}
         message={options.message}
-        confirmLabel={options.confirmLabel}
-        cancelLabel={options.cancelLabel}
-        variant={options.variant}
+        confirmLabel={confirmLabel}
+        cancelLabel={cancelLabel}
+        variant={variant}
         onConfirm={() => close(true)}
         onCancel={() => close(false)}
       />

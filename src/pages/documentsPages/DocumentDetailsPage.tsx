@@ -10,6 +10,7 @@ import {
   type DocumentInput,
   type DocumentItem,
 } from "../../api/documentsClient";
+
 import useConfirm from "../../hooks/useConfirm";
 import Menu from "../../components/menu/Menu";
 import { useAuth } from "../../auth/Auth";
@@ -27,65 +28,77 @@ function emptyInput(): DocumentInput {
   return { title: "", category: "", summary: "", content: "" };
 }
 
+function isNumericId(value: string) {
+  return /^\d+$/.test(value);
+}
+
 export default function DocumentDetailsPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const { user } = useAuth();
 
+  const isAdmin = user?.role === "admin";
   const isNew = id === "new";
-  const docId = useMemo(() => Number(id), [id]);
+
+  const docId = useMemo(() => {
+    if (!id) return null;
+    if (!isNumericId(id)) return null;
+    return Number(id);
+  }, [id]);
 
   const [doc, setDoc] = useState<DocumentItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const [mode, setMode] = useState<"view" | "edit">(isNew ? "edit" : "view");
   const [form, setForm] = useState<DocumentInput>(emptyInput());
   const [isSaving, setIsSaving] = useState(false);
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user } = useAuth();
-
-  const isAdmin = user?.role === "admin";
-
-  async function load() {
-    if (isNew) {
-      setDoc(null);
-      setForm(emptyInput());
-      setError(null);
-      setLoading(false);
-      return;
-    }
-
-    if (!Number.isFinite(docId)) {
-      setError("Invalid document id.");
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await getDocument(docId);
-      setDoc(data);
-      setForm(toInput(data));
-      setMode("view");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load document");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   useEffect(() => {
+    async function load() {
+      setError(null);
+
+      if (isNew) {
+        setDoc(null);
+        setForm(emptyInput());
+        setMode("edit");
+        setLoading(false);
+        return;
+      }
+
+      if (docId === null) {
+        setDoc(null);
+        setMode("view");
+        setLoading(false);
+        setError("Invalid document id.");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const data = await getDocument(docId);
+        setDoc(data);
+        setForm(toInput(data));
+        setMode("view");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to load document");
+      } finally {
+        setLoading(false);
+      }
+    }
+
     void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, isNew, docId]);
 
   async function onSave() {
     if (!isAdmin) {
       setError("Forbidden");
       return;
     }
+
     const title = form.title.trim();
     const category = form.category.trim();
     const summary = form.summary.trim();
@@ -108,6 +121,11 @@ export default function DocumentDetailsPage() {
           content,
         });
         navigate(`/documents/${created.id}`, { replace: true });
+        return;
+      }
+
+      if (docId === null) {
+        setError("Invalid document id.");
         return;
       }
 
@@ -161,6 +179,9 @@ export default function DocumentDetailsPage() {
     }
   }
 
+  const canEdit = isAdmin;
+  const canDelete = isAdmin && !isNew;
+
   if (loading) {
     return (
       <div className="doc-details">
@@ -196,7 +217,7 @@ export default function DocumentDetailsPage() {
 
         <div className="top-actions">
           {mode === "view" ? (
-            isAdmin ? (
+            canEdit ? (
               <button
                 className="primary-btn"
                 type="button"
@@ -226,7 +247,7 @@ export default function DocumentDetailsPage() {
             </>
           )}
 
-          {!isNew && isAdmin && (
+          {canDelete && (
             <div className="menu-wrap" onClick={(e) => e.stopPropagation()}>
               <button
                 className="icon-btn"
@@ -273,6 +294,7 @@ export default function DocumentDetailsPage() {
               <input
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
+                disabled={!canEdit}
               />
             </label>
 
@@ -281,6 +303,7 @@ export default function DocumentDetailsPage() {
               <input
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
+                disabled={!canEdit}
               />
             </label>
 
@@ -290,6 +313,7 @@ export default function DocumentDetailsPage() {
                 rows={4}
                 value={form.summary}
                 onChange={(e) => setForm({ ...form, summary: e.target.value })}
+                disabled={!canEdit}
               />
             </label>
 
@@ -299,6 +323,7 @@ export default function DocumentDetailsPage() {
                 rows={18}
                 value={form.content}
                 onChange={(e) => setForm({ ...form, content: e.target.value })}
+                disabled={!canEdit}
               />
             </label>
           </div>

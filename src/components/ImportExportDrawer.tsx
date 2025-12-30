@@ -202,7 +202,7 @@ export default function ImportExportDrawer({
 
     try {
       const docs = parseDocuments(jsonText.trim());
-      await importDocumentsBulk(mode, docs);
+      await importDocumentsBulk({ mode, documents: docs });
       setJsonText("");
       onImported();
       onClose();

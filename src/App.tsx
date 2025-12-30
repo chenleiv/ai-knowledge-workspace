@@ -9,8 +9,10 @@ import UsersPage from "./pages/loginPage/UsersPage";
 import { useTheme } from "./hooks/useTheme";
 import ThemeToggle from "./themeToggle/ThemeToggle";
 import "./components/confirmModal/confirmDialog.scss";
+
 import UserMenu from "./components/userMenu/UserMenu";
 import "./components/userMenu/userMenu.scss";
+
 import { useAuth } from "./auth/Auth";
 import RequireAuth from "./auth/RequireAuth";
 import RequireRole from "./auth/RequireRole";
@@ -43,15 +45,9 @@ function App() {
 
           <Route element={<RequireAuth />}>
             <Route path="/" element={<Navigate to="/documents" replace />} />
-
             <Route path="/documents" element={<DocumentsPage />} />
 
-            {/* Admin-only NEW */}
-            <Route element={<RequireRole allow={["admin"]} />}>
-              <Route path="/documents/new" element={<DocumentDetailsPage />} />
-            </Route>
-
-            {/* Everyone (viewer/admin) can view details */}
+            {/* One route handles: /documents/123 AND /documents/new */}
             <Route path="/documents/:id" element={<DocumentDetailsPage />} />
 
             <Route path="/assistant" element={<AssistantPage />} />

@@ -29,6 +29,19 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
 
+  const isLocal =
+    url.hostname === "localhost" ||
+    url.hostname === "127.0.0.1" ||
+    (request.headers.get("Origin") ?? "").startsWith("http://localhost");
+
+  const loginCookieAttrs = isLocal
+    ? "HttpOnly; Path=/; Max-Age=3600; SameSite=Lax"
+    : "HttpOnly; Path=/; Max-Age=3600; SameSite=None; Secure";
+
+  const logoutCookieAttrs = isLocal
+    ? "HttpOnly; Path=/; Max-Age=0; SameSite=Lax"
+    : "HttpOnly; Path=/; Max-Age=0; SameSite=None; Secure";
+
   const rawPath = url.pathname;
   const path = rawPath.replace(/^\/api(?=\/|$)/, "").replace(/\/+$/, "");
 
@@ -82,7 +95,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     };
 
     return json({ user }, 200, {
-      "Set-Cookie": `access_token=demo.${user.role}; HttpOnly; Path=/; Max-Age=3600; SameSite=None; Secure`,
+      "Set-Cookie": `access_token=demo.${user.role}; ${loginCookieAttrs}`,
     });
   }
 
@@ -94,7 +107,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
 
   if (method === "POST" && path === "/auth/logout") {
     return json({ ok: true }, 200, {
-      "Set-Cookie": `access_token=; HttpOnly; Path=/; Max-Age=0; SameSite=None; Secure`,
+      "Set-Cookie": `access_token=; ${logoutCookieAttrs}`,
     });
   }
 

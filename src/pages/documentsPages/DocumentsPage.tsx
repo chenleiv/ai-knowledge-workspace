@@ -6,7 +6,6 @@ import {
   deleteDocument,
   listDocuments,
   type DocumentItem,
-  exportDocuments,
   importDocumentsBulk,
 } from "../../api/documentsClient";
 import useConfirm from "../../hooks/useConfirm";
@@ -38,24 +37,53 @@ import {
 import { loadJson, saveJson } from "./utils/storage";
 import InlineBanner from "../../components/banners/InlineBanner";
 import { useAuth } from "../../auth/Auth";
+import { downloadExport } from "../../api/downloadExport";
 
 const ORDER_KEY = "documentsOrder";
 const FAVORITES_KEY = "documentsFavorites";
 
-function normalizeImportedDocuments(
-  parsed: unknown
-): Record<string, unknown>[] {
-  const isObj = (v: unknown): v is Record<string, unknown> =>
-    !!v && typeof v === "object" && !Array.isArray(v);
+type AnyRecord = Record<string, unknown>;
 
-  const toObjArray = (v: unknown): Record<string, unknown>[] =>
-    Array.isArray(v) ? v.filter(isObj) : [];
+function isRecord(v: unknown): v is AnyRecord {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
 
-  if (Array.isArray(parsed)) return toObjArray(parsed);
+function asString(v: unknown): string | null {
+  return typeof v === "string" ? v : null;
+}
 
-  if (isObj(parsed)) return toObjArray(parsed.documents);
+function asNumber(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
 
-  return [];
+export function normalizeImportedDocuments(parsed: unknown): DocumentItem[] {
+  const rawArray: unknown = Array.isArray(parsed)
+    ? parsed
+    : isRecord(parsed) && Array.isArray(parsed.documents)
+    ? parsed.documents
+    : [];
+
+  if (!Array.isArray(rawArray)) return [];
+
+  const out: DocumentItem[] = [];
+
+  for (const item of rawArray) {
+    if (!isRecord(item)) continue;
+
+    const title = asString(item.title);
+    const category = asString(item.category);
+    const summary = asString(item.summary);
+    const content = asString(item.content);
+
+    // allow missing id in imported JSON
+    const id = asNumber(item.id) ?? Date.now() + out.length;
+
+    if (!title || !category || !summary || !content) continue;
+
+    out.push({ id, title, category, summary, content });
+  }
+
+  return out;
 }
 
 export default function DocumentsPage() {
@@ -204,19 +232,7 @@ export default function DocumentsPage() {
   }
 
   async function onExport() {
-    const data = await exportDocuments();
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "documents.json";
-    a.click();
-
-    URL.revokeObjectURL(url);
+    await downloadExport();
   }
 
   async function requestImport(mode: "merge" | "replace") {
@@ -242,6 +258,8 @@ export default function DocumentsPage() {
     input.accept = "application/json";
 
     input.onchange = async () => {
+      setError(null);
+
       try {
         const file = input.files?.[0];
         if (!file) return;
@@ -250,18 +268,21 @@ export default function DocumentsPage() {
         const parsed = JSON.parse(text);
         const documents = normalizeImportedDocuments(parsed);
 
-        if (!Array.isArray(documents) || documents.length === 0) {
+        if (documents.length === 0) {
           setError(
             'Import file must be a JSON array of documents (or { "documents": [...] }).'
           );
           return;
         }
 
-        await importDocumentsBulk(mode, documents as DocumentItem[]);
+        await importDocumentsBulk({ mode, documents });
         await load();
         setPageMenuOpen(false);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Import failed");
+      } finally {
+        // Allow selecting the same file again
+        input.value = "";
       }
     };
 

@@ -26,6 +26,7 @@ export function createDocument(input: DocumentInput) {
   });
 }
 
+// admin only
 export function updateDocument(id: number, input: DocumentInput) {
   return apiFetch<DocumentItem>(`/api/documents/${id}`, {
     method: "PUT",
@@ -33,21 +34,26 @@ export function updateDocument(id: number, input: DocumentInput) {
   });
 }
 
+// admin only
 export async function deleteDocument(id: number) {
   await apiFetch<void>(`/api/documents/${id}`, { method: "DELETE" });
   return { ok: true as const };
 }
 
+// viewer/admin
 export function exportDocuments() {
-  return apiFetch<DocumentItem[]>("/api/documents/export");
+  // If your server supports GET, this is fine.
+  // If your server expects POST, change method to POST.
+  return apiFetch<DocumentItem[]>("/api/documents/export", { method: "POST" });
 }
 
-export function importDocumentsBulk(
-  mode: "merge" | "replace",
-  documents: DocumentItem[]
-) {
-  return apiFetch<DocumentItem[]>("/api/documents/import-bulk", {
+// admin only
+export function importDocumentsBulk(payload: {
+  mode: "merge" | "replace";
+  documents: DocumentItem[];
+}) {
+  return apiFetch<{ inserted: number }>("/api/documents/import-bulk", {
     method: "POST",
-    body: JSON.stringify({ mode, documents }),
+    body: JSON.stringify(payload),
   });
 }

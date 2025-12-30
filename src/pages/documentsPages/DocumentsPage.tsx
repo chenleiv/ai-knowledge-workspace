@@ -41,29 +41,26 @@ import {
   normalizeOrder,
   sameArray,
 } from "./utils/ordering";
-import { loadJson, saveJson } from "./utils/storage";
-
-const ORDER_KEY = "documentsOrder";
-const FAVORITES_KEY = "documentsFavorites";
+import { loadJson, saveJson, scopedKey } from "../../utils/storage";
 
 export default function DocumentsPage() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const confirm = useConfirm();
-
   const { user } = useAuth();
+
+  const orderKey = scopedKey("documentsOrder", user?.email);
+  const favoritesKey = scopedKey("documentsFavorites", user?.email);
+
+  const navigate = useNavigate();
+  const confirm = useConfirm();
+  const location = useLocation();
+
   const isAdmin = user?.role === "admin";
 
   const [query, setQuery] = useState("");
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const [order, setOrder] = useState<number[]>(() =>
-    loadJson<number[]>(ORDER_KEY, [])
-  );
-  const [favorites, setFavorites] = useState<Record<number, boolean>>(() =>
-    loadJson<Record<number, boolean>>(FAVORITES_KEY, {})
-  );
+  const [order, setOrder] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<Record<number, boolean>>({});
 
   const [activeDragId, setActiveDragId] = useState<number | null>(null);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -87,13 +84,18 @@ export default function DocumentsPage() {
 
       setOrder((prev) => {
         const next = normalizeOrder(prev, data);
-        if (!sameArray(next, prev)) saveJson(ORDER_KEY, next);
+        if (!sameArray(next, prev)) saveJson(orderKey, next);
         return next;
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load documents");
     }
-  }, []);
+  }, [orderKey]);
+
+  useEffect(() => {
+    setOrder(loadJson<number[]>(orderKey, []));
+    setFavorites(loadJson<Record<number, boolean>>(favoritesKey, {}));
+  }, [orderKey, favoritesKey]);
 
   useEffect(() => {
     void load();
@@ -118,7 +120,7 @@ export default function DocumentsPage() {
     setFavorites((prev) => {
       const next = { ...prev, [id]: !prev[id] };
       if (!next[id]) delete next[id];
-      saveJson(FAVORITES_KEY, next);
+      saveJson(favoritesKey, next);
       return next;
     });
   }
@@ -147,14 +149,14 @@ export default function DocumentsPage() {
 
       setOrder((prev) => {
         const next = prev.filter((id) => id !== doc.id);
-        saveJson(ORDER_KEY, next);
+        saveJson(orderKey, next);
         return next;
       });
 
       setFavorites((prev) => {
         const next = { ...prev };
         delete next[doc.id];
-        saveJson(FAVORITES_KEY, next);
+        saveJson(favoritesKey, next);
         return next;
       });
     } catch (e) {
@@ -191,7 +193,7 @@ export default function DocumentsPage() {
       const oldIndex = prev.indexOf(active.id as number);
       const newIndex = prev.indexOf(over.id as number);
       const next = arrayMove(prev, oldIndex, newIndex);
-      saveJson(ORDER_KEY, next);
+      saveJson(orderKey, next);
       return next;
     });
   }

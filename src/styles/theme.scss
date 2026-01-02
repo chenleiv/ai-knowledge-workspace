@@ -19,9 +19,19 @@
 
     --focus: rgba(0, 0, 0, 0.12);
 
+    --success-bg: rgba(34, 197, 94, 0.08);
+    --success-border: rgba(34, 197, 94, 0.25);
+    --success-text: #166534;
+
+    --info-bg: rgba(59, 130, 246, 0.08);
+    --info-border: rgba(59, 130, 246, 0.25);
+    --info-text: #1e3a8a;
+
     --danger-bg: rgba(220, 38, 38, 0.08);
     --danger-border: rgba(220, 38, 38, 0.18);
     --danger-text: #991b1b;
+
+
 
     /* Keep existing primary for links if needed */
     --primary: #007aff;
@@ -46,6 +56,14 @@
     --overlay: rgba(0, 0, 0, 0.65);
 
     --focus: rgba(255, 255, 255, 0.14);
+
+    --success-bg: rgba(34, 197, 94, 0.14);
+    --success-border: rgba(34, 197, 94, 0.35);
+    --success-text: #86efac;
+
+    --info-bg: rgba(59, 130, 246, 0.14);
+    --info-border: rgba(59, 130, 246, 0.35);
+    --info-text: #bfdbfe;
 
     --danger-bg: rgba(255, 80, 80, 0.12);
     --danger-border: rgba(255, 80, 80, 0.25);

@@ -9,19 +9,6 @@ export function uid() {
     : String(Date.now() + Math.random());
 }
 
-export function loadJson<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-export function saveJson<T>(key: string, value: T) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
 export function buildSnippet(content: string, query: string) {
   const clean = content.replace(/\s+/g, " ").trim();
   if (!clean) return "";

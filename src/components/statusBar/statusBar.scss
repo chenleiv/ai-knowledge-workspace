@@ -1,0 +1,143 @@
+.statusbar {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: min(92vw, 460px);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px var(--shadow);
+
+    animation: slideUpFade 180ms ease-out;
+}
+
+.statusbar-inner {
+    display: flex;
+    padding: 12px;
+
+    .statusbar-icon {
+        padding-right: 12px;
+    }
+}
+
+.statusbar-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+}
+
+/* accent stripe */
+.statusbar::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 14px 0 0 14px;
+}
+
+/* ===== kinds ===== */
+
+.statusbar-success {
+    border-color: var(--success-border);
+    background: linear-gradient(to right,
+            var(--success-bg),
+            var(--panel) 40%);
+
+    &::before {
+        background: var(--success-border);
+    }
+
+    .statusbar-title {
+        color: var(--success-text);
+    }
+}
+
+.statusbar-error {
+    border-color: var(--danger-border);
+    background: linear-gradient(to right,
+            var(--danger-bg),
+            var(--panel) 40%);
+
+    &::before {
+        background: var(--danger-border);
+    }
+
+    .statusbar-title {
+        color: var(--danger-text);
+    }
+}
+
+.statusbar-info {
+    border-color: var(--info-border);
+    background: linear-gradient(to right,
+            var(--info-bg),
+            var(--panel) 40%);
+
+    &::before {
+        background: var(--info-border);
+    }
+
+    .statusbar-title {
+        color: var(--info-text);
+    }
+}
+
+/* ===== text ===== */
+
+.statusbar-text {
+    flex: 1;
+}
+
+.statusbar-title {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.statusbar-message {
+    color: var(--secondery-text);
+    line-height: 1.4;
+}
+
+/* ===== actions ===== */
+
+.statusbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.statusbar-action {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.statusbar-close {
+    background: var(--soft);
+    border: none;
+    border-radius: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+/* ===== animation ===== */
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}

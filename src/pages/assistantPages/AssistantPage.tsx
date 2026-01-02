@@ -3,20 +3,13 @@ import "./assistantPage.scss";
 
 import { listDocuments, type DocumentItem } from "../../api/documentsClient";
 import type { ChatMessage, SourceRef } from "./types";
-import {
-  CHAT_KEY,
-  CONTEXT_KEY,
-  buildSnippet,
-  loadJson,
-  saveJson,
-  scoreDoc,
-  uid,
-} from "./utils";
+import { CHAT_KEY, CONTEXT_KEY, buildSnippet, scoreDoc, uid } from "./utils";
 
 import ContextPanel from "./components/ContextPanel";
 import MessagesList from "./components/MessagesList";
 import TemplatesBar from "./components/TemplatesBar";
 import Composer from "./components/Composer";
+import { loadJson, saveJson } from "../../utils/storage";
 
 export default function AssistantPage() {
   const [docs, setDocs] = useState<DocumentItem[]>([]);

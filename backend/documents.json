@@ -40,12 +40,5 @@
     "summary": "Processes, signals, foreground/background jobs, and practical commands for managing running programs.",
     "content": "In Linux, a running program is a process identified by a PID (process ID). You can inspect processes using ps, top, or htop. Each process has a state (running, sleeping, stopped, zombie) and resource usage.\n\nSignals are a primary mechanism to control processes:\n- SIGTERM: request graceful shutdown (default for kill).\n- SIGKILL: immediate termination (cannot be caught).\n- SIGINT: interrupt (Ctrl+C) for foreground processes.\n\nJob control:\n- Run a command in the background by appending &: for example, \"myapp &\".\n- Suspend a foreground process with Ctrl+Z.\n- Resume with fg (foreground) or bg (background).\n\nPractical tips:\n- Prefer SIGTERM before SIGKILL to allow cleanup.\n- Use pgrep to find PIDs by name.\n- Use systemd service files for long-running daemons in production environments.\n\nUnderstanding processes and signals helps debug runaway CPU usage, memory leaks, and stuck programs, and is a core skill for troubleshooting servers.",
     "id": 6
-  },
-  {
-    "title": "vsfv",
-    "category": "r3wr23qr",
-    "summary": "bfbw",
-    "content": "bwrbf",
-    "id": 8
   }
 ]

@@ -42,9 +42,11 @@ import {
   sameArray,
 } from "./utils/ordering";
 import { loadJson, saveJson, scopedKey } from "../../utils/storage";
+import { useStatus } from "../../components/statusBar/useStatus";
 
 export default function DocumentsPage() {
   const { user } = useAuth();
+  const status = useStatus();
 
   const orderKey = scopedKey("documentsOrder", user?.email);
   const favoritesKey = scopedKey("documentsFavorites", user?.email);
@@ -144,6 +146,7 @@ export default function DocumentsPage() {
 
     try {
       await deleteDocument(doc.id);
+      status.show({ kind: "success", message: "Document deleted." });
 
       setDocs((prev) => prev.filter((d) => d.id !== doc.id));
 
@@ -160,6 +163,12 @@ export default function DocumentsPage() {
         return next;
       });
     } catch (e) {
+      status.show({
+        kind: "error",
+        title: "Delete failed",
+        message: e instanceof Error ? e.message : "Unknown error",
+        timeoutMs: 0,
+      });
       setError(e instanceof Error ? e.message : "Delete failed");
     } finally {
       setOpenMenuId(null);
@@ -199,12 +208,26 @@ export default function DocumentsPage() {
   }
 
   async function onExport() {
-    await downloadExport();
+    try {
+      await downloadExport();
+      status.show({ kind: "success", message: "Export started." });
+    } catch (e) {
+      status.show({
+        kind: "error",
+        title: "Export failed",
+        message: e instanceof Error ? e.message : "Unknown error",
+        timeoutMs: 0,
+      });
+    }
   }
 
   async function requestImport(mode: "merge" | "replace") {
     if (!isAdmin) {
-      setError("Forbidden");
+      status.show({
+        kind: "error",
+        title: "Forbidden",
+        message: "This action is available to admins only.",
+      });
       return;
     }
 
@@ -249,8 +272,15 @@ export default function DocumentsPage() {
 
         await importDocumentsBulk({ mode, documents });
         await load();
+        status.show({ kind: "success", message: "Import completed." });
         setPageMenuOpen(false);
       } catch (e) {
+        status.show({
+          kind: "error",
+          title: "Import failed",
+          message: e instanceof Error ? e.message : "Unknown error",
+          timeoutMs: 0,
+        });
         setError(e instanceof Error ? e.message : "Import failed");
       } finally {
         input.value = "";

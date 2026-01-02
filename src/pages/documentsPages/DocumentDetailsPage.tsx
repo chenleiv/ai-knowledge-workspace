@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import "./documentDetailsPage.scss";
 
@@ -14,6 +14,8 @@ import {
 import useConfirm from "../../hooks/useConfirm";
 import Menu from "../../components/menu/Menu";
 import { useAuth } from "../../auth/useAuth";
+import { useStatus } from "../../components/statusBar/useStatus";
+import { useUnsavedChangesWarning } from "../../hooks/useUnsavedChanges";
 
 function toInput(doc: DocumentItem): DocumentInput {
   return {
@@ -28,66 +30,102 @@ function emptyInput(): DocumentInput {
   return { title: "", category: "", summary: "", content: "" };
 }
 
+function errorMessage(e: unknown, fallback: string) {
+  return e instanceof Error ? e.message : fallback;
+}
+
 export default function DocumentDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { user } = useAuth();
+  const status = useStatus();
 
   const isAdmin = user?.role === "admin";
   const isNew = !id || id === "new";
 
-  const docId = useMemo(() => Number(id), [id]);
+  const docId = useMemo(() => {
+    if (!id || id === "new") return null;
+    const n = Number(id);
+    return Number.isFinite(n) ? n : null;
+  }, [id]);
 
   const [doc, setDoc] = useState<DocumentItem | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const [mode, setMode] = useState<"view" | "edit">(isNew ? "edit" : "view");
   const [form, setForm] = useState<DocumentInput>(emptyInput());
   const [isSaving, setIsSaving] = useState(false);
-
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    async function load() {
-      setError(null);
+  const [baseline, setBaseline] = useState<DocumentInput>(emptyInput());
 
-      if (isNew) {
-        setDoc(null);
-        setForm(emptyInput());
-        setMode("edit");
-        setLoading(false);
-        return;
-      }
+  const isDirty = useMemo(() => {
+    const a = JSON.stringify(form);
+    const b = JSON.stringify(baseline);
+    return a !== b;
+  }, [form, baseline]);
 
-      if (docId === null) {
-        setDoc(null);
-        setMode("view");
-        setLoading(false);
-        setError("Invalid document id.");
-        return;
-      }
+  useUnsavedChangesWarning({
+    enabled: mode === "edit" && isDirty,
+    message: "You have unsaved changes. Are you sure you want to leave?",
+  });
 
-      setLoading(true);
-      try {
-        const data = await getDocument(docId);
-        setDoc(data);
-        setForm(toInput(data));
-        setMode("view");
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to load document");
-      } finally {
-        setLoading(false);
-      }
+  const canEdit = isAdmin;
+  const canDelete = isAdmin && !isNew;
+
+  const load = useCallback(async () => {
+    if (isNew) {
+      const empty = emptyInput();
+      setDoc(null);
+      setForm(empty);
+      setBaseline(empty);
+      setMode("edit");
+      return;
     }
 
+    if (docId == null) {
+      setDoc(null);
+      setMode("view");
+      status.show({
+        kind: "error",
+        title: "Invalid URL",
+        message: "Document id is invalid.",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await getDocument(docId);
+      setDoc(data);
+      const next = toInput(data);
+      setForm(next);
+      setBaseline(next);
+      setMode("view");
+    } catch (e) {
+      setDoc(null);
+      status.show({
+        kind: "error",
+        title: "Failed to load",
+        message: errorMessage(e, "Failed to load document."),
+        timeoutMs: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [docId, isNew, status]);
+
+  useEffect(() => {
     void load();
-  }, [id, isNew, docId]);
+  }, [load]);
 
   async function onSave() {
     if (!isAdmin) {
-      setError("Forbidden");
+      status.show({
+        kind: "error",
+        title: "Forbidden",
+        message: "This action is available to admins only.",
+      });
       return;
     }
 
@@ -97,27 +135,35 @@ export default function DocumentDetailsPage() {
     const content = form.content.trim();
 
     if (!title || !category || !summary || !content) {
-      setError("Please fill all fields.");
+      status.show({
+        kind: "error",
+        title: "Missing fields",
+        message: "Please fill all fields.",
+      });
       return;
     }
 
     setIsSaving(true);
-    setError(null);
-
     try {
       if (isNew) {
+        setBaseline({ title, category, summary, content });
         const created = await createDocument({
           title,
           category,
           summary,
           content,
         });
+        status.show({ kind: "success", message: "Document created." });
         navigate(`/documents/${created.id}`, { replace: true });
         return;
       }
 
-      if (docId === null) {
-        setError("Invalid document id.");
+      if (docId == null) {
+        status.show({
+          kind: "error",
+          title: "Invalid URL",
+          message: "Document id is invalid.",
+        });
         return;
       }
 
@@ -129,9 +175,16 @@ export default function DocumentDetailsPage() {
       });
       setDoc(updated);
       setForm(toInput(updated));
+      setBaseline(toInput(updated));
       setMode("view");
+      status.show({ kind: "success", message: "Changes saved." });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed");
+      status.show({
+        kind: "error",
+        title: "Save failed",
+        message: errorMessage(e, "Save failed."),
+        timeoutMs: 0,
+      });
     } finally {
       setIsSaving(false);
     }
@@ -142,9 +195,12 @@ export default function DocumentDetailsPage() {
       navigate("/documents");
       return;
     }
-    if (doc) setForm(toInput(doc));
+    if (doc) {
+      const next = toInput(doc);
+      setForm(next);
+      setBaseline(next);
+    }
     setMode("view");
-    setError(null);
   }
 
   async function onDelete() {
@@ -160,42 +216,63 @@ export default function DocumentDetailsPage() {
 
     if (!ok) return;
 
-    setError(null);
     try {
       await deleteDocument(doc.id);
-      navigate("/documents");
+      status.show({ kind: "success", message: "Document deleted." });
+      navigate("/documents", { replace: true });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Delete failed");
+      status.show({
+        kind: "error",
+        title: "Delete failed",
+        message: errorMessage(e, "Delete failed."),
+        timeoutMs: 0,
+      });
     } finally {
       setMenuOpen(false);
     }
   }
 
-  const canEdit = isAdmin;
-  const canDelete = isAdmin && !isNew;
+  async function onBack() {
+    if (mode === "edit" && isDirty) {
+      const ok = await confirm({
+        title: "Discard changes?",
+        message: "You have unsaved changes. Leave without saving?",
+        confirmLabel: "Leave",
+        cancelLabel: "Stay",
+        variant: "danger",
+      });
+      if (!ok) return;
+    }
+
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/documents", { replace: true });
+    }
+  }
 
   if (loading) {
     return (
       <div className="doc-details">
         <div className="doc-details-top">
-          <Link to="/documents" className="back-link">
+          <button type="button" className="back-link" onClick={onBack}>
             ← Back
-          </Link>
+          </button>
         </div>
         <div className="panel">Loading…</div>
       </div>
     );
   }
 
-  if (error && !isNew && !doc) {
+  if (!isNew && !doc) {
     return (
       <div className="doc-details">
         <div className="doc-details-top">
-          <Link to="/documents" className="back-link">
+          <button type="button" className="back-link" onClick={onBack}>
             ← Back
-          </Link>
+          </button>
         </div>
-        <div className="error">{error}</div>
+        <div className="panel">Document not found.</div>
       </div>
     );
   }
@@ -203,9 +280,9 @@ export default function DocumentDetailsPage() {
   return (
     <div className="doc-details" role="presentation">
       <div className="doc-details-top">
-        <Link to="/documents" className="back-link">
+        <button type="button" className="back-link" onClick={onBack}>
           ← Back
-        </Link>
+        </button>
 
         <div className="top-actions">
           {mode === "view" ? (
@@ -260,8 +337,6 @@ export default function DocumentDetailsPage() {
           )}
         </div>
       </div>
-
-      {error && <div className="error">{error}</div>}
 
       <div className="panel">
         {mode === "view" && doc ? (

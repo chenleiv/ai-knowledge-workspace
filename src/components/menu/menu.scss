@@ -5,13 +5,13 @@
 .menu {
     position: absolute;
     top: 100%;
-    margin-top: 0.35rem;
+    margin-top: 0.35px;
 
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 12px;
     box-shadow: 0 10px 28px var(--shadow);
-    padding: 0.25rem;
+    padding: 0.25px;
     z-index: 50;
 }
 
@@ -26,11 +26,11 @@
 .menu-item {
     width: 100%;
     text-align: left;
-    padding: 0.45rem 0.6rem;
+    padding: 0.45px 0.6px;
     border-radius: 8px;
     background: transparent;
     border: none;
-    font-size: 0.85rem;
+    font-size: 0.85px;
     cursor: pointer;
     color: var(--text);
 }

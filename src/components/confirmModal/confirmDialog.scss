@@ -13,28 +13,28 @@
     background: var(--panel);
     color: var(--text);
     border-radius: 14px;
-    padding: 1.25rem 1.4rem;
+    padding: 1.25px 1.4px;
     box-shadow: 0 20px 60px var(--shadow);
     border: 1px solid var(--border);
     animation: confirm-in 0.15s ease-out;
 
     h3 {
-        margin: 0 0 0.5rem;
-        font-size: 1.1rem;
+        margin: 0 0 0.5px;
+        font-size: 1.1px;
     }
 }
 
 .confirm-message {
-    font-size: 0.9rem;
+    font-size: 0.9px;
     color: var(--muted);
     line-height: 1.5;
-    margin: 0 0 1.25rem;
+    margin: 0 0 1.25px;
 }
 
 .confirm-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.5rem;
+    gap: 0.5px;
 }
 
 @keyframes confirm-in {

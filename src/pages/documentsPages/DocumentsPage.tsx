@@ -65,7 +65,6 @@ export default function DocumentsPage() {
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
 
   const [activeDragId, setActiveDragId] = useState<number | null>(null);
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [pageMenuOpen, setPageMenuOpen] = useState(false);
@@ -181,7 +180,6 @@ export default function DocumentsPage() {
     const q = query.toLowerCase().trim();
     let result = orderedDocs;
 
-    if (showFavoritesOnly) result = result.filter((d) => favorites[d.id]);
     if (!q) return result;
 
     return result.filter(
@@ -191,7 +189,13 @@ export default function DocumentsPage() {
         d.summary.toLowerCase().includes(q) ||
         d.content.toLowerCase().includes(q)
     );
-  }, [query, orderedDocs, showFavoritesOnly, favorites]);
+  }, [query, orderedDocs, favorites]);
+
+  // ✅ Favorites chips – based on the CURRENT filtered view
+  const favoriteChips = useMemo(
+    () => filteredDocs.filter((d) => favorites[d.id]),
+    [filteredDocs, favorites]
+  );
 
   function onDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -325,16 +329,29 @@ export default function DocumentsPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-
-        <label className="favorites-toggle">
-          <input
-            type="checkbox"
-            checked={showFavoritesOnly}
-            onChange={(e) => setShowFavoritesOnly(e.target.checked)}
-          />
-          Favorites only
-        </label>
       </div>
+
+      {/* ✅ Favorites chips bar */}
+      {favoriteChips.length > 0 && (
+        <div className="favorites-chips" onClick={(e) => e.stopPropagation()}>
+          <div className="favorites-chips-label">Favorites</div>
+
+          <div className="favorites-chips-row">
+            {favoriteChips.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                className="fav-chip"
+                onClick={() => navigate(`/documents/${d.id}`)}
+                title={`Open "${d.title}"`}
+              >
+                <span className="fav-chip-star">★</span>
+                <span className="fav-chip-text">{d.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="section">
         <div className="section-title">All documents</div>
@@ -351,6 +368,7 @@ export default function DocumentsPage() {
             setActiveDragId(null);
           }}
         >
+          {/* ✅ drag works for ALL filtered docs, one list */}
           <SortableContext
             items={filteredDocs.map((d) => d.id)}
             strategy={verticalListSortingStrategy}

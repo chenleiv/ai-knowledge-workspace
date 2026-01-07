@@ -16,7 +16,7 @@
 
 .search-row input[type="text"] {
   flex: 1;
-  padding: 0.45rem 0.65rem;
+  padding: 12px 12px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--panel);
@@ -25,20 +25,6 @@
 
 .search-row input::placeholder {
   color: var(--muted);
-}
-
-.favorites-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
-  color: var(--muted);
-  user-select: none;
-
-  input {
-    width: 16px;
-    height: 16px;
-  }
 }
 
 .count {
@@ -186,6 +172,71 @@
 /* Drag overlay wrapper */
 .drag-overlay {
   pointer-events: none;
+}
+
+.favorites-chips {
+  margin: 8px 0;
+  padding: 10px 12px;
+  background: var(--soft);
+  border-radius: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.favorites-chips-label {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-right: 6px;
+}
+
+.favorites-ps-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
+.fav-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  max-width: 260px;
+  padding: 8px 10px;
+
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.fav-chip:hover {
+  background-color: var(--soft);
+}
+
+.fav-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+.fav-chip-star {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.fav-chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  line-height: 1;
 }
 
 @media (max-width: 640px) {

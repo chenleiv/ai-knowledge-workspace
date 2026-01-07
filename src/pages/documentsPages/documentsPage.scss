@@ -4,14 +4,14 @@
 .documents-page {
   display: flex;
   flex-direction: column;
-  gap: 1.25px;
+  gap: 1.25rem;
 }
 
 /* Search row */
 .search-row {
   display: flex;
   align-items: center;
-  gap: 0.75px;
+  gap: 0.75rem;
 }
 
 .search-row input[type="text"] {
@@ -28,7 +28,7 @@
 }
 
 .count {
-  font-size: 0.75px;
+  font-size: 0.75rem;
   color: var(--muted);
   white-space: nowrap;
 }
@@ -41,7 +41,7 @@
 }
 
 .section-title {
-  font-size: 0.8px;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--muted);
@@ -51,7 +51,7 @@
 .docs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 0.9px;
+  gap: 0.9rem;
 }
 
 /* Card */
@@ -59,11 +59,11 @@
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 0.75px;
+  padding: 0.75rem;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 0.55px;
+  gap: 0.55rem;
   transition: box-shadow 0.15s ease, border-color 0.15s ease,
     transform 0.15s ease, background 0.15s ease;
 }
@@ -86,7 +86,7 @@
 .doc-card-header {
   display: flex;
   align-items: flex-start;
-  gap: 0.5px;
+  gap: 0.5rem;
 }
 
 .drag-handle {
@@ -94,8 +94,8 @@
   background: transparent;
   color: var(--muted);
   cursor: grab;
-  font-size: 1px;
-  padding: 0 0.25px;
+  font-size: 1rem;
+  padding: 0 0.25rem;
 }
 
 .drag-handle:active {
@@ -109,7 +109,7 @@
 
 .doc-title {
   margin: 0;
-  font-size: 0.95px;
+  font-size: 0.95rem;
   font-weight: 650;
   white-space: nowrap;
   overflow: hidden;
@@ -117,7 +117,7 @@
 }
 
 .doc-meta {
-  font-size: 0.72px;
+  font-size: 0.72rem;
   color: var(--muted);
   margin-top: 2px;
 }
@@ -126,7 +126,7 @@
 .doc-actions {
   display: flex;
   align-items: center;
-  gap: 0.25px;
+  gap: 0.25rem;
 }
 
 .icon-btn {
@@ -134,9 +134,9 @@
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  padding: 0.25px 0.35px;
+  padding: 0.25rem 0.35rem;
   border-radius: 10px;
-  font-size: 0.95px;
+  font-size: 0.95rem;
 }
 
 .icon-btn:hover {
@@ -150,18 +150,18 @@
 
 /* Empty / Error */
 .empty {
-  font-size: 0.85px;
+  font-size: 0.85rem;
   color: var(--muted);
-  padding: 1px 0;
+  padding: 1rem 0;
 }
 
 .error {
   background: var(--danger-bg);
   border: 1px solid var(--danger-border);
   color: var(--danger-text);
-  padding: 0.6px 0.8px;
+  padding: 0.6rem 0.8rem;
   border-radius: 12px;
-  font-size: 0.85px;
+  font-size: 0.85rem;
 }
 
 .banner {

@@ -3,7 +3,7 @@
 .danger-btn,
 .icon-btn {
   border-radius: 999px;
-  padding: 0.55px 0.95px;
+  padding: 8px 15px;
   border: 1px solid var(--border);
   background: var(--soft);
   color: var(--text);
@@ -31,7 +31,7 @@
 
 .icon-btn {
   border-radius: 12px;
-  padding: 0.4px 0.6px;
+  padding: 6px 9px;
   background: transparent;
 }
 
@@ -81,7 +81,7 @@
     background: var(--panel);
 
     h1 {
-      font-size: 1.4px;
+      font-size: 22px;
       margin: 0;
       color: var(--text);
       white-space: nowrap;
@@ -89,12 +89,12 @@
 
     nav {
       display: flex;
-      gap: 1px;
+      gap: 16px;
 
       a {
         text-decoration: none;
         color: var(--soft-3);
-        padding: 0.4px 0.6px;
+        padding: 6px 9px;
         border-radius: 10px;
         border: 1px solid transparent;
         transition: background 0.15s ease, color 0.15s ease;
@@ -156,7 +156,7 @@
   }
 
   .app-layout header h1 {
-    font-size: 1.1px;
+    font-size: 17px;
     line-height: 1.2;
   }
 
@@ -170,7 +170,7 @@
     text-align: center;
     padding: 10px 0;
     border-radius: 14px;
-    font-size: 0.9px;
+    font-size: 14px;
   }
 }
 

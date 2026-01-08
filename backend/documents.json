@@ -40,5 +40,40 @@
     "summary": "Processes, signals, foreground/background jobs, and practical commands for managing running programs.",
     "content": "In Linux, a running program is a process identified by a PID (process ID). You can inspect processes using ps, top, or htop. Each process has a state (running, sleeping, stopped, zombie) and resource usage.\n\nSignals are a primary mechanism to control processes:\n- SIGTERM: request graceful shutdown (default for kill).\n- SIGKILL: immediate termination (cannot be caught).\n- SIGINT: interrupt (Ctrl+C) for foreground processes.\n\nJob control:\n- Run a command in the background by appending &: for example, \"myapp &\".\n- Suspend a foreground process with Ctrl+Z.\n- Resume with fg (foreground) or bg (background).\n\nPractical tips:\n- Prefer SIGTERM before SIGKILL to allow cleanup.\n- Use pgrep to find PIDs by name.\n- Use systemd service files for long-running daemons in production environments.\n\nUnderstanding processes and signals helps debug runaway CPU usage, memory leaks, and stuck programs, and is a core skill for troubleshooting servers.",
     "id": 6
+  },
+  {
+    "title": "OWASP Top 10 Quick Notes",
+    "category": "Security",
+    "summary": "A compact checklist of the OWASP Top 10 categories with practical reminders for dev teams.",
+    "content": "OWASP Top 10 (high-level):\n1) Broken Access Control\n2) Cryptographic Failures\n3) Injection\n4) Insecure Design\n5) Security Misconfiguration\n6) Vulnerable and Outdated Components\n7) Identification and Authentication Failures\n8) Software and Data Integrity Failures\n9) Security Logging and Monitoring Failures\n10) Server-Side Request Forgery (SSRF)\n\nPractical notes:\n- Always validate access on the server (not only UI).\n- Use parameterized queries and escaping.\n- Prefer allowlists over blocklists.\n- Centralize auth and permissions.\n- Log important security events and monitor them.\n\nUseful habit: in every feature, ask: \"What data is this user allowed to read/write?\"",
+    "id": 1767786562643
+  },
+  {
+    "title": "React Performance: Common Wins",
+    "category": "Frontend",
+    "summary": "Simple performance improvements: memoization, list rendering, and avoiding unnecessary re-renders.",
+    "content": "Quick wins:\n- Use React.memo for pure components that re-render too often.\n- Use useMemo/useCallback only when it prevents real work.\n- Split large components into smaller ones.\n- For long lists: virtualize (react-window/react-virtual).\n- Keep state as close as possible to where it’s used.\n- Avoid creating new objects/functions in props in hot paths.\n\nSignals you should optimize:\n- Slow typing or scrolling\n- Frequent re-rendering of large trees\n- Expensive computations on every render\n\nTip: measure first (React DevTools Profiler) before adding complexity.",
+    "id": 1767786562644
+  },
+  {
+    "title": "Git: Fixing Mistakes Safely",
+    "category": "Git",
+    "summary": "A safe guide to undoing commits, fixing history, and recovering from common Git mistakes.",
+    "content": "Common operations:\n- Undo staged changes: git reset\n- Undo working tree changes: git checkout -- <file> (or git restore)\n- Undo last commit but keep changes: git reset --soft HEAD~1\n- Undo last commit and discard changes: git reset --hard HEAD~1 (careful)\n- Create a 'revert' commit (safe for shared branches): git revert <sha>\n\nRules of thumb:\n- If it’s already pushed to a shared branch, prefer git revert.\n- Use git reset --hard only when you’re 100% sure you don’t need the changes.\n\nRecovery:\n- Lost commit? try: git reflog",
+    "id": 1767786562645
+  },
+  {
+    "title": "Docker Basics for Local Dev",
+    "category": "DevOps",
+    "summary": "The minimum Docker knowledge for running services locally: images, containers, volumes, and compose.",
+    "content": "Core concepts:\n- Image: a built artifact (like a template).\n- Container: a running instance of an image.\n- Volume: persistent storage outside the container.\n\nUseful commands:\n- docker ps\n- docker logs <container>\n- docker exec -it <container> sh\n- docker build -t myapp .\n- docker run -p 3000:3000 myapp\n\nDocker Compose:\n- Define multiple services (db + api + frontend).\n- Use volumes for databases.\n- Keep environment variables in .env (do not commit secrets).\n\nTip: if something is 'working on my machine', docker-compose makes it reproducible.",
+    "id": 1767786562646
+  },
+  {
+    "title": "HTTP Status Codes Cheat Sheet",
+    "category": "Web",
+    "summary": "A practical cheat sheet for the most common HTTP status codes and when to use them.",
+    "content": "2xx Success:\n- 200 OK: standard success\n- 201 Created: new resource created\n- 204 No Content: success with no body\n\n3xx Redirects:\n- 301 Moved Permanently\n- 302 Found\n- 304 Not Modified\n\n4xx Client errors:\n- 400 Bad Request: validation fails\n- 401 Unauthorized: not authenticated\n- 403 Forbidden: authenticated but not allowed\n- 404 Not Found\n- 409 Conflict: state conflict (duplicate, etc.)\n\n5xx Server errors:\n- 500 Internal Server Error\n- 502 Bad Gateway\n- 503 Service Unavailable\n\nTip: For APIs, keep error shape consistent (e.g., { detail: string }).",
+    "id": 1767786562647
   }
 ]

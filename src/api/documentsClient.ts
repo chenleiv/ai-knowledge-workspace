@@ -52,8 +52,11 @@ export function importDocumentsBulk(payload: {
   mode: "merge" | "replace";
   documents: DocumentItem[];
 }) {
-  return apiFetch<{ inserted: number }>("/api/documents/import-bulk", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  return apiFetch<{ inserted: number; mode: "merge" | "replace" }>(
+    "/api/documents/import-bulk",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
 }

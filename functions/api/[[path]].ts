@@ -201,33 +201,72 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   // ----------------------------
   // POST /documents/import-bulk (admin only)
   // ----------------------------
+  // ----------------------------
+  // POST /documents/import-bulk  (admin only)
+  // Supports:
+  // 1) Array form: [ {title, category, summary, content}, ... ]
+  // 2) Payload form: { mode: "merge"|"replace", documents: [...] }
+  // ----------------------------
   if (method === "POST" && path === "/documents/import-bulk") {
     const guard = requireAdmin();
     if (guard) return guard;
 
-    const items = await request.json();
-    if (!Array.isArray(items))
+    const raw = await request.json();
+
+    const mode: "merge" | "replace" =
+      raw && typeof raw === "object" && !Array.isArray(raw) && "mode" in raw
+        ? (raw as { mode?: unknown }).mode === "replace"
+          ? "replace"
+          : "merge"
+        : "merge";
+
+    const docsRaw: unknown = Array.isArray(raw)
+      ? raw
+      : raw &&
+        typeof raw === "object" &&
+        !Array.isArray(raw) &&
+        "documents" in raw
+      ? (raw as { documents?: unknown }).documents
+      : null;
+
+    if (!Array.isArray(docsRaw)) {
       return json({ detail: "Expected an array" }, 400);
+    }
+
+    // Normalize to safe rows (ignore id/created_at/updated_at if they exist)
+    const rows = docsRaw
+      .filter(
+        (d): d is Record<string, unknown> =>
+          !!d && typeof d === "object" && !Array.isArray(d)
+      )
+      .map((d) => ({
+        title: String(d.title ?? "").trim(),
+        category: String(d.category ?? "").trim(),
+        summary: String(d.summary ?? "").trim(),
+        content: String(d.content ?? "").trim(),
+      }))
+      .filter((d) => d.title && d.category && d.summary && d.content);
+
+    if (mode === "replace") {
+      await db.prepare("DELETE FROM documents").run();
+    }
 
     const now = new Date().toISOString();
     let inserted = 0;
 
-    for (const it of items) {
-      const { title, category, summary, content } = it ?? {};
-      if (!title || !category || !summary || !content) continue;
-
+    for (const r of rows) {
       await db
         .prepare(
           `INSERT INTO documents (title, category, summary, content, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?)`
+         VALUES (?, ?, ?, ?, ?, ?)`
         )
-        .bind(title, category, summary, content, now, now)
+        .bind(r.title, r.category, r.summary, r.content, now, now)
         .run();
 
       inserted++;
     }
 
-    return json({ inserted }, 200);
+    return json({ inserted, mode }, 200);
   }
 
   // ----------------------------

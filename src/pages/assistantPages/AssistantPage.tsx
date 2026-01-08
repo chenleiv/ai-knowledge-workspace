@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./assistantPage.scss";
 
 import { listDocuments, type DocumentItem } from "../../api/documentsClient";
@@ -33,7 +33,12 @@ export default function AssistantPage() {
 
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [isContextOpen, setIsContextOpen] = useState(false);
 
+  const onClearSelection = useCallback(() => {
+    setSelectedIds([]);
+    saveJson(CONTEXT_KEY, []);
+  }, []);
   async function load() {
     setDocsLoading(true);
     setDocsError(null);
@@ -62,6 +67,13 @@ export default function AssistantPage() {
     saveJson(CHAT_KEY, messages);
   }, [messages]);
 
+  useEffect(() => {
+    if (selectedIds.length > 0 || contextQuery.trim().length > 0) {
+      setIsContextOpen(true);
+    }
+  }, [selectedIds, contextQuery]);
+  const showContextPanel = isContextOpen;
+
   function toggleSelected(id: number) {
     setSelectedIds((prev) => {
       const next = prev.includes(id)
@@ -73,18 +85,13 @@ export default function AssistantPage() {
   }
 
   const selectedDocs = useMemo(() => {
+    if (selectedIds.length === 0) return [];
     const set = new Set(selectedIds);
     return docs.filter((d) => set.has(d.id));
   }, [docs, selectedIds]);
 
   function clearChat() {
-    setMessages([
-      {
-        id: uid(),
-        role: "assistant",
-        text: "Chat cleared. Select documents and ask again.",
-      },
-    ]);
+    setMessages([]);
   }
 
   function applyTemplate(kind: "summarize" | "actions" | "interview") {
@@ -157,31 +164,31 @@ export default function AssistantPage() {
   }
 
   return (
-    <div className="assistant-shell">
-      <ContextPanel
-        docs={docs}
-        loading={docsLoading}
-        error={docsError}
-        selectedIds={selectedIds}
-        contextQuery={contextQuery}
-        onRefresh={load}
-        onToggleSelected={toggleSelected}
-        onChangeQuery={setContextQuery}
-      />
-
+    <div
+      className={`assistant-shell ${
+        showContextPanel ? "with-context" : "no-context"
+      }`}
+    >
       <section className="assistant-page">
-        <TemplatesBar onApply={applyTemplate} onClear={clearChat} />
+        <div className="assistant-context-toggle">
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={clearChat}
+            disabled={messages.length === 0}
+          >
+            Clear chat
+          </button>
+        </div>
 
         <MessagesList messages={messages} />
 
-        {selectedIds.length === 0 && (
-          <div className="assistant-hint">
-            Scope:{" "}
-            {selectedDocs.length > 0
-              ? `Selected documents (${selectedDocs.length})`
-              : "All documents"}
-          </div>
-        )}
+        <div className="assistant-hint">
+          Scope:{" "}
+          {selectedIds.length === 0
+            ? "All documents"
+            : `Selected documents (${selectedIds.length})`}
+        </div>
 
         <Composer
           value={input}
@@ -189,7 +196,19 @@ export default function AssistantPage() {
           onChange={setInput}
           onSend={send}
         />
+        <TemplatesBar onApply={applyTemplate} />
       </section>
+
+      <ContextPanel
+        docs={docs}
+        loading={docsLoading}
+        error={docsError}
+        selectedIds={selectedIds}
+        contextQuery={contextQuery}
+        onToggleSelected={toggleSelected}
+        onChangeQuery={setContextQuery}
+        onClearSelection={onClearSelection}
+      />
     </div>
   );
 }

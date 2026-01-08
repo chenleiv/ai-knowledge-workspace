@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import type { DocumentItem } from "../../../api/documentsClient";
 
 type Props = {
@@ -6,13 +6,21 @@ type Props = {
   loading: boolean;
   error: string | null;
 
-  selectedIds: number[];
+  selectedIds: number[]; // empty => "All documents"
   contextQuery: string;
 
-  onRefresh: () => void;
   onToggleSelected: (id: number) => void;
   onChangeQuery: (value: string) => void;
+  onClearSelection: () => void;
 };
+
+function matchesQuery(d: DocumentItem, q: string) {
+  const title = (d.title ?? "").toLowerCase();
+  const category = (d.category ?? "").toLowerCase();
+  const summary = (d.summary ?? "").toLowerCase();
+
+  return title.includes(q) || category.includes(q) || summary.includes(q);
+}
 
 export default function ContextPanel({
   docs,
@@ -20,39 +28,41 @@ export default function ContextPanel({
   error,
   selectedIds,
   contextQuery,
-  onRefresh,
   onToggleSelected,
   onChangeQuery,
+  onClearSelection,
 }: Props) {
   const filteredDocs = useMemo(() => {
     const q = contextQuery.toLowerCase().trim();
     if (!q) return docs;
-
-    return docs.filter((d) => {
-      return (
-        (d.title || "").toLowerCase().includes(q) ||
-        (d.category || "").toLowerCase().includes(q) ||
-        (d.summary || "").toLowerCase().includes(q)
-      );
-    });
+    return docs.filter((d) => matchesQuery(d, q));
   }, [docs, contextQuery]);
+
+  const hasSelection = selectedIds.length > 0;
+
+  const hint = hasSelection
+    ? `Use only selected documents. (${selectedIds.length} selected)`
+    : "No selection — Use all documents.";
+
+  const isSelected = useCallback(
+    (id: number) => selectedIds.includes(id),
+    [selectedIds]
+  );
+
+  const handleToggle = useCallback(
+    (id: number) => onToggleSelected(id),
+    [onToggleSelected]
+  );
+
+  const handleClear = useCallback(() => {
+    onClearSelection();
+  }, [onClearSelection]);
 
   return (
     <aside className="context-panel">
-      <div className="context-header">
-        <div>
-          <h2>Context</h2>
-          <p>Select documents the assistant can use.</p>
-        </div>
-
-        <button
-          className="secondary-btn"
-          type="button"
-          onClick={onRefresh}
-          disabled={loading}
-        >
-          {loading ? "Loading..." : "Refresh"}
-        </button>
+      <div className="context-header-main">
+        <h2>Context</h2>
+        <p>Select specific documents to narrow context.</p>
       </div>
 
       <div className="context-search">
@@ -60,30 +70,47 @@ export default function ContextPanel({
           value={contextQuery}
           onChange={(e) => onChangeQuery(e.target.value)}
           placeholder="Search documents..."
+          disabled={loading}
         />
-        <div className="context-count">{selectedIds.length} selected</div>
       </div>
 
+      <div className="context-header-hint">
+        <div className="context-hint">{hint}</div>
+        <button
+          className="secondary-btn"
+          type="button"
+          onClick={handleClear}
+          disabled={loading}
+        >
+          Clear
+        </button>
+      </div>
       {error && <div className="error">{error}</div>}
 
       <div className="context-list">
         {filteredDocs.map((d) => {
-          const checked = selectedIds.includes(d.id);
+          const checked = isSelected(d.id);
+
           return (
-            <label
+            <div
               key={d.id}
               className={`context-item ${checked ? "checked" : ""}`}
+              role="button"
+              tabIndex={0}
+              aria-pressed={checked}
+              onClick={() => handleToggle(d.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleToggle(d.id);
+                }
+              }}
             >
-              <input
-                type="checkbox"
-                checked={checked}
-                onChange={() => onToggleSelected(d.id)}
-              />
               <div className="context-item-main">
                 <div className="context-title">{d.title}</div>
                 <div className="context-meta">{d.category}</div>
               </div>
-            </label>
+            </div>
           );
         })}
 

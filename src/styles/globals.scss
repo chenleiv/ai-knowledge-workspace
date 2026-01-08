@@ -49,3 +49,45 @@ select {
     box-shadow: 0 0 0 3px var(--focus);
   }
 }
+
+/* ========= Scrollbar (WebKit: Chrome/Safari/Edge) ========= */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(127, 127, 140, 0.35);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  /* makes it look thinner */
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(127, 127, 140, 0.55);
+  background-clip: content-box;
+}
+
+/* ========= Scrollbar (Firefox) ========= */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(127, 127, 140, 0.45) transparent;
+}
+
+/* Optional: only show thumb on hover (WebKit only) */
+.context-list::-webkit-scrollbar-thumb,
+.messages::-webkit-scrollbar-thumb {
+  background: rgba(127, 127, 140, 0.25);
+  background-clip: content-box;
+}
+
+.context-list:hover::-webkit-scrollbar-thumb,
+.messages:hover::-webkit-scrollbar-thumb {
+  background: rgba(127, 127, 140, 0.45);
+  background-clip: content-box;
+}

@@ -42,8 +42,6 @@ export async function deleteDocument(id: number) {
 
 // viewer/admin
 export function exportDocuments() {
-  // If your server supports GET, this is fine.
-  // If your server expects POST, change method to POST.
   return apiFetch<DocumentItem[]>("/api/documents/export", { method: "POST" });
 }
 

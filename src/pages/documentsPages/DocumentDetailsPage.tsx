@@ -255,7 +255,7 @@ export default function DocumentDetailsPage() {
     return (
       <div className="doc-details">
         <div className="doc-details-top">
-          <button type="button" className="back-link" onClick={onBack}>
+          <button type="button" className="primary-btn" onClick={onBack}>
             ← Back
           </button>
         </div>
@@ -268,7 +268,7 @@ export default function DocumentDetailsPage() {
     return (
       <div className="doc-details">
         <div className="doc-details-top">
-          <button type="button" className="back-link" onClick={onBack}>
+          <button type="button" className="primary-btn" onClick={onBack}>
             ← Back
           </button>
         </div>
@@ -280,7 +280,7 @@ export default function DocumentDetailsPage() {
   return (
     <div className="doc-details" role="presentation">
       <div className="doc-details-top">
-        <button type="button" className="back-link" onClick={onBack}>
+        <button type="button" className="primary-btn" onClick={onBack}>
           ← Back
         </button>
 

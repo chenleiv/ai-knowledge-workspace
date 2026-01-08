@@ -2,10 +2,9 @@ type TemplateKind = "summarize" | "actions" | "interview";
 
 type Props = {
   onApply: (kind: TemplateKind) => void;
-  onClear: () => void;
 };
 
-export default function TemplatesBar({ onApply, onClear }: Props) {
+export default function TemplatesBar({ onApply }: Props) {
   return (
     <div className="assistant-topbar">
       <div className="templates">
@@ -31,10 +30,6 @@ export default function TemplatesBar({ onApply, onClear }: Props) {
           Interview Qs
         </button>
       </div>
-
-      <button type="button" className="secondary-btn" onClick={onClear}>
-        Clear chat
-      </button>
     </div>
   );
 }

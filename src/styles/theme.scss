@@ -1,15 +1,15 @@
 :root {
-    --bg: #f7f7f8;
+    --bg: #f9f8f7; //#f7f7f8;
     --panel: #ffffff;
     --card: #ffffff;
 
     --soft: #f1f1f2;
     --soft-2: #e9e9eb;
 
-    --soft-3: #111113c8;
+    --soft-3: #111113e8;
     --white: #f2f2f3c6;
 
-    --text: #111113;
+    --text: #2c2c2b;
     --secondery-text: #111113bb;
     --muted: #6b6b73;
 
@@ -38,13 +38,13 @@
 }
 
 [data-theme="dark"] {
-    --bg: #1f1f1f;
-    --panel: #161616c9;
+    --bg: #191919; //#1f1f1f;
+    --panel: #202020; //  #161616c9;
     --card: #171719;
 
-    --soft: #1f1f22;
+    --soft: #2c2c2c;
     --soft-2: #26262a;
-    --soft-3: #f2f2f3ba;
+    --soft-3: #ffffff;
 
     --white: #f2f2f3c6;
 

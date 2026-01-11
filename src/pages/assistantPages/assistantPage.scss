@@ -103,14 +103,16 @@
 }
 
 .context-list {
-  margin-top: 12px;
-  overflow: auto;
-  padding-right: 6px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-right: -6px;
   scrollbar-gutter: stable;
+  background: var(--bg);
+  border: 1px solid var(--soft-2);
+  overflow: auto;
+  border-radius: 10px;
+  gap: 8px;
+  padding: 6px;
+  margin: 12px 6px 0;
 
 }
 
@@ -213,8 +215,10 @@
 
 .messages {
   overflow-y: auto;
-  padding-right: 8px;
-  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--soft);
+  background-color: var(--bg);
 }
 
 .message {

@@ -19,7 +19,7 @@
   padding: 12px 12px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: var(--panel);
+  background: var(--soft);
   color: var(--text);
 }
 
@@ -177,23 +177,24 @@
 .favorites-chips {
   margin: 8px 0;
   padding: 10px 12px;
-  background: var(--soft);
   border-radius: 14px;
   display: flex;
   gap: 12px;
   align-items: center;
+  background: var(--panel);
 }
 
 .favorites-chips-label {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--soft-3);
   white-space: nowrap;
   padding-right: 6px;
 }
 
-.favorites-ps-row {
+.favorites-chips-row {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
   overflow-x: auto;
   padding-bottom: 2px;
   scrollbar-width: thin;
@@ -218,6 +219,8 @@
 
 .fav-chip:hover {
   background-color: var(--soft);
+  box-shadow: 0 10px 24px var(--shadow);
+  border-color: #7f7f7f40;
 }
 
 .fav-chip:focus-visible {

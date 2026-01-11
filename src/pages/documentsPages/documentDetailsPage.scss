@@ -15,8 +15,6 @@
     }
 }
 
-
-
 .panel {
     border: 1px solid var(--border);
     background: var(--panel);
@@ -69,7 +67,7 @@
     textarea {
         border-radius: 12px;
         border: 1px solid var(--border);
-        background: var(--panel);
+        background: var(--soft);
         color: var(--text);
         padding: 10px 12px;
         outline: none;

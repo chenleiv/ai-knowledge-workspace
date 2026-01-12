@@ -2,20 +2,18 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   DndContext,
-  DragOverlay,
-  KeyboardSensor,
   PointerSensor,
+  KeyboardSensor,
   closestCenter,
   useSensor,
   useSensors,
   type DragEndEvent,
-  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   arrayMove,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
+  horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
 import "./documentsPage.scss";
@@ -29,20 +27,20 @@ import {
 
 import useConfirm from "../../hooks/useConfirm";
 import DocumentsHeader from "./components/DocumentsHeader";
-import SortableDocumentCard from "./components/SortableDocumentCard";
+import DocumentCard from "./components/documentCard";
 import InlineBanner from "../../components/banners/InlineBanner";
 import { useAuth } from "../../auth/useAuth";
-
 import { downloadExport } from "../../api/downloadExport";
 import { normalizeImportedDocuments } from "./utils/documentsPageHelpers";
-import {
-  applyOrder,
-  makePreview,
-  normalizeOrder,
-  sameArray,
-} from "./utils/ordering";
+import { applyOrder, normalizeOrder, sameArray } from "./utils/ordering";
 import { loadJson, saveJson, scopedKey } from "../../utils/storage";
 import { useStatus } from "../../components/statusBar/useStatus";
+
+import FavoriteChip from "./components/favoriteChip";
+import {
+  getFavoritesOrder,
+  saveFavoritesOrder,
+} from "../../api/favoritesOrderClient";
 
 export default function DocumentsPage() {
   const { user } = useAuth();
@@ -61,17 +59,22 @@ export default function DocumentsPage() {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // Keep your existing order for regular docs (even if we later remove dragging)
   const [order, setOrder] = useState<number[]>([]);
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
 
-  const [activeDragId, setActiveDragId] = useState<number | null>(null);
-
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [pageMenuOpen, setPageMenuOpen] = useState(false);
-
   const [showForbidden, setShowForbidden] = useState(false);
 
-  const sensors = useSensors(
+  // Favorites order persisted in backend
+  const [favOrder, setFavOrder] = useState<number[]>([]);
+  const [favEditMode, setFavEditMode] = useState(false);
+  const [favDraftOrder, setFavDraftOrder] = useState<number[]>([]);
+  const [isSavingFavOrder, setIsSavingFavOrder] = useState(false);
+
+  // DnD sensors for favorites chips (horizontal)
+  const favSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
@@ -93,6 +96,7 @@ export default function DocumentsPage() {
     }
   }, [orderKey]);
 
+  // Load local order + local favorites
   useEffect(() => {
     setOrder(loadJson<number[]>(orderKey, []));
     setFavorites(loadJson<Record<number, boolean>>(favoritesKey, {}));
@@ -102,6 +106,27 @@ export default function DocumentsPage() {
     void load();
   }, [load]);
 
+  // Load favorites order from backend (per user)
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadFavOrder() {
+      try {
+        const res = await getFavoritesOrder();
+        if (cancelled) return;
+        setFavOrder(res.order ?? []);
+      } catch {
+        // ok to ignore (works even if not configured yet)
+        setFavOrder([]);
+      }
+    }
+
+    void loadFavOrder();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     if ((location.state as { forbidden?: boolean } | null)?.forbidden) {
       setShowForbidden(true);
@@ -109,8 +134,12 @@ export default function DocumentsPage() {
     }
   }, [location, navigate]);
 
+  function openDocById(id: number) {
+    navigate(`/documents/${id}`);
+  }
+
   function openDoc(doc: DocumentItem) {
-    navigate(`/documents/${doc.id}`);
+    openDocById(doc.id);
   }
 
   function openCreate() {
@@ -150,7 +179,7 @@ export default function DocumentsPage() {
       setDocs((prev) => prev.filter((d) => d.id !== doc.id));
 
       setOrder((prev) => {
-        const next = prev.filter((id) => id !== doc.id);
+        const next = prev.filter((x) => x !== doc.id);
         saveJson(orderKey, next);
         return next;
       });
@@ -178,36 +207,83 @@ export default function DocumentsPage() {
 
   const filteredDocs = useMemo(() => {
     const q = query.toLowerCase().trim();
-    let result = orderedDocs;
+    if (!q) return orderedDocs;
 
-    if (!q) return result;
-
-    return result.filter(
+    return orderedDocs.filter(
       (d) =>
         d.title.toLowerCase().includes(q) ||
         d.category.toLowerCase().includes(q) ||
         d.summary.toLowerCase().includes(q) ||
         d.content.toLowerCase().includes(q)
     );
-  }, [query, orderedDocs, favorites]);
+  }, [query, orderedDocs]);
 
-  // ✅ Favorites chips – based on the CURRENT filtered view
-  const favoriteChips = useMemo(
-    () => filteredDocs.filter((d) => favorites[d.id]),
-    [filteredDocs, favorites]
-  );
+  const favoriteIdsSet = useMemo(() => {
+    return new Set(Object.keys(favorites).map((k) => Number(k)));
+  }, [favorites]);
 
-  function onDragEnd(event: DragEndEvent) {
+  // Favorites chips should follow backend order; anything missing goes to the end.
+  const favoriteDocs = useMemo(() => {
+    const favDocs = filteredDocs.filter((d) => favoriteIdsSet.has(d.id));
+    if (favDocs.length === 0) return [];
+
+    const byId = new Map(favDocs.map((d) => [d.id, d]));
+    const ordered: DocumentItem[] = [];
+
+    for (const id of favOrder) {
+      const doc = byId.get(id);
+      if (doc) ordered.push(doc);
+    }
+    for (const doc of favDocs) {
+      if (!favOrder.includes(doc.id)) ordered.push(doc);
+    }
+
+    return ordered;
+  }, [filteredDocs, favoriteIdsSet, favOrder]);
+
+  // Regular docs remain where they are (favorites are NOT removed from list)
+  // If you want to hide favorites from "All documents", say and we’ll do it.
+  const regularDocs = filteredDocs;
+
+  function startFavoritesEdit() {
+    setFavDraftOrder(favoriteDocs.map((d) => d.id));
+    setFavEditMode(true);
+  }
+
+  function cancelFavoritesEdit() {
+    setFavEditMode(false);
+    setFavDraftOrder([]);
+  }
+
+  async function saveFavoritesEdit() {
+    setIsSavingFavOrder(true);
+    try {
+      await saveFavoritesOrder(favDraftOrder);
+      setFavOrder(favDraftOrder);
+      setFavEditMode(false);
+      status.show({ kind: "success", message: "Favorites order saved." });
+    } catch (e) {
+      status.show({
+        kind: "error",
+        title: "Save failed",
+        message:
+          e instanceof Error ? e.message : "Could not save favorites order.",
+        timeoutMs: 0,
+      });
+    } finally {
+      setIsSavingFavOrder(false);
+    }
+  }
+
+  function onFavDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over) return;
     if (active.id === over.id) return;
 
-    setOrder((prev) => {
+    setFavDraftOrder((prev) => {
       const oldIndex = prev.indexOf(active.id as number);
       const newIndex = prev.indexOf(over.id as number);
-      const next = arrayMove(prev, oldIndex, newIndex);
-      saveJson(orderKey, next);
-      return next;
+      return arrayMove(prev, oldIndex, newIndex);
     });
   }
 
@@ -331,99 +407,103 @@ export default function DocumentsPage() {
         />
       </div>
 
-      {/* ✅ Favorites chips bar */}
-      {favoriteChips.length > 0 && (
+      {/* Favorites chips */}
+      {favoriteDocs.length > 0 && (
         <div className="favorites-chips" onClick={(e) => e.stopPropagation()}>
-          <div className="favorites-chips-label">Favorites</div>
+          <div className="favorites-chips-head">
+            <div className="favorites-chips-label">Favorites</div>
 
-          <div className="favorites-chips-row">
-            {favoriteChips.map((d) => (
+            {!favEditMode ? (
               <button
-                key={d.id}
                 type="button"
-                className="fav-chip"
-                onClick={() => navigate(`/documents/${d.id}`)}
-                title={`Open "${d.title}"`}
+                className="favorites-edit-btn"
+                onClick={startFavoritesEdit}
               >
-                <span className="fav-chip-star">★</span>
-                <span className="fav-chip-text">{d.title}</span>
+                Edit
               </button>
-            ))}
+            ) : (
+              <div className="favorites-edit-actions">
+                <button
+                  type="button"
+                  className="favorites-cancel-btn"
+                  onClick={cancelFavoritesEdit}
+                  disabled={isSavingFavOrder}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="favorites-save-btn"
+                  onClick={saveFavoritesEdit}
+                  disabled={isSavingFavOrder}
+                >
+                  {isSavingFavOrder ? "Saving..." : "Save"}
+                </button>
+              </div>
+            )}
           </div>
+
+          {favEditMode ? (
+            <DndContext
+              sensors={favSensors}
+              collisionDetection={closestCenter}
+              onDragEnd={onFavDragEnd}
+            >
+              <SortableContext
+                items={favDraftOrder}
+                strategy={horizontalListSortingStrategy}
+              >
+                <div className="favorites-chips-row">
+                  {favDraftOrder.map((id) => {
+                    const doc = favoriteDocs.find((d) => d.id === id);
+                    if (!doc) return null;
+                    return (
+                      <FavoriteChip
+                        key={doc.id}
+                        doc={doc}
+                        editable={true}
+                        onOpen={openDocById}
+                      />
+                    );
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
+          ) : (
+            <div className="favorites-chips-row">
+              {favoriteDocs.map((d) => (
+                <FavoriteChip
+                  key={d.id}
+                  doc={d}
+                  editable={false}
+                  onOpen={openDocById}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       <div className="section">
         <div className="section-title">All documents</div>
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={(e: DragStartEvent) =>
-            setActiveDragId(e.active.id as number)
-          }
-          onDragCancel={() => setActiveDragId(null)}
-          onDragEnd={(e) => {
-            onDragEnd(e);
-            setActiveDragId(null);
-          }}
-        >
-          {/* ✅ drag works for ALL filtered docs, one list */}
-          <SortableContext
-            items={filteredDocs.map((d) => d.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="docs-grid">
-              {filteredDocs.map((doc) => (
-                <SortableDocumentCard
-                  key={doc.id}
-                  doc={doc}
-                  isFavorite={!!favorites[doc.id]}
-                  isMenuOpen={openMenuId === doc.id}
-                  onToggleFavorite={toggleFavorite}
-                  onOpen={openDoc}
-                  isAdmin={isAdmin}
-                  onDelete={onDelete}
-                  onToggleMenu={toggleCardMenu}
-                  onCloseMenu={() => setOpenMenuId(null)}
-                />
-              ))}
-            </div>
-          </SortableContext>
-
-          <DragOverlay>
-            {activeDragId != null ? (
-              <div className="drag-overlay">
-                {(() => {
-                  const doc = docs.find((d) => d.id === activeDragId);
-                  if (!doc) return null;
-
-                  return (
-                    <div className="doc-card is-overlay">
-                      <div className="doc-card-header">
-                        <div className="drag-handle">⠿</div>
-                        <div className="doc-header-main">
-                          <h3 className="doc-title">{doc.title}</h3>
-                          <div className="doc-meta">{doc.category}</div>
-                        </div>
-                        <div className="doc-actions">
-                          <div
-                            className={`icon-btn ${
-                              favorites[doc.id] ? "active" : ""
-                            }`}
-                          >
-                            {favorites[doc.id] ? "★" : "☆"}
-                          </div>
-                        </div>
-                      </div>
-                      <p className="doc-preview">{makePreview(doc, 160)}</p>
-                    </div>
-                  );
-                })()}
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+        {/* ✅ No DnD here anymore (regular cards not draggable) */}
+        <div className="docs-grid">
+          {regularDocs.map((doc) => (
+            <DocumentCard
+              key={doc.id}
+              doc={doc}
+              isFavorite={!!favorites[doc.id]}
+              isMenuOpen={openMenuId === doc.id}
+              onToggleFavorite={toggleFavorite}
+              onOpen={openDoc}
+              isAdmin={isAdmin}
+              onDelete={onDelete}
+              onToggleMenu={toggleCardMenu}
+              onCloseMenu={() => setOpenMenuId(null)}
+            />
+          ))}
+        </div>
       </div>
 
       {filteredDocs.length === 0 && (

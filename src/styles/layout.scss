@@ -23,6 +23,34 @@
   background: var(--panel);
 }
 
+.text-btn {
+  background: none;
+  border: none;
+  padding: 4px 6px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+
+  cursor: pointer;
+  border-radius: 8px;
+
+  text-align: left;
+
+  &:hover {
+    background: var(--soft);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus);
+  }
+
+  &.danger {
+    color: var(--danger-text);
+  }
+}
+
 .danger-btn {
   background: var(--danger-bg);
   border-color: var(--danger-border);
@@ -141,7 +169,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 660px) {
 
   .app-layout {
     main {
@@ -152,7 +180,7 @@
   .app-layout header {
     padding: 12px 14px;
     flex-direction: column;
-    gap: 12px;
+
   }
 
   .app-layout header h1 {

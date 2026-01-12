@@ -14,10 +14,9 @@
   background: var(--panel);
   border-radius: 14px;
   padding: 14px 8px 6px 14px;
-  ;
   height: calc(100dvh - 140px);
-  display: grid;
-  grid-template-rows: auto 1fr;
+  display: flex;
+  flex-direction: column;
   color: var(--text);
 }
 
@@ -112,7 +111,7 @@
   border-radius: 10px;
   gap: 8px;
   padding: 6px;
-  margin: 12px 6px 0;
+  margin: 12px 0 0;
 
 }
 
@@ -359,13 +358,15 @@
   .context-panel,
   .assistant-page {
     height: auto;
-    min-height: 520px;
+    // min-height: 520px;
   }
 
   .context-list {
     display: grid;
     grid-template-columns: 1fr;
     gap: 10px;
+    max-height: 350px;
+    overflow-y: auto;
   }
 
   .bubble,

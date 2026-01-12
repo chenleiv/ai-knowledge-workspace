@@ -1,9 +1,14 @@
+import {
+  parseAuthUserFromCookie,
+  buildLoginCookie,
+  buildLogoutCookie,
+  type AuthUser,
+  type Role,
+} from "./helpers/authCookie";
+
 export interface Env {
   ai_workspace: D1Database;
 }
-
-type Role = "admin" | "viewer";
-type AuthUser = { email: string; role: Role };
 
 interface DocumentBody {
   title?: string;
@@ -13,16 +18,6 @@ interface DocumentBody {
 }
 
 type LoginBody = { email?: string; password?: string };
-
-function parseAuthUserFromCookie(cookieHeader: string | null): AuthUser | null {
-  const cookie = cookieHeader ?? "";
-  const m = cookie.match(/access_token=demo\.(admin|viewer)/);
-  if (!m) return null;
-
-  const role = m[1] as Role;
-  const email = role === "admin" ? "admin@demo.com" : "viewer@demo.com";
-  return { email, role };
-}
 
 export const onRequest: PagesFunction<Env> = async (ctx) => {
   const { request, env } = ctx;
@@ -95,7 +90,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     };
 
     return json({ user }, 200, {
-      "Set-Cookie": `access_token=demo.${user.role}; ${loginCookieAttrs}`,
+      "Set-Cookie": buildLoginCookie(request, user.role as Role),
     });
   }
 
@@ -107,14 +102,16 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
 
   if (method === "POST" && path === "/auth/logout") {
     return json({ ok: true }, 200, {
-      "Set-Cookie": `access_token=; ${logoutCookieAttrs}`,
+      "Set-Cookie": buildLogoutCookie(request),
     });
   }
 
   // ----------------------------
   // AUTH GUARDS for documents
   // ----------------------------
-  const authedUser = parseAuthUserFromCookie(request.headers.get("Cookie"));
+  const authedUser = parseAuthUserFromCookie(
+    request.headers.get("Cookie")
+  ) as AuthUser | null;
 
   const requireAuth = () => {
     if (!authedUser) return json({ detail: "Not authenticated" }, 401);
@@ -342,6 +339,57 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
       if (guard) return guard;
 
       await db.prepare(`DELETE FROM documents WHERE id = ?`).bind(id).run();
+      return json({ ok: true }, 200);
+    }
+  }
+
+  // ----------------------------
+  // Favorites order (per user)
+  // GET  /favorites/order
+  // PUT  /favorites/order   body: { order: number[] }
+  // ----------------------------
+  if (path === "/favorites/order") {
+    const guard = requireAuth();
+    if (guard) return guard;
+
+    const user = authedUser; // already parsed from cookie in your file
+    if (!user) return json({ detail: "Not authenticated" }, 401);
+
+    if (method === "GET") {
+      const row = await db
+        .prepare(`SELECT order_json FROM favorites_order WHERE email = ?`)
+        .bind(user.email)
+        .first<{ order_json: string }>();
+
+      const order = row?.order_json
+        ? (JSON.parse(row.order_json) as number[])
+        : [];
+      return json({ order }, 200);
+    }
+
+    if (method === "PUT") {
+      const body = (await request.json()) as { order?: unknown };
+      if (!Array.isArray(body.order)) {
+        return json({ detail: "Expected { order: number[] }" }, 400);
+      }
+
+      // sanitize to numbers only
+      const order = body.order
+        .map((x) => Number(x))
+        .filter((n) => Number.isFinite(n));
+
+      const now = new Date().toISOString();
+      await db
+        .prepare(
+          `INSERT INTO favorites_order (email, order_json, updated_at)
+         VALUES (?, ?, ?)
+         ON CONFLICT(email) DO UPDATE SET
+           order_json = excluded.order_json,
+           updated_at = excluded.updated_at`
+        )
+        .bind(user.email, JSON.stringify(order), now)
+        .run();
+
       return json({ ok: true }, 200);
     }
   }

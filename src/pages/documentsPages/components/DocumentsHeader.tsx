@@ -1,11 +1,8 @@
 import { useState } from "react";
-import PageActionsMenu from "./PageActionsMenu";
+import ImportMenuButton from "./ImportMenuButton";
 
 type Props = {
   onNew: () => void;
-  pageMenuOpen: boolean;
-  onTogglePageMenu: () => void;
-  onClosePageMenu: () => void;
   onExport: () => Promise<void> | void;
   onImport: (mode: "merge" | "replace") => void;
   isAdmin: boolean;
@@ -13,9 +10,6 @@ type Props = {
 
 export default function DocumentsHeader({
   onNew,
-  pageMenuOpen,
-  onTogglePageMenu,
-  onClosePageMenu,
   onExport,
   onImport,
   isAdmin,
@@ -24,13 +18,11 @@ export default function DocumentsHeader({
 
   async function handleExport() {
     if (isExporting) return;
-
     setIsExporting(true);
     try {
       await onExport();
     } finally {
       setIsExporting(false);
-      onClosePageMenu();
     }
   }
 
@@ -44,20 +36,23 @@ export default function DocumentsHeader({
         {isAdmin ? (
           <>
             <button className="primary-btn" type="button" onClick={onNew}>
-              New Document
+              Create New Document
             </button>
 
-            <PageActionsMenu
-              open={pageMenuOpen}
-              onToggle={onTogglePageMenu}
-              onClose={onClosePageMenu}
-              onExport={handleExport}
-              onImport={onImport}
-            />
+            <button
+              className="text-btn"
+              type="button"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              {isExporting ? "Exporting..." : "Export"}
+            </button>
+
+            <ImportMenuButton onImport={onImport} />
           </>
         ) : (
           <button
-            className="secondary-btn"
+            className="text-btn"
             type="button"
             onClick={handleExport}
             disabled={isExporting}

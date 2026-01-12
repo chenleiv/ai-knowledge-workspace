@@ -64,7 +64,6 @@ export default function DocumentsPage() {
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
 
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  const [pageMenuOpen, setPageMenuOpen] = useState(false);
   const [showForbidden, setShowForbidden] = useState(false);
 
   // Favorites order persisted in backend
@@ -149,8 +148,18 @@ export default function DocumentsPage() {
   function toggleFavorite(id: number) {
     setFavorites((prev) => {
       const next = { ...prev, [id]: !prev[id] };
-      if (!next[id]) delete next[id];
+      const isNowFav = !!next[id];
+
+      if (!isNowFav) delete next[id];
       saveJson(favoritesKey, next);
+
+      // keep backend order list aligned (local UI)
+      setFavOrder((prevOrder) => {
+        if (!isNowFav) return prevOrder.filter((x) => x !== id);
+        if (prevOrder.includes(id)) return prevOrder;
+        return [...prevOrder, id];
+      });
+
       return next;
     });
   }
@@ -245,35 +254,35 @@ export default function DocumentsPage() {
   // If you want to hide favorites from "All documents", say and we’ll do it.
   const regularDocs = filteredDocs;
 
-  function startFavoritesEdit() {
-    setFavDraftOrder(favoriteDocs.map((d) => d.id));
-    setFavEditMode(true);
-  }
+  // function startFavoritesEdit() {
+  //   setFavDraftOrder(favoriteDocs.map((d) => d.id));
+  //   setFavEditMode(true);
+  // }
 
-  function cancelFavoritesEdit() {
-    setFavEditMode(false);
-    setFavDraftOrder([]);
-  }
+  // function cancelFavoritesEdit() {
+  //   setFavEditMode(false);
+  //   setFavDraftOrder([]);
+  // }
 
-  async function saveFavoritesEdit() {
-    setIsSavingFavOrder(true);
-    try {
-      await saveFavoritesOrder(favDraftOrder);
-      setFavOrder(favDraftOrder);
-      setFavEditMode(false);
-      status.show({ kind: "success", message: "Favorites order saved." });
-    } catch (e) {
-      status.show({
-        kind: "error",
-        title: "Save failed",
-        message:
-          e instanceof Error ? e.message : "Could not save favorites order.",
-        timeoutMs: 0,
-      });
-    } finally {
-      setIsSavingFavOrder(false);
-    }
-  }
+  // async function saveFavoritesEdit() {
+  //   setIsSavingFavOrder(true);
+  //   try {
+  //     await saveFavoritesOrder(favDraftOrder);
+  //     setFavOrder(favDraftOrder);
+  //     setFavEditMode(false);
+  //     status.show({ kind: "success", message: "Favorites order saved." });
+  //   } catch (e) {
+  //     status.show({
+  //       kind: "error",
+  //       title: "Save failed",
+  //       message:
+  //         e instanceof Error ? e.message : "Could not save favorites order.",
+  //       timeoutMs: 0,
+  //     });
+  //   } finally {
+  //     setIsSavingFavOrder(false);
+  //   }
+  // }
 
   function onFavDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -353,7 +362,6 @@ export default function DocumentsPage() {
         await importDocumentsBulk({ mode, documents });
         await load();
         status.show({ kind: "success", message: "Import completed." });
-        setPageMenuOpen(false);
       } catch (e) {
         status.show({
           kind: "error",
@@ -385,12 +393,6 @@ export default function DocumentsPage() {
 
       <DocumentsHeader
         onNew={openCreate}
-        pageMenuOpen={pageMenuOpen}
-        onTogglePageMenu={() => {
-          setOpenMenuId(null);
-          setPageMenuOpen((v) => !v);
-        }}
-        onClosePageMenu={() => setPageMenuOpen(false)}
         onExport={() => void onExport()}
         onImport={(mode) => void requestImport(mode)}
         isAdmin={isAdmin}
@@ -409,38 +411,60 @@ export default function DocumentsPage() {
 
       {/* Favorites chips */}
       {favoriteDocs.length > 0 && (
-        <div className="favorites-chips" onClick={(e) => e.stopPropagation()}>
+        <div
+          className={`favorites-chips ${favEditMode ? "is-editing" : ""}`}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="favorites-chips-head">
             <div className="favorites-chips-label">Favorites</div>
-
-            {!favEditMode ? (
-              <button
-                type="button"
-                className="favorites-edit-btn"
-                onClick={startFavoritesEdit}
-              >
-                Edit
-              </button>
-            ) : (
-              <div className="favorites-edit-actions">
-                <button
-                  type="button"
-                  className="favorites-cancel-btn"
-                  onClick={cancelFavoritesEdit}
-                  disabled={isSavingFavOrder}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="favorites-save-btn"
-                  onClick={saveFavoritesEdit}
-                  disabled={isSavingFavOrder}
-                >
-                  {isSavingFavOrder ? "Saving..." : "Save"}
-                </button>
+            {favEditMode && (
+              <div className="favorites-edit-hint" role="note">
+                Drag chips to reorder. Click the pencil again to save.
               </div>
             )}
+            <button
+              type="button"
+              className={`fav-edit-toggle ${favEditMode ? "is-active" : ""}`}
+              aria-label={
+                favEditMode ? "Finish editing favorites" : "Edit favorites"
+              }
+              title={favEditMode ? "Done editing" : "Edit favorites"}
+              onClick={async () => {
+                if (favEditMode) {
+                  // exiting edit → SAVE
+                  try {
+                    setIsSavingFavOrder(true);
+                    await saveFavoritesOrder(favDraftOrder);
+                    setFavOrder(favDraftOrder);
+                    status.show({
+                      kind: "success",
+                      message: "Favorites order saved.",
+                    });
+                  } catch (e) {
+                    status.show({
+                      kind: "error",
+                      title: "Save failed",
+                      message:
+                        e instanceof Error
+                          ? e.message
+                          : "Could not save favorites order.",
+                      timeoutMs: 0,
+                    });
+                  } finally {
+                    setIsSavingFavOrder(false);
+                    setFavEditMode(false);
+                    setFavDraftOrder([]);
+                  }
+                } else {
+                  // entering edit
+                  setFavDraftOrder(favoriteDocs.map((d) => d.id));
+                  setFavEditMode(true);
+                }
+              }}
+              disabled={isSavingFavOrder}
+            >
+              ✎
+            </button>
           </div>
 
           {favEditMode ? (
@@ -487,7 +511,6 @@ export default function DocumentsPage() {
       <div className="section">
         <div className="section-title">All documents</div>
 
-        {/* ✅ No DnD here anymore (regular cards not draggable) */}
         <div className="docs-grid">
           {regularDocs.map((doc) => (
             <DocumentCard

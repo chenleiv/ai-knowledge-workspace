@@ -25,7 +25,7 @@
 
     --info-bg: rgba(59, 130, 246, 0.08);
     --info-border: rgba(59, 130, 246, 0.25);
-    --info-text: #1e3a8a;
+    --info-text: #1c2135;
 
     --danger-bg: rgba(220, 38, 38, 0.08);
     --danger-border: rgba(220, 38, 38, 0.18);
@@ -34,13 +34,15 @@
 
 
     /* Keep existing primary for links if needed */
-    --primary: #007aff;
+    --primary: #2e69ff;
+    --primary-text: #ffffff;
+    --primary-hover: #2459e6;
 }
 
 [data-theme="dark"] {
     --bg: #191919; //#1f1f1f;
     --panel: #202020; //  #161616c9;
-    --card: #171719;
+    --card: #e2e2e2;
 
     --soft: #2c2c2c;
     --soft-2: #26262a;
@@ -54,6 +56,10 @@
     --border: #2a2a2f;
     --shadow: rgba(0, 0, 0, 0.55);
     --overlay: rgba(0, 0, 0, 0.65);
+
+    --primary: #5488fc;
+    --primary-text: #ffffff;
+    --primary-hover: #4073e0;
 
     --focus: rgba(255, 255, 255, 0.14);
 

@@ -227,10 +227,11 @@
 
   &.user {
     align-items: flex-end;
+    color: var(--text);
 
     .bubble {
       background: var(--primary);
-      color: var(--secondery-text);
+      color: var(--white);
       border: 1px solid transparent;
     }
   }
@@ -310,15 +311,15 @@
   }
 
   .send-btn {
-    background: var(--soft-2);
-    color: var(--secondery-text);
+    background: var(--primary);
+    color: var(--primary-text);
     border: 1px solid var(--border);
     padding: 10px 16px;
     border-radius: 999px;
     cursor: pointer;
 
     &:hover:not(:disabled) {
-      background: var(--primary);
+      background: var(--primary-hover);
       border-color: var(--border);
     }
 
@@ -358,7 +359,7 @@
   .context-panel,
   .assistant-page {
     height: auto;
-    // min-height: 520px;
+    min-height: 520px;
   }
 
   .context-list {

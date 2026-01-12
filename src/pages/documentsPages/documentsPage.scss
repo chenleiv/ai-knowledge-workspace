@@ -78,11 +78,6 @@
   margin: 0px 0px 6px;
 }
 
-.doc-card.is-dragging {
-  opacity: 0.7;
-  cursor: grabbing;
-}
-
 .doc-card.is-overlay {
   box-shadow: 0 18px 36px var(--shadow);
 }
@@ -110,7 +105,7 @@
 
 .doc-meta {
   font-size: 12px;
-  color: var(--primary-hover);
+  color: var(--soft-3);
   margin-top: 8px;
 }
 
@@ -137,7 +132,7 @@
 }
 
 .icon-btn.active {
-  color: var(--primary);
+  color: rgba(255, 217, 0, 0.882);
 }
 
 /* Empty / Error */
@@ -302,21 +297,30 @@
 .favorites-chips.is-editing {
   border: 1px solid var(--primary);
   box-shadow: 0 0 0 3px var(--focus);
-  cursor: grab;
 }
 
 .fav-edit-toggle.is-active {
   color: var(--text);
   border-color: var(--primary);
   background: var(--soft);
-  cursor: grabbing;
 }
 
 .favorites-edit-hint {
   margin-top: 8px;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.35;
+  font-size: 14px;
+  color: var(--info-text);
+  line-height: 1.5;
+}
+
+.favorites-chips.is-editing {
+  cursor: default;
+}
+
+.fav-chip.is-dragging {
+  opacity: 0.7;
+  transform: scale(1.03);
+  box-shadow: 0 12px 24px var(--shadow);
+  cursor: grabbing;
 }
 
 .fav-chip-star {

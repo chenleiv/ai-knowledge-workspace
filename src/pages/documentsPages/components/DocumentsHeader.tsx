@@ -27,40 +27,34 @@ export default function DocumentsHeader({
   }
 
   return (
-    <div className="documents-header" onClick={(e) => e.stopPropagation()}>
-      <div>
-        <h2>Documents</h2>
-      </div>
+    <div className="top-actions" onClick={(e) => e.stopPropagation()}>
+      {isAdmin ? (
+        <>
+          <button className="primary-btn" type="button" onClick={onNew}>
+            Create New Document
+          </button>
 
-      <div className="top-actions">
-        {isAdmin ? (
-          <>
-            <button className="primary-btn" type="button" onClick={onNew}>
-              Create New Document
-            </button>
-
-            <button
-              className="text-btn"
-              type="button"
-              onClick={handleExport}
-              disabled={isExporting}
-            >
-              {isExporting ? "Exporting..." : "Export"}
-            </button>
-
-            <ImportMenuButton onImport={onImport} />
-          </>
-        ) : (
           <button
             className="text-btn"
             type="button"
             onClick={handleExport}
             disabled={isExporting}
           >
-            {isExporting ? "Exporting..." : "Export JSON"}
+            {isExporting ? "Exporting..." : "Export"}
           </button>
-        )}
-      </div>
+
+          <ImportMenuButton onImport={onImport} />
+        </>
+      ) : (
+        <button
+          className="text-btn"
+          type="button"
+          onClick={handleExport}
+          disabled={isExporting}
+        >
+          {isExporting ? "Exporting..." : "Export JSON"}
+        </button>
+      )}
     </div>
   );
 }

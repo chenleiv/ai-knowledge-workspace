@@ -1,0 +1,67 @@
+.fav-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    max-width: 320px;
+    padding: 7px 10px;
+
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+
+    cursor: pointer;
+    user-select: none;
+    transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+
+    box-shadow: 0 1px 0 var(--shadow);
+}
+
+.fav-chip:hover {
+    background: var(--soft);
+    border-color: rgba(127, 127, 127, 0.22);
+}
+
+.fav-chip:active {
+    transform: translateY(1px);
+}
+
+.fav-chip:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus);
+}
+
+/* Star */
+.fav-chip-star {
+    font-size: 13px;
+    line-height: 1;
+    color: var(--muted);
+}
+
+/* Text */
+.fav-chip-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+/* Edit mode: visually “draggable”, like Notion database pills */
+.fav-chip.is-editable {
+    cursor: grab;
+}
+
+.fav-chip.is-editable:hover {
+    border-color: var(--primary);
+}
+
+.fav-chip.is-dragging {
+    cursor: grabbing;
+    opacity: 0.85;
+    transform: scale(1.02);
+    box-shadow: 0 10px 24px var(--shadow);
+    border-color: var(--primary);
+}

@@ -7,11 +7,12 @@ type Props = {
   isFavorite: boolean;
   isMenuOpen: boolean;
   onToggleFavorite: (id: number) => void;
-  onOpen: (doc: DocumentItem) => void;
+  onOpen: () => void;
   onDelete: (doc: DocumentItem) => void;
   onToggleMenu: (id: number) => void;
   onCloseMenu: () => void;
   isAdmin: boolean;
+  isActive?: boolean;
 };
 
 export default function DocumentCard({
@@ -24,17 +25,18 @@ export default function DocumentCard({
   onToggleMenu,
   onCloseMenu,
   isAdmin,
+  isActive,
 }: Props) {
   const preview = makePreview(doc, 160);
 
   return (
     <article
-      className="doc-card"
+      className={`doc-card ${isActive ? "is-active" : ""}`}
       role="button"
       tabIndex={0}
-      onClick={() => onOpen(doc)}
+      onClick={onOpen}
       onKeyDown={(e) => {
-        if (e.key === "Enter") onOpen(doc);
+        if (e.key === "Enter") onOpen();
       }}
     >
       <div className="doc-card-header">
@@ -48,9 +50,7 @@ export default function DocumentCard({
             className={`icon-btn ${isFavorite ? "active" : ""}`}
             type="button"
             onClick={() => onToggleFavorite(doc.id)}
-            aria-label={
-              isFavorite ? "Remove from favorites" : "Add to favorites"
-            }
+            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
             title={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
             {isFavorite ? "★" : "☆"}

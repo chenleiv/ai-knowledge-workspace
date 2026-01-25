@@ -304,27 +304,36 @@ export default function DocumentsPage() {
         </InlineBanner>
       )}
 
-      <h2 className="title">Documents</h2>
 
-      <div className="search-row" onClick={(e) => e.stopPropagation()}>
-        <input
-          type="text"
-          placeholder="Search title, category, summary, content..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </div>
-
-      {error && <div className="error">{error}</div>}
-
-      <div className="documents-split">
-        <div className="documents-left">
+      <div className="documents-header-container">
+        <div className="search-row" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="text"
+            placeholder="Search title, category, summary, content..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        <div className="documents-header">
           <DocumentsHeader
             onNew={openCreate}
             onExport={() => void onExport()}
             onImport={(mode) => void requestImport(mode)}
             isAdmin={isAdmin}
           />
+        </div>
+      </div>
+
+      {error && <div className="error">{error}</div>}
+
+      <div className="documents-split">
+        <div className="documents-left">
+          {/* <DocumentsHeader
+            onNew={openCreate}
+            onExport={() => void onExport()}
+            onImport={(mode) => void requestImport(mode)}
+            isAdmin={isAdmin}
+          /> */}
 
           <div className="section">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>

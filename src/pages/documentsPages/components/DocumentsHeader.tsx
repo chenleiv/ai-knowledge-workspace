@@ -34,16 +34,18 @@ export default function DocumentsHeader({
             Create New Document
           </button>
 
-          <button
-            className="text-btn"
-            type="button"
-            onClick={handleExport}
-            disabled={isExporting}
-          >
-            {isExporting ? "Exporting..." : "Export"}
-          </button>
+          <div className="top-actions-buttons">
+            <button
+              className="text-btn"
+              type="button"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              {isExporting ? "Exporting..." : "Export"}
+            </button>
 
-          <ImportMenuButton onImport={onImport} />
+            <ImportMenuButton onImport={onImport} />
+          </div>
         </>
       ) : (
         <button

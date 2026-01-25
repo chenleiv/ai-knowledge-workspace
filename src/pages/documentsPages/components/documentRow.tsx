@@ -53,7 +53,7 @@ export default function DocumentRow({
                 <div className="doc-row-title" title={doc.title}>
                     {doc.title}
                 </div>
-                <div className="doc-row-meta">{doc.category}</div>
+                {/* <div className="doc-row-meta">{doc.category}</div> */}
             </div>
 
             <div className="doc-row-actions no-dnd" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>

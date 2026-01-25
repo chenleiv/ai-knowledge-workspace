@@ -151,9 +151,9 @@ export default function DocumentPane({ doc, canEdit, onOpenFullPage, onSaved }: 
             </div>
 
             {mode === "view" ? (
-                <div className="doc-pane-body">
-                    {/* <h2 className="doc-pane-title">{doc.title}</h2> */}
-                    <div className="doc-pane-meta">{doc.category}</div>
+                <div key={doc.id} className="doc-pane-body doc-pane-anim">
+
+                    <div className="doc-pane-meta">Subject: {doc.category}</div>
 
                     <div className="doc-pane-section">
                         <div className="doc-pane-label">Summary</div>

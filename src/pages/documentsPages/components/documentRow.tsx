@@ -1,4 +1,7 @@
 import type { DocumentItem } from "../../../api/documentsClient";
+import Menu from "../../../components/menu/Menu";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Props = {
     doc: DocumentItem;
@@ -14,8 +17,6 @@ type Props = {
     onDelete: (doc: DocumentItem) => void;
 };
 
-import Menu from "../../../components/menu/Menu";
-
 export default function DocumentRow({
     doc,
     active,
@@ -28,13 +29,25 @@ export default function DocumentRow({
     onCloseMenu,
     onDelete,
 }: Props) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+        useSortable({ id: doc.id });
+
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.7 : 1,
+    };
+
     return (
         <div
-            className={`doc-row ${active ? "is-active" : ""}`}
-            role="button"
-            tabIndex={0}
+            ref={setNodeRef}
+            style={style}
+            className={`doc-row ${active ? "is-active" : ""} ${isDragging ? "is-dragging" : ""
+                }`}
             onClick={onOpen}
             onKeyDown={(e) => e.key === "Enter" && onOpen()}
+            {...attributes}
+            {...listeners}
         >
             <div className="doc-row-main">
                 <div className="doc-row-title" title={doc.title}>
@@ -43,42 +56,38 @@ export default function DocumentRow({
                 <div className="doc-row-meta">{doc.category}</div>
             </div>
 
-            <div className="doc-row-actions" onClick={(e) => e.stopPropagation()}>
-                <button
-                    className={`icon-btn ${isFavorite ? "active" : ""}`}
-                    type="button"
-                    onClick={() => onToggleFavorite(doc.id)}
-                    aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                    title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                >
-                    {isFavorite ? "★" : "☆"}
-                </button>
+            <div className="doc-row-actions no-dnd" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+                <div className="menu-wrap no-dnd" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+                    <button
+                        className="icon-btn"
+                        type="button"
+                        aria-label="Menu"
+                        title="Menu"
+                        onClick={() => onToggleMenu(doc.id)}
+                    >
+                        ⋯
+                    </button>
 
-                {isAdmin && (
-                    <div className="menu-wrap">
-                        <button
-                            className="icon-btn"
-                            type="button"
-                            aria-label="Menu"
-                            title="Menu"
-                            onClick={() => onToggleMenu(doc.id)}
-                        >
-                            ⋯
-                        </button>
-
-                        <Menu
-                            open={isMenuOpen}
-                            onClose={onCloseMenu}
-                            items={[
-                                {
-                                    label: "Delete",
-                                    danger: true,
-                                    onClick: () => onDelete(doc),
-                                },
-                            ]}
-                        />
-                    </div>
-                )}
+                    <Menu
+                        open={isMenuOpen}
+                        onClose={onCloseMenu}
+                        items={[
+                            {
+                                label: isFavorite ? "Remove from favorites" : "Add to favorites",
+                                onClick: () => onToggleFavorite(doc.id),
+                            },
+                            ...(isAdmin
+                                ? [
+                                    {
+                                        label: "Delete",
+                                        danger: true,
+                                        onClick: () => onDelete(doc),
+                                    },
+                                ]
+                                : []),
+                        ]}
+                    />
+                </div>
             </div>
         </div>
     );

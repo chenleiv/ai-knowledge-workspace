@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import "./documentsPage.scss";
 import {
   DndContext,
   PointerSensor,
@@ -10,19 +11,17 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import {
+  SortableContext,
   arrayMove,
   sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-
-import "./documentsPage.scss";
-
 import {
   deleteDocument,
   importDocumentsBulk,
   listDocuments,
   type DocumentItem,
 } from "../../api/documentsClient";
-
 import useConfirm from "../../hooks/useConfirm";
 import DocumentsHeader from "./components/DocumentsHeader";
 import InlineBanner from "../../components/banners/InlineBanner";
@@ -32,9 +31,6 @@ import { normalizeImportedDocuments } from "./utils/documentsPageHelpers";
 import { applyOrder, normalizeOrder, sameArray } from "./utils/ordering";
 import { loadJson, saveJson, scopedKey } from "../../utils/storage";
 import { useStatus } from "../../components/statusBar/useStatus";
-
-import { getFavoritesOrder, saveFavoritesOrder } from "../../api/favoritesOrderClient";
-
 import DocumentPane from "./components/DocumentPane";
 import DocumentRow from "./components/documentRow";
 
@@ -55,32 +51,22 @@ export default function DocumentsPage() {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // keep existing order for list view (even if no card dragging)
+  // list order (kept, even if you currently don't drag)
   const [order, setOrder] = useState<number[]>([]);
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
 
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [showForbidden, setShowForbidden] = useState(false);
 
-  // Favorites order persisted in backend
-  const [favOrder, setFavOrder] = useState<number[]>([]);
-  const [favEditMode, setFavEditMode] = useState(false);
-  const [favDraftOrder, setFavDraftOrder] = useState<number[]>([]);
-  const [savingFavOrder, setSavingFavOrder] = useState(false);
-
   // Right pane selection
   const [activeDocId, setActiveDocId] = useState<number | null>(null);
+
+
 
   const activeDoc = useMemo(() => {
     if (activeDocId == null) return null;
     return docs.find((d) => d.id === activeDocId) ?? null;
   }, [activeDocId, docs]);
-
-  // DnD sensors for favorites chips (horizontal)
-  const favSensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
 
   const load = useCallback(async () => {
     setError(null);
@@ -89,13 +75,14 @@ export default function DocumentsPage() {
       const data = await listDocuments();
       setDocs(data);
 
+      // keep order aligned with actual docs
       setOrder((prev) => {
         const next = normalizeOrder(prev, data);
         if (!sameArray(next, prev)) saveJson(orderKey, next);
         return next;
       });
 
-      // if active doc deleted remotely etc.
+      // if active doc disappears (deleted remotely etc.)
       setActiveDocId((prev) => {
         if (prev == null) return prev;
         return data.some((d) => d.id === prev) ? prev : null;
@@ -105,37 +92,18 @@ export default function DocumentsPage() {
     }
   }, [orderKey]);
 
-  // Load local order + local favorites
+  // load local order + favorites
   useEffect(() => {
     setOrder(loadJson<number[]>(orderKey, []));
     setFavorites(loadJson<Record<number, boolean>>(favoritesKey, {}));
   }, [orderKey, favoritesKey]);
 
-  // Load docs
+  // load docs
   useEffect(() => {
     void load();
   }, [load]);
 
-  // Load favorites order from backend (per user)
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadFavOrder() {
-      try {
-        const res = await getFavoritesOrder();
-        if (cancelled) return;
-        setFavOrder(res.order ?? []);
-      } catch {
-        setFavOrder([]);
-      }
-    }
-
-    void loadFavOrder();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+  // forbidden banner from route state
   useEffect(() => {
     if ((location.state as { forbidden?: boolean } | null)?.forbidden) {
       setShowForbidden(true);
@@ -143,6 +111,24 @@ export default function DocumentsPage() {
     }
   }, [location, navigate]);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  function onDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over) return;
+    if (active.id === over.id) return;
+
+    setOrder((prev) => {
+      const oldIndex = prev.indexOf(active.id as number);
+      const newIndex = prev.indexOf(over.id as number);
+      const next = arrayMove(prev, oldIndex, newIndex);
+      saveJson(orderKey, next);
+      return next;
+    });
+  }
 
   function openCreate() {
     navigate("/documents/new");
@@ -151,18 +137,8 @@ export default function DocumentsPage() {
   function toggleFavorite(id: number) {
     setFavorites((prev) => {
       const next = { ...prev, [id]: !prev[id] };
-      const isNowFav = !!next[id];
-
-      if (!isNowFav) delete next[id];
+      if (!next[id]) delete next[id];
       saveJson(favoritesKey, next);
-
-      // keep favOrder aligned visually
-      setFavOrder((prevOrder) => {
-        if (!isNowFav) return prevOrder.filter((x) => x !== id);
-        if (prevOrder.includes(id)) return prevOrder;
-        return [...prevOrder, id];
-      });
-
       return next;
     });
   }
@@ -202,7 +178,6 @@ export default function DocumentsPage() {
         return next;
       });
 
-      setFavOrder((prev) => prev.filter((x) => x !== doc.id));
       setActiveDocId((prev) => (prev === doc.id ? null : prev));
     } catch (e) {
       status.show({
@@ -233,42 +208,6 @@ export default function DocumentsPage() {
   }, [query, orderedDocs]);
 
   const regularDocs = filteredDocs;
-
-  // Auto-save favorites order when leaving edit mode
-  useEffect(() => {
-    if (favEditMode) return;
-    // leaving edit mode → if draft exists, save it
-    if (favDraftOrder.length === 0) return;
-
-    let cancelled = false;
-
-    async function persist() {
-      setSavingFavOrder(true);
-      try {
-        await saveFavoritesOrder(favDraftOrder);
-        if (cancelled) return;
-        setFavOrder(favDraftOrder);
-        status.show({ kind: "success", message: "Favorites order saved." });
-      } catch (e) {
-        if (cancelled) return;
-        status.show({
-          kind: "error",
-          title: "Save failed",
-          message: e instanceof Error ? e.message : "Could not save favorites order.",
-          timeoutMs: 0,
-        });
-      } finally {
-        if (!cancelled) setSavingFavOrder(false);
-      }
-    }
-
-    void persist();
-
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [favEditMode]);
 
   async function onExport() {
     try {
@@ -327,7 +266,9 @@ export default function DocumentsPage() {
         const documents = normalizeImportedDocuments(parsed);
 
         if (documents.length === 0) {
-          setError('Import file must be a JSON array of documents (or { "documents": [...] }).');
+          setError(
+            'Import file must be a JSON array of documents (or { "documents": [...] }).'
+          );
           return;
         }
 
@@ -384,27 +325,34 @@ export default function DocumentsPage() {
             onImport={(mode) => void requestImport(mode)}
             isAdmin={isAdmin}
           />
+
           <div className="section">
-            <div className="docs-list">
-              {regularDocs.map((doc) => (
-                <DocumentRow
-                  key={doc.id}
-                  doc={doc}
-                  active={activeDocId === doc.id}
-                  isFavorite={!!favorites[doc.id]}
-                  isAdmin={isAdmin}
-                  isMenuOpen={openMenuId === doc.id}
-                  onOpen={() => setActiveDocId(doc.id)}
-                  onToggleFavorite={toggleFavorite}
-                  onToggleMenu={toggleCardMenu}
-                  onCloseMenu={() => setOpenMenuId(null)}
-                  onDelete={onDelete}
-                />
-              ))}
-            </div>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+              <SortableContext items={regularDocs.map((d) => d.id)} strategy={verticalListSortingStrategy}>
+                <div className="docs-list">
+                  {regularDocs.map((doc) => (
+                    <DocumentRow
+                      key={doc.id}
+                      doc={doc}
+                      active={activeDocId === doc.id}
+                      isFavorite={!!favorites[doc.id]}
+                      isAdmin={isAdmin}
+                      isMenuOpen={openMenuId === doc.id}
+                      onOpen={() => setActiveDocId(doc.id)}
+                      onToggleFavorite={toggleFavorite}
+                      onToggleMenu={toggleCardMenu}
+                      onCloseMenu={() => setOpenMenuId(null)}
+                      onDelete={onDelete}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           </div>
 
-          {filteredDocs.length === 0 && <p className="empty">No documents found.</p>}
+          {filteredDocs.length === 0 && (
+            <p className="empty">No documents found.</p>
+          )}
         </div>
 
         <div className="documents-right">
@@ -413,7 +361,9 @@ export default function DocumentsPage() {
             canEdit={isAdmin}
             onOpenFullPage={(id) => navigate(`/documents/${id}`)}
             onSaved={(updated) => {
-              setDocs((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+              setDocs((prev) =>
+                prev.map((d) => (d.id === updated.id ? updated : d))
+              );
             }}
           />
         </div>

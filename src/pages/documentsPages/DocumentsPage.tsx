@@ -76,6 +76,11 @@ export default function DocumentsPage() {
     return docs.find((d) => d.id === activeDocId) ?? null;
   }, [activeDocId, docs]);
 
+  // DnD sensors for favorites chips (horizontal)
+  const favSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const load = useCallback(async () => {
     setError(null);
@@ -138,17 +143,10 @@ export default function DocumentsPage() {
     }
   }, [location, navigate]);
 
+
   function openCreate() {
     navigate("/documents/new");
   }
-
-  useEffect(() => {
-    if (activeDocId == null) return;
-    const el = document.querySelector(`[data-doc-id="${activeDocId}"]`);
-    if (el instanceof HTMLElement) {
-      el.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    }
-  }, [activeDocId]);
 
   function toggleFavorite(id: number) {
     setFavorites((prev) => {

@@ -14,9 +14,10 @@
   flex-direction: column;
   gap: 12px;
   height: calc(100vh - 204px);
+  overflow: visible;
 
   .section {
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 }
 
@@ -55,51 +56,34 @@
   padding-bottom: 12px;
 }
 
-/* LEFT list container */
 .docs-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding-right: 8px;
+  margin: 6px 4px;
+  overflow: visible;
 }
 
-/* Notion-ish row (left list item) */
 .doc-row {
-  border: 1px solid var(--border);
+  position: relative;
   background: var(--panel);
+  border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 10px 10px 10px 12px;
+
+  padding: 10px 10px 10px 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 10px;
 
-  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease,
-    box-shadow 140ms ease;
+  transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
 
-  &:hover {
-    background: var(--soft);
-    box-shadow: 0 10px 24px var(--shadow);
-    border-color: rgba(127, 127, 127, 0.25);
-    transform: translateX(2px);
-  }
-
-  &.is-active {
-    border-color: var(--primary);
-    background: var(--panel);
-    box-shadow: 0 0 0 3px var(--focus);
-  }
-
-  &.is-active:hover {
-    box-shadow: 0 0 0 3px var(--focus), 0 10px 24px var(--shadow);
-    border-color: rgba(127, 127, 127, 0.25);
-  }
-
-
+  /* selection bar */
   &::before {
     content: "";
     position: absolute;
-    left: -6px;
+    left: 6px;
     top: 10px;
     bottom: 10px;
     width: 3px;
@@ -107,19 +91,34 @@
     background: var(--primary);
     opacity: 0;
     transform: scaleY(0.7);
-    transition: opacity 160ms ease, transform 160ms ease;
+    transition:
+      opacity 140ms ease,
+      transform 140ms ease;
   }
 
-  &.is-active::before {
-    opacity: 1;
-    transform: scaleY(1);
+  /* Hover should NOT look like selection */
+  &:hover {
+    background: var(--soft);
+    border-color: rgba(127, 127, 127, 0.25);
   }
 
-  &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--focus), 0 10px 24px var(--shadow);
+  /* Active selection (always visible) */
+  &.is-active {
+    background: var(--soft);
+    box-shadow: 0 0 0 2px var(--focus);
+
+    &::before {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+  }
+
+  /* Keep same look on hover when active (no extra effects) */
+  &.is-active:hover {
+    background: var(--panel);
   }
 }
+
 
 .doc-row-main {
   min-width: 0;

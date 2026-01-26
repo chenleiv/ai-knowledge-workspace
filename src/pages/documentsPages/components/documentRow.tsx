@@ -2,6 +2,7 @@ import type { DocumentItem } from "../../../api/documentsClient";
 import Menu from "../../../components/menu/Menu";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useRef } from "react";
 
 type Props = {
     doc: DocumentItem;
@@ -29,6 +30,8 @@ export default function DocumentRow({
     onCloseMenu,
     onDelete,
 }: Props) {
+    const menuBtnRef = useRef<HTMLButtonElement | null>(null);
+
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
         useSortable({ id: doc.id });
 
@@ -53,12 +56,12 @@ export default function DocumentRow({
                 <div className="doc-row-title" title={doc.title}>
                     {doc.title}
                 </div>
-                {/* <div className="doc-row-meta">{doc.category}</div> */}
             </div>
 
             <div className="doc-row-actions no-dnd" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                 <div className="menu-wrap no-dnd" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                     <button
+                        ref={menuBtnRef}
                         className="icon-btn"
                         type="button"
                         aria-label="Menu"
@@ -69,6 +72,7 @@ export default function DocumentRow({
                     </button>
 
                     <Menu
+                        anchorEl={menuBtnRef.current}
                         open={isMenuOpen}
                         onClose={onCloseMenu}
                         items={[
@@ -76,7 +80,8 @@ export default function DocumentRow({
                                 label: isFavorite ? "Remove from favorites" : "Add to favorites",
                                 onClick: () => onToggleFavorite(doc.id),
                             },
-                            ...(isAdmin
+                            ...
+                            (isAdmin
                                 ? [
                                     {
                                         label: "Delete",

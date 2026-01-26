@@ -50,15 +50,10 @@ export default function DocumentsPage() {
   const [query, setQuery] = useState("");
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  // list order (kept, even if you currently don't drag)
   const [order, setOrder] = useState<number[]>([]);
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
-
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [showForbidden, setShowForbidden] = useState(false);
-
-  // Right pane selection
   const [activeDocId, setActiveDocId] = useState<number | null>(null);
 
 
@@ -75,14 +70,12 @@ export default function DocumentsPage() {
       const data = await listDocuments();
       setDocs(data);
 
-      // keep order aligned with actual docs
       setOrder((prev) => {
         const next = normalizeOrder(prev, data);
         if (!sameArray(next, prev)) saveJson(orderKey, next);
         return next;
       });
 
-      // if active doc disappears (deleted remotely etc.)
       setActiveDocId((prev) => {
         if (prev == null) return prev;
         return data.some((d) => d.id === prev) ? prev : null;
@@ -92,18 +85,15 @@ export default function DocumentsPage() {
     }
   }, [orderKey]);
 
-  // load local order + favorites
   useEffect(() => {
     setOrder(loadJson<number[]>(orderKey, []));
     setFavorites(loadJson<Record<number, boolean>>(favoritesKey, {}));
   }, [orderKey, favoritesKey]);
 
-  // load docs
   useEffect(() => {
     void load();
   }, [load]);
 
-  // forbidden banner from route state
   useEffect(() => {
     if ((location.state as { forbidden?: boolean } | null)?.forbidden) {
       setShowForbidden(true);
@@ -193,7 +183,6 @@ export default function DocumentsPage() {
   }
 
   const orderedDocs = useMemo(() => applyOrder(docs, order), [docs, order]);
-
   const filteredDocs = useMemo(() => {
     const q = query.toLowerCase().trim();
     if (!q) return orderedDocs;
@@ -304,36 +293,28 @@ export default function DocumentsPage() {
         </InlineBanner>
       )}
 
-
-      <div className="documents-header-container">
-        <div className="search-row" onClick={(e) => e.stopPropagation()}>
-          <input
-            type="text"
-            placeholder="Search title, category, summary, content..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-        <div className="documents-header">
-          <DocumentsHeader
-            onNew={openCreate}
-            onExport={() => void onExport()}
-            onImport={(mode) => void requestImport(mode)}
-            isAdmin={isAdmin}
-          />
-        </div>
-      </div>
-
-      {error && <div className="error">{error}</div>}
-
       <div className="documents-split">
         <div className="documents-left">
-          {/* <DocumentsHeader
-            onNew={openCreate}
-            onExport={() => void onExport()}
-            onImport={(mode) => void requestImport(mode)}
-            isAdmin={isAdmin}
-          /> */}
+          <div className="documents-header-container">
+            <div className="search-row" onClick={(e) => e.stopPropagation()}>
+              <input
+                type="text"
+                placeholder="Search title, category, summary, content..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+            <div className="documents-header">
+              <DocumentsHeader
+                onNew={openCreate}
+                onExport={() => void onExport()}
+                onImport={(mode) => void requestImport(mode)}
+                isAdmin={isAdmin}
+              />
+            </div>
+          </div>
+
+          {error && <div className="error">{error}</div>}
 
           <div className="section">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>

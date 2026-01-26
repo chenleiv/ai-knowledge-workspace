@@ -4,7 +4,6 @@
 .icon-btn {
   border-radius: 999px;
   padding: 8px 15px;
-  border: 1px solid var(--border);
   background: var(--soft);
   color: var(--text);
   cursor: pointer;
@@ -59,7 +58,7 @@
 
 .icon-btn {
   border-radius: 12px;
-  padding: 6px 9px;
+  padding: 4px 6px;
   background: transparent;
 }
 
@@ -68,8 +67,7 @@
 }
 
 .secondary-btn:hover,
-.danger-btn:hover,
-.icon-btn:hover {
+.danger-btn:hover {
   background: var(--soft-2);
 }
 

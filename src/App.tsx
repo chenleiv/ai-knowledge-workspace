@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import DocumentsPage from "./pages/documentsPages/DocumentsPage";
-import DocumentDetailsPage from "./pages/documentsPages/DocumentDetailsPage";
 import AssistantPage from "./pages/assistantPages/AssistantPage";
 import LoginPage from "./pages/loginPage/LoginPge";
 import UsersPage from "./pages/loginPage/UsersPage";
@@ -31,13 +30,8 @@ function App() {
 
             {/* Admin-only: create */}
             <Route element={<RequireRole allow={["admin"]} />}>
-              <Route path="/documents/new" element={<DocumentDetailsPage />} />
               <Route path="/users" element={<UsersPage />} />
             </Route>
-
-            {/* Everyone: view/edit existing by id */}
-            <Route path="/documents/:id" element={<DocumentDetailsPage />} />
-
             <Route path="/assistant" element={<AssistantPage />} />
           </Route>
 

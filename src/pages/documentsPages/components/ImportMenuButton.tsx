@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Menu from "../../../components/menu/Menu";
 
 type Props = {
-  onImport: (mode: "merge" | "replace") => void;
+  onImport: (mode: "merge" | "replace") => void; ref?: React.RefObject<HTMLButtonElement>;
 };
 
 export default function ImportMenuButton({ onImport }: Props) {
   const [open, setOpen] = useState(false);
-
+  const menuBtnRef = useRef<HTMLButtonElement | null>(null);
   return (
     <div className="menu-wrap" onClick={(e) => e.stopPropagation()}>
       <button
@@ -21,6 +21,7 @@ export default function ImportMenuButton({ onImport }: Props) {
       </button>
 
       <Menu
+        anchorEl={menuBtnRef.current}
         open={open}
         onClose={() => setOpen(false)}
         align="right"

@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import type { DocumentItem, DocumentInput } from "../../../api/documentsClient";
-import { updateDocument } from "../../../api/documentsClient";
 import { useStatus } from "../../../components/statusBar/useStatus";
+import { createDocument, updateDocument } from "../../../api/documentsClient";
 
 type Props = {
     doc: DocumentItem | null;
     canEdit: boolean;
-    onOpenFullPage: (id: number) => void;
+    isCreating: boolean;
+    onCancelCreate: () => void;
+    onCreated: (doc: DocumentItem) => void;
     onSaved: (doc: DocumentItem) => void;
 };
 
@@ -19,7 +21,7 @@ function toInput(d: DocumentItem): DocumentInput {
     };
 }
 
-export default function DocumentPane({ doc, canEdit, onOpenFullPage, onSaved }: Props) {
+export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate, onCreated, onSaved }: Props) {
     const status = useStatus();
     const [mode, setMode] = useState<"view" | "edit">("view");
     const [form, setForm] = useState<DocumentInput>({
@@ -32,20 +34,31 @@ export default function DocumentPane({ doc, canEdit, onOpenFullPage, onSaved }: 
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
+        if (isCreating) {
+            setMode("edit");
+            const empty = { title: "", category: "", summary: "", content: "" };
+            setForm(empty);
+            setBaseline(empty);
+            return;
+        }
+
         if (!doc) {
             setMode("view");
             return;
         }
+
         const next = toInput(doc);
         setForm(next);
         setBaseline(next);
         setMode("view");
-    }, [doc?.id]); // switch doc resets pane
+    }, [doc?.id, isCreating]);
 
-    const isDirty = useMemo(() => JSON.stringify(form) !== JSON.stringify(baseline), [form, baseline]);
+    const isDirty = useMemo(
+        () => JSON.stringify(form) !== JSON.stringify(baseline),
+        [form, baseline]
+    );
 
     async function onSave() {
-        if (!doc) return;
         if (!canEdit) {
             status.show({ kind: "error", title: "Forbidden", message: "Admins only." });
             return;
@@ -63,10 +76,20 @@ export default function DocumentPane({ doc, canEdit, onOpenFullPage, onSaved }: 
 
         setSaving(true);
         try {
+            if (isCreating) {
+                const created = await createDocument({ title, category, summary, content });
+                onCreated(created);
+                status.show({ kind: "success", message: "Document created." });
+                return;
+            }
+
+            if (!doc) return;
+
             const updated = await updateDocument(doc.id, { title, category, summary, content });
             onSaved(updated);
-            setBaseline(toInput(updated));
-            setForm(toInput(updated));
+            const next = toInput(updated);
+            setBaseline(next);
+            setForm(next);
             setMode("view");
             status.show({ kind: "success", message: "Saved." });
         } catch (e) {
@@ -82,6 +105,10 @@ export default function DocumentPane({ doc, canEdit, onOpenFullPage, onSaved }: 
     }
 
     function onCancel() {
+        if (isCreating) {
+            onCancelCreate();
+            return;
+        }
         setForm(baseline);
         setMode("view");
     }
@@ -107,7 +134,7 @@ export default function DocumentPane({ doc, canEdit, onOpenFullPage, onSaved }: 
                 <div className="doc-pane-actions">
                     {mode === "view" ? (
                         <>
-                            {canEdit && (
+                            {canEdit ? (
                                 <button
                                     type="button"
                                     className="icon-btn doc-pane-edit"
@@ -117,44 +144,34 @@ export default function DocumentPane({ doc, canEdit, onOpenFullPage, onSaved }: 
                                 >
                                     ✎
                                 </button>
-                            )}
-
-                            <button
-                                type="button"
-                                className="doc-pane-link"
-                                onClick={() => onOpenFullPage(doc.id)}
-                            >
-                                Open
-                            </button>
+                            ) : null}
                         </>
                     ) : (
-                        <>
+                        <div className="doc-pane-actions-right">
                             <button
                                 type="button"
-                                className="doc-pane-save"
+                                className="primary-btn"
                                 onClick={onSave}
                                 disabled={saving || !isDirty}
                             >
                                 {saving ? "Saving..." : "Save"}
                             </button>
+
                             <button
                                 type="button"
-                                className="doc-pane-cancel"
+                                className="primary-btn"
                                 onClick={onCancel}
                                 disabled={saving}
                             >
                                 Cancel
                             </button>
-                        </>
+                        </div>
                     )}
                 </div>
             </div>
 
             {mode === "view" ? (
                 <div key={doc.id} className="doc-pane-body doc-pane-anim">
-
-                    <div className="doc-pane-meta">Subject: {doc.category}</div>
-
                     <div className="doc-pane-section">
                         <div className="doc-pane-label">Summary</div>
                         <div className="doc-pane-text">{doc.summary}</div>
@@ -167,38 +184,39 @@ export default function DocumentPane({ doc, canEdit, onOpenFullPage, onSaved }: 
                 </div>
             ) : (
                 <div className="doc-pane-body">
-                    <div className="doc-pane-form">
-                        <label>
-                            Title
-                            <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-                        </label>
+                    <label>
+                        Title
+                        <input
+                            value={form.title}
+                            onChange={(e) => setForm({ ...form, title: e.target.value })}
+                        />
+                    </label>
 
-                        <label>
-                            Category
-                            <input
-                                value={form.category}
-                                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                            />
-                        </label>
+                    <label>
+                        Category
+                        <input
+                            value={form.category}
+                            onChange={(e) => setForm({ ...form, category: e.target.value })}
+                        />
+                    </label>
 
-                        <label>
-                            Summary
-                            <textarea
-                                rows={4}
-                                value={form.summary}
-                                onChange={(e) => setForm({ ...form, summary: e.target.value })}
-                            />
-                        </label>
+                    <label>
+                        Summary
+                        <textarea
+                            rows={4}
+                            value={form.summary}
+                            onChange={(e) => setForm({ ...form, summary: e.target.value })}
+                        />
+                    </label>
 
-                        <label>
-                            Content
-                            <textarea
-                                rows={16}
-                                value={form.content}
-                                onChange={(e) => setForm({ ...form, content: e.target.value })}
-                            />
-                        </label>
-                    </div>
+                    <label>
+                        Content
+                        <textarea
+                            rows={16}
+                            value={form.content}
+                            onChange={(e) => setForm({ ...form, content: e.target.value })}
+                        />
+                    </label>
                 </div>
             )}
         </div>

@@ -7,6 +7,7 @@ export type MenuItem = {
   onClick: () => void | Promise<void>;
   danger?: boolean;
   disabled?: boolean;
+  ref?: React.RefObject<HTMLButtonElement>;
 };
 
 type Align = "left" | "right";
@@ -125,6 +126,7 @@ export default function Menu({
       {items?.length ? (
         items.map((item, idx) => (
           <button
+            ref={item.ref}
             key={idx}
             type="button"
             role="menuitem"

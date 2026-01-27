@@ -1,21 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import DocumentsList from "./components/DocumentList";
+import { arrayMove } from "@dnd-kit/sortable";
+import type { DragEndEvent } from "@dnd-kit/core";
 import "./documentsPage.scss";
-import {
-  DndContext,
-  PointerSensor,
-  KeyboardSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import {
   deleteDocument,
   importDocumentsBulk,
@@ -23,23 +11,21 @@ import {
   type DocumentItem,
 } from "../../api/documentsClient";
 import useConfirm from "../../hooks/useConfirm";
-import DocumentsHeader from "./components/DocumentsHeader";
-import InlineBanner from "../../components/banners/InlineBanner";
+
 import { useAuth } from "../../auth/useAuth";
 import { downloadExport } from "../../api/downloadExport";
 import { normalizeImportedDocuments } from "./utils/documentsPageHelpers";
 import { applyOrder, normalizeOrder, sameArray } from "./utils/ordering";
-import { loadJson, saveJson, scopedKey } from "../../utils/storage";
+import { saveJson, scopedKey } from "../../utils/storage";
 import { useStatus } from "../../components/statusBar/useStatus";
 import DocumentPane from "./components/DocumentPane";
-import DocumentRow from "./components/documentRow";
+import DocumentsSidebar from "./components/DocumentsSidebar";
 
 export default function DocumentsPage() {
   const { user } = useAuth();
   const status = useStatus();
 
   const orderKey = scopedKey("documentsOrder", user?.email);
-  const favoritesKey = scopedKey("documentsFavorites", user?.email);
 
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -51,6 +37,8 @@ export default function DocumentsPage() {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<number[]>([]);
+  // const [paneMode, setPaneMode] = useState<DrawerMode>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [showForbidden, setShowForbidden] = useState(false);
@@ -77,18 +65,15 @@ export default function DocumentsPage() {
       });
 
       setActiveDocId((prev) => {
-        if (prev == null) return prev;
-        return data.some((d) => d.id === prev) ? prev : null;
+        if (prev == null) {
+          return data.length > 0 ? data[0].id : null;
+        }
+        return data.some((d) => d.id === prev) ? prev : (data[0]?.id ?? null);
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load documents");
     }
   }, [orderKey]);
-
-  useEffect(() => {
-    setOrder(loadJson<number[]>(orderKey, []));
-    setFavorites(loadJson<Record<number, boolean>>(favoritesKey, {}));
-  }, [orderKey, favoritesKey]);
 
   useEffect(() => {
     void load();
@@ -101,10 +86,27 @@ export default function DocumentsPage() {
     }
   }, [location, navigate]);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
+  function handleCreated(doc: DocumentItem) {
+    setIsCreating(false);
+    setDocs((prev) => [doc, ...prev]);
+    setOrder((prev) => {
+      const without = prev.filter((x) => x !== doc.id);
+      const next = [doc.id, ...without];
+      saveJson(orderKey, next);
+      return next;
+    });
+    setActiveDocId(doc.id);
+  }
+
+  function openCreate() {
+    setIsCreating(true);
+    setActiveDocId(null);
+  }
+
+  function openDocument(id: number) {
+    setIsCreating(false);
+    setActiveDocId(id);
+  }
 
   function onDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -114,21 +116,19 @@ export default function DocumentsPage() {
     setOrder((prev) => {
       const oldIndex = prev.indexOf(active.id as number);
       const newIndex = prev.indexOf(over.id as number);
+
+      if (oldIndex === -1 || newIndex === -1) return prev;
+
       const next = arrayMove(prev, oldIndex, newIndex);
       saveJson(orderKey, next);
       return next;
     });
   }
 
-  function openCreate() {
-    navigate("/documents/new");
-  }
-
   function toggleFavorite(id: number) {
     setFavorites((prev) => {
       const next = { ...prev, [id]: !prev[id] };
       if (!next[id]) delete next[id];
-      saveJson(favoritesKey, next);
       return next;
     });
   }
@@ -164,7 +164,6 @@ export default function DocumentsPage() {
       setFavorites((prev) => {
         const next = { ...prev };
         delete next[doc.id];
-        saveJson(favoritesKey, next);
         return next;
       });
 
@@ -281,83 +280,47 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="documents-page" role="presentation">
-      {showForbidden && (
-        <InlineBanner type="error">
-          <div className="banner">
-            <span>This section is available to admins only.</span>
-            <button onClick={() => setShowForbidden(false)} type="button">
-              ✕
-            </button>
-          </div>
-        </InlineBanner>
-      )}
-
-      <div className="documents-split">
-        <div className="documents-left">
-          <div className="documents-header-container">
-            <div className="search-row" onClick={(e) => e.stopPropagation()}>
-              <input
-                type="text"
-                placeholder="Search title, category, summary, content..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-            <div className="documents-header">
-              <DocumentsHeader
-                onNew={openCreate}
-                onExport={() => void onExport()}
-                onImport={(mode) => void requestImport(mode)}
-                isAdmin={isAdmin}
-              />
-            </div>
-          </div>
-
-          {error && <div className="error">{error}</div>}
-
-          <div className="section">
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-              <SortableContext items={regularDocs.map((d) => d.id)} strategy={verticalListSortingStrategy}>
-                <div className="docs-list">
-                  {regularDocs.map((doc) => (
-                    <DocumentRow
-                      key={doc.id}
-                      doc={doc}
-                      active={activeDocId === doc.id}
-                      isFavorite={!!favorites[doc.id]}
-                      isAdmin={isAdmin}
-                      isMenuOpen={openMenuId === doc.id}
-                      onOpen={() => setActiveDocId(doc.id)}
-                      onToggleFavorite={toggleFavorite}
-                      onToggleMenu={toggleCardMenu}
-                      onCloseMenu={() => setOpenMenuId(null)}
-                      onDelete={onDelete}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          </div>
-
-          {filteredDocs.length === 0 && (
-            <p className="empty">No documents found.</p>
-          )}
-        </div>
-
-        <div className="documents-right">
-          <DocumentPane
-            doc={activeDoc}
-            canEdit={isAdmin}
-            onOpenFullPage={(id) => navigate(`/documents/${id}`)}
-            onSaved={(updated) => {
-              setDocs((prev) =>
-                prev.map((d) => (d.id === updated.id ? updated : d))
-              );
-            }}
+    <div className="documents-layout" role="presentation">
+      <div className="documents-sidebar">
+        <DocumentsSidebar
+          isAdmin={isAdmin}
+          query={query}
+          onQueryChange={setQuery}
+          error={error}
+          showForbidden={showForbidden}
+          onCloseForbidden={() => setShowForbidden(false)}
+          onNew={openCreate}
+          onExport={() => void onExport()}
+          onImport={(mode) => void requestImport(mode)}
+        >
+          <DocumentsList
+            docs={regularDocs}
+            activeDocId={activeDocId}
+            favorites={favorites}
+            isAdmin={isAdmin}
+            openMenuId={openMenuId}
+            onToggleMenu={toggleCardMenu}
+            onCloseMenu={() => setOpenMenuId(null)}
+            onOpen={(id) => openDocument(id)}
+            onToggleFavorite={toggleFavorite}
+            onDelete={onDelete}
+            onDragEnd={onDragEnd}
           />
-        </div>
+        </DocumentsSidebar>
       </div>
+
+      <section className="documents-pane">
+        <DocumentPane
+          doc={activeDoc}
+          canEdit={isAdmin}
+          isCreating={isCreating}
+          onCancelCreate={() => setIsCreating(false)}
+          onCreated={handleCreated}
+          onSaved={(updated) => {
+            setDocs((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+          }}
+        />
+      </section>
     </div>
   );
 }

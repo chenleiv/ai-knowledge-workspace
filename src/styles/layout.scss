@@ -112,7 +112,7 @@
   color: var(--text);
 
   header {
-    padding: 4px 32px;
+    padding: 6px 32px;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
@@ -156,13 +156,11 @@
       display: flex;
       align-items: center;
       gap: 28px;
-
-
     }
   }
 
   main {
-    padding: 18px 32px;
+    // padding: 18px 32px;
     flex: 1;
     background: var(--bg);
     height: calc(100vh - 400px);
@@ -182,12 +180,6 @@
 }
 
 @media (max-width: 660px) {
-
-  .app-layout {
-    main {
-      padding: 18px;
-    }
-  }
 
   .app-layout header {
     padding: 12px 14px;

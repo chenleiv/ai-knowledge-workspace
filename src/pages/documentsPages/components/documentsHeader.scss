@@ -9,12 +9,17 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    padding: 0;
 
-    .top-actions-buttons {
+    .plus-btn {
+        font-size: 26px;
+    }
+
+    .buttons {
         display: flex;
         align-items: end;
         gap: 16px;
-
+        font-size: 12px;
     }
 }
 

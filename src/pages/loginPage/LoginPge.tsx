@@ -44,10 +44,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="panel" style={{ maxWidth: 520, margin: "0 auto" }}>
+    <div className="login-panel" style={{ maxWidth: 520, margin: "0 auto" }}>
       <h2 style={{ marginTop: 0 }}>Login</h2>
 
-      <form className="form" onSubmit={onSubmit}>
+      <form className="login-form" onSubmit={onSubmit}>
         <label>
           Email
           <input value={email} onChange={(e) => setEmail(e.target.value)} />

@@ -113,7 +113,8 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
         setMode("view");
     }
 
-    if (!doc) {
+    const showEmpty = !isCreating && !doc;
+    if (showEmpty) {
         return (
             <div className="doc-pane">
                 <div className="doc-pane-empty">
@@ -126,15 +127,19 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
         );
     }
 
+    const paneTitle = isCreating ? "New document" : (doc?.title ?? "");
+
     return (
         <div className="doc-pane">
             <div className="doc-pane-top">
-                <h2 className="doc-pane-title">{doc.title}</h2>
-
+                <div className="doc-pane-title-container">
+                    <h2 className="doc-pane-title">{paneTitle}</h2>
+                    <h4 className="doc-pane-title small">{doc?.category ?? ""}</h4>
+                </div>
                 <div className="doc-pane-actions">
                     {mode === "view" ? (
                         <>
-                            {canEdit ? (
+                            {canEdit && !isCreating ? (
                                 <button
                                     type="button"
                                     className="icon-btn doc-pane-edit"
@@ -147,7 +152,7 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
                             ) : null}
                         </>
                     ) : (
-                        <div className="doc-pane-actions-right">
+                        <>
                             <button
                                 type="button"
                                 className="primary-btn"
@@ -165,60 +170,62 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
                             >
                                 Cancel
                             </button>
-                        </div>
+                        </>
                     )}
                 </div>
             </div>
 
-            {mode === "view" ? (
-                <div key={doc.id} className="doc-pane-body doc-pane-anim">
-                    <div className="doc-pane-section">
-                        <div className="doc-pane-label">Summary</div>
-                        <div className="doc-pane-text">{doc.summary}</div>
+            {
+                mode === "view" && doc ? (
+                    <div key={doc.id} className="doc-pane-body doc-pane-anim">
+                        <div className="doc-pane-section">
+                            <div className="doc-pane-label">Summary</div>
+                            <div className="doc-pane-text">{doc.summary}</div>
+                        </div>
+
+                        <div className="doc-pane-section">
+                            <div className="doc-pane-label">Content</div>
+                            <div className="doc-pane-text prewrap">{doc.content}</div>
+                        </div>
                     </div>
+                ) : (
+                    <div className="doc-pane-body">
+                        <label className="doc-pane-label">
+                            Title
+                            <input
+                                value={form.title}
+                                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                            />
+                        </label>
 
-                    <div className="doc-pane-section">
-                        <div className="doc-pane-label">Content</div>
-                        <div className="doc-pane-text prewrap">{doc.content}</div>
+                        <label className="doc-pane-label">
+                            Category
+                            <input
+                                value={form.category}
+                                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                            />
+                        </label>
+
+                        <label className="doc-pane-label">
+                            Summary
+                            <textarea
+                                rows={4}
+                                value={form.summary}
+                                onChange={(e) => setForm({ ...form, summary: e.target.value })}
+                            />
+                        </label>
+
+                        <label className="doc-pane-label">
+                            Content
+                            <textarea
+                                rows={16}
+                                value={form.content}
+                                onChange={(e) => setForm({ ...form, content: e.target.value })}
+                            />
+                        </label>
                     </div>
-                </div>
-            ) : (
-                <div className="doc-pane-body">
-                    <label>
-                        Title
-                        <input
-                            value={form.title}
-                            onChange={(e) => setForm({ ...form, title: e.target.value })}
-                        />
-                    </label>
-
-                    <label>
-                        Category
-                        <input
-                            value={form.category}
-                            onChange={(e) => setForm({ ...form, category: e.target.value })}
-                        />
-                    </label>
-
-                    <label>
-                        Summary
-                        <textarea
-                            rows={4}
-                            value={form.summary}
-                            onChange={(e) => setForm({ ...form, summary: e.target.value })}
-                        />
-                    </label>
-
-                    <label>
-                        Content
-                        <textarea
-                            rows={16}
-                            value={form.content}
-                            onChange={(e) => setForm({ ...form, content: e.target.value })}
-                        />
-                    </label>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

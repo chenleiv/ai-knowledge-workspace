@@ -88,17 +88,21 @@ export default function DocumentsPage() {
 
   function handleCreated(doc: DocumentItem) {
     setIsCreating(false);
+
     setDocs((prev) => [doc, ...prev]);
+
     setOrder((prev) => {
       const without = prev.filter((x) => x !== doc.id);
       const next = [doc.id, ...without];
       saveJson(orderKey, next);
       return next;
     });
+
     setActiveDocId(doc.id);
   }
 
   function openCreate() {
+    setQuery("");
     setIsCreating(true);
     setActiveDocId(null);
   }

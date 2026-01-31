@@ -4,6 +4,7 @@ import { login } from "../../api/authClient";
 import { useAuth } from "../../auth/useAuth";
 import type { LoginLocationState } from "../../router/locationState";
 import { useStatus } from "../../components/statusBar/useStatus";
+import "./loginPage.scss";
 
 export default function LoginPage() {
   const nav = useNavigate();
@@ -44,18 +45,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-panel" style={{ maxWidth: 520, margin: "0 auto" }}>
-      <h2 style={{ marginTop: 0 }}>Login</h2>
+    <div className="login-panel">
+      <h2 className="login-title">Login</h2>
 
       <form className="login-form" onSubmit={onSubmit}>
-        <label>
+        <label className="login-field">
           Email
-          <input value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input className="login-input" value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
 
-        <label>
+        <label className="login-field">
           Password
-          <input
+          <input className="login-input"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

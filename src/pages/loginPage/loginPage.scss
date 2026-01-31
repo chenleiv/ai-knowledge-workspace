@@ -1,0 +1,33 @@
+.login-panel {
+    width: min(520px, 96vw);
+    border: 1px solid var(--border);
+    background: var(--panel);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 10px 28px var(--shadow);
+    margin: 90px auto;
+
+    .login-title {
+        margin: 0 0 22px;
+        color: var(--text);
+        text-align: center;
+    }
+
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 22px;
+
+        .login-field {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            align-items: center;
+            gap: 12px;
+
+            button {
+                width: 100%;
+            }
+        }
+    }
+}

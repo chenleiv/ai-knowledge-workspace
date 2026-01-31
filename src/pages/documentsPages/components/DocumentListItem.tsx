@@ -12,7 +12,6 @@ type Props = {
 
 export default function DocumentListItem({
     title,
-    category,
     active,
     isDragging,
     onClick,
@@ -35,7 +34,6 @@ export default function DocumentListItem({
                 <div className="doc-row-title" title={title}>
                     {title}
                 </div>
-                {/* {category ? <div className="doc-row-meta">{category}</div> : null} */}
             </div>
 
             <div className="doc-row-actions" onClick={(e) => e.stopPropagation()}>

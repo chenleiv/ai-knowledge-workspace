@@ -8,6 +8,7 @@ type Props = {
 export default function ImportMenuButton({ onImport }: Props) {
   const [open, setOpen] = useState(false);
   const menuBtnRef = useRef<HTMLButtonElement | null>(null);
+
   return (
     <div className="menu-wrap" onClick={(e) => e.stopPropagation()}>
       <button

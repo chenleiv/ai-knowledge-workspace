@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DocumentsList from "./components/DocumentList";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -44,6 +44,7 @@ export default function DocumentsPage() {
   const [showForbidden, setShowForbidden] = useState(false);
   const [activeDocId, setActiveDocId] = useState<number | null>(null);
 
+  const lastActiveDocIdRef = useRef<number | null>(null);
 
 
   const activeDoc = useMemo(() => {
@@ -103,8 +104,19 @@ export default function DocumentsPage() {
 
   function openCreate() {
     setQuery("");
+    lastActiveDocIdRef.current = activeDocId ?? null;
     setIsCreating(true);
     setActiveDocId(null);
+  }
+
+  function onCancelCreate() {
+    setIsCreating(false);
+
+    const fallback =
+      lastActiveDocIdRef.current ??
+      (orderedDocs[0]?.id ?? null);
+
+    setActiveDocId(fallback);
   }
 
   function openDocument(id: number) {
@@ -157,6 +169,9 @@ export default function DocumentsPage() {
       await deleteDocument(doc.id);
       status.show({ kind: "success", message: "Document deleted." });
 
+      const wasActive = activeDocId === doc.id;
+
+
       setDocs((prev) => prev.filter((d) => d.id !== doc.id));
 
       setOrder((prev) => {
@@ -165,13 +180,13 @@ export default function DocumentsPage() {
         return next;
       });
 
-      setFavorites((prev) => {
-        const next = { ...prev };
-        delete next[doc.id];
-        return next;
-      });
-
-      setActiveDocId((prev) => (prev === doc.id ? null : prev));
+      if (wasActive) {
+        setActiveDocId(() => {
+          const nextOrdered = orderedDocs
+            .filter((d) => d.id !== doc.id); // זה orderedDocs מה־render הנוכחי
+          return nextOrdered[0]?.id ?? null;
+        });
+      }
     } catch (e) {
       status.show({
         kind: "error",
@@ -318,7 +333,7 @@ export default function DocumentsPage() {
           doc={activeDoc}
           canEdit={isAdmin}
           isCreating={isCreating}
-          onCancelCreate={() => setIsCreating(false)}
+          onCancelCreate={() => onCancelCreate()}
           onCreated={handleCreated}
           onSaved={(updated) => {
             setDocs((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));

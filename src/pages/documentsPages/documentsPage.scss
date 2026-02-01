@@ -249,7 +249,6 @@
     flex-direction: column;
     text-transform: uppercase;
     color: var(--muted);
-    // margin-bottom: 8px;
     font-size: 12px;
     letter-spacing: 0.06em;
     gap: 6px;
@@ -269,6 +268,22 @@
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+
+  .doc-pane-anim {
+    animation: paneFade 160ms ease;
+  }
+
+  @keyframes paneFade {
+    from {
+      opacity: 0.6;
+      transform: translateY(2px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 

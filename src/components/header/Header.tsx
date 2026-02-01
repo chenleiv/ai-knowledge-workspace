@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useTheme } from "../../hooks/useTheme";
 import ThemeToggle from "../../themeToggle/ThemeToggle";
 import UserMenu from "../userMenu/UserMenu";
@@ -15,8 +15,22 @@ export default function Header() {
 
       {isAuthed && (
         <nav>
-          <Link to="/documents">Documents</Link>
-          <Link to="/assistant">AI Assistant</Link>
+          <NavLink
+            className={({ isActive }) =>
+              `nav-link${isActive ? " is-active" : ""}`
+            }
+            to="/documents"
+          >
+            Documents
+          </NavLink>
+          <NavLink
+            className={({ isActive }) =>
+              `nav-link${isActive ? " is-active" : ""}`
+            }
+            to="/assistant"
+          >
+            AI Assistant
+          </NavLink>
         </nav>
       )}
 

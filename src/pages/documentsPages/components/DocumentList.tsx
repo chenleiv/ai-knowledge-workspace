@@ -63,7 +63,7 @@ function SortableRow({
     const { setNodeRef, transform, transition, isDragging, attributes, listeners } =
         useSortable({ id: doc.id });
 
-    const menuBtnRef = useRef<HTMLButtonElement | null>(null);
+    const menuBtnRef = useRef<HTMLButtonElement>(null);
 
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
@@ -114,7 +114,7 @@ function SortableRow({
                             ⋯
                         </button>
 
-                        <Menu open={isMenuOpen} onClose={onCloseMenu} items={menuItems} anchorEl={menuBtnRef.current} />
+                        <Menu open={isMenuOpen} onClose={onCloseMenu} items={menuItems} anchorRef={menuBtnRef} />
                     </div>
                 }
             />

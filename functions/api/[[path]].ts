@@ -24,19 +24,6 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
 
-  const isLocal =
-    url.hostname === "localhost" ||
-    url.hostname === "127.0.0.1" ||
-    (request.headers.get("Origin") ?? "").startsWith("http://localhost");
-
-  const loginCookieAttrs = isLocal
-    ? "HttpOnly; Path=/; Max-Age=3600; SameSite=Lax"
-    : "HttpOnly; Path=/; Max-Age=3600; SameSite=None; Secure";
-
-  const logoutCookieAttrs = isLocal
-    ? "HttpOnly; Path=/; Max-Age=0; SameSite=Lax"
-    : "HttpOnly; Path=/; Max-Age=0; SameSite=None; Secure";
-
   const rawPath = url.pathname;
   const path = rawPath.replace(/^\/api(?=\/|$)/, "").replace(/\/+$/, "");
 

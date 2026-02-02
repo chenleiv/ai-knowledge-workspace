@@ -21,7 +21,7 @@ type Props = {
   minWidth?: number;
 
   // NEW
-  anchorEl: HTMLElement | null;
+  anchorRef: React.RefObject<HTMLElement | null>
   offset?: number;
 };
 
@@ -38,20 +38,21 @@ export default function Menu({
   children,
   align = "right",
   minWidth = 180,
-  anchorEl,
+  anchorRef,
   offset = 8,
 }: Props) {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<Pos>({ top: 0, left: 0 });
 
-  const canRender = open && anchorEl;
 
   // Positioning
   useLayoutEffect(() => {
-    if (!canRender) return;
+    if (!open) return;
+    const el = anchorRef.current;
+    if (!el) return;
 
     const compute = () => {
-      const r = anchorEl.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
@@ -76,7 +77,7 @@ export default function Menu({
       window.removeEventListener("resize", onWin);
       window.removeEventListener("scroll", onWin, true);
     };
-  }, [canRender, anchorEl, align, minWidth, offset]);
+  }, [open, anchorRef, align, minWidth, offset]);
 
   // Close handlers
   useEffect(() => {
@@ -107,7 +108,7 @@ export default function Menu({
     };
   }, [open, onClose]);
 
-  if (!canRender) return null;
+  if (!open) return null;
 
   return createPortal(
     <div

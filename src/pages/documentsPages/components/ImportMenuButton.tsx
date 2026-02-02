@@ -22,7 +22,7 @@ export default function ImportMenuButton({ onImport }: Props) {
       </button>
 
       <Menu
-        anchorEl={menuBtnRef.current}
+        anchorRef={menuBtnRef as React.RefObject<HTMLElement>}
         open={open}
         onClose={() => setOpen(false)}
         align="right"

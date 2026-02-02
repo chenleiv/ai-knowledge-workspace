@@ -51,7 +51,7 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
         setForm(next);
         setBaseline(next);
         setMode("view");
-    }, [doc?.id, isCreating]);
+    }, [doc, isCreating]);
 
     const isDirty = useMemo(
         () => JSON.stringify(form) !== JSON.stringify(baseline),

@@ -134,10 +134,10 @@ export default function AssistantPage() {
         top.length === 0
           ? []
           : top.map((d) => ({
-              id: d.id,
-              title: d.title,
-              snippet: buildSnippet(d.content || d.summary || "", question),
-            }));
+            id: d.id,
+            title: d.title,
+            snippet: buildSnippet(d.content || d.summary || "", question),
+          }));
 
       let answer: string;
 
@@ -165,50 +165,65 @@ export default function AssistantPage() {
 
   return (
     <div
-      className={`assistant-shell ${
-        showContextPanel ? "with-context" : "no-context"
-      }`}
+      className={`assistant-shell ${showContextPanel ? "with-context" : "no-context"
+        }`}
     >
+      <aside className="context-panel-container">
+        <div className="context-panel-inner">
+          <ContextPanel
+            docs={docs}
+            loading={docsLoading}
+            error={docsError}
+            selectedIds={selectedIds}
+            contextQuery={contextQuery}
+            onToggleSelected={toggleSelected}
+            onChangeQuery={setContextQuery}
+            onClearSelection={onClearSelection}
+          />
+        </div>
+      </aside>
+
       <section className="assistant-page">
-        <div className="assistant-context-toggle">
-          <button
-            type="button"
-            className="secondary-btn"
-            onClick={clearChat}
-            disabled={messages.length === 0}
-          >
-            Clear chat
-          </button>
+        <div className="assistant-page-inner">
+          <div className="assistant-topbar">
+            <div className="assistant-title">
+              <h2>AI Assistant</h2>
+              <p>Ask questions grounded in your documents.</p>
+            </div>
+
+            <div className="assistant-topbar-actions">
+              <button
+                type="button"
+                className="text-btn"
+                onClick={clearChat}
+                disabled={messages.length === 0}
+              >
+                Clear chat
+              </button>
+            </div>
+          </div>
+
+
+          <MessagesList messages={messages} />
+
+          <div className="assistant-hint">
+            Scope:{" "}
+            {selectedIds.length === 0
+              ? "All documents"
+              : `Selected documents (${selectedIds.length})`}
+          </div>
+          <TemplatesBar onApply={applyTemplate} />
+
+          <Composer
+            value={input}
+            disabled={isSending}
+            onChange={setInput}
+            onSend={send}
+          />
         </div>
-
-        <MessagesList messages={messages} />
-
-        <div className="assistant-hint">
-          Scope:{" "}
-          {selectedIds.length === 0
-            ? "All documents"
-            : `Selected documents (${selectedIds.length})`}
-        </div>
-
-        <Composer
-          value={input}
-          disabled={isSending}
-          onChange={setInput}
-          onSend={send}
-        />
-        <TemplatesBar onApply={applyTemplate} />
       </section>
 
-      <ContextPanel
-        docs={docs}
-        loading={docsLoading}
-        error={docsError}
-        selectedIds={selectedIds}
-        contextQuery={contextQuery}
-        onToggleSelected={toggleSelected}
-        onChangeQuery={setContextQuery}
-        onClearSelection={onClearSelection}
-      />
+
     </div>
   );
 }

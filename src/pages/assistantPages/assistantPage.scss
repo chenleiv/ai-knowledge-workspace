@@ -1,42 +1,254 @@
 .assistant-shell {
+  height: calc(100vh - 100px);
   display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 16px;
+  grid-template-columns: 340px 1fr;
   align-items: stretch;
+  overflow: hidden;
 }
 
-/* =========================
-   Context Panel
-========================= */
-
-.context-panel {
-  border: 1px solid var(--border);
+.assistant-page {
+  height: 100%;
   background: var(--panel);
-  border-radius: 14px;
-  padding: 14px 8px 6px 14px;
-  height: calc(100dvh - 140px);
+  overflow: hidden;
+}
+
+.assistant-page-inner {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  color: var(--text);
+  gap: 12px;
+  padding: 14px 14px 6px 14px;
+  min-height: 0;
 }
 
-.context-header-hint {
+.assistant-topbar {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  justify-content: space-between;
   gap: 12px;
-  padding-right: 8px;
 
-  button {
-    padding: 4px;
-    font-size: 10px;
+  .text-btn {
+    background: var(--bg);
+    padding: 12px 16px;
   }
 }
 
-.context-header-main {
+.assistant-title h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.assistant-title p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.templates {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
+.template-btn {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+
+  &:hover {
+    background: var(--soft);
+    border-color: rgba(127, 127, 127, 0.25);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus);
+  }
+}
+
+.messages {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--soft);
+  background: var(--bg);
+}
+
+.messages {
+  scrollbar-gutter: stable;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+    background-clip: content-box;
+  }
+}
+
+.message {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-bottom: 14px;
+
+  .bubble {
+    max-width: 900px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--soft);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+
+  &.user .bubble {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  &.assistant .bubble {
+    background: var(--soft);
+  }
+}
+
+.sources {
+  max-width: 900px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+  padding: 10px 12px;
+}
+
+.sources-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.sources-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.source-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.source-snippet {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.assistant-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Composer */
+.composer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px 0 0;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+
+  input {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--soft);
+    color: var(--text);
+    outline: none;
+    font-size: 13px;
+
+    &::placeholder {
+      color: var(--muted);
+    }
+
+    &:focus {
+      background: var(--panel);
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+  }
+
+  .send-btn {
+    background: var(--primary);
+    color: var(--primary-text);
+    border: 1px solid transparent;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 140ms ease, background 140ms ease, opacity 140ms ease;
+
+    &:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* =========================
+     RIGHT: Context sidebar (like documents sidebar)
+  ========================= */
+
+.context-panel {
+  height: 100%;
+  background: var(--panel);
+  overflow: hidden;
+  padding: 16px 6px 0px 14px;
   min-width: 0;
+}
+
+.context-panel-inner {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.context-header-main {
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid var(--border);
 
   h2 {
     margin: 0;
@@ -47,51 +259,63 @@
   p {
     margin: 6px 0 0;
     color: var(--muted);
-    font-size: 13px;
-    line-height: 1.3;
+    font-size: 12px;
+    line-height: 1.35;
   }
 }
 
+/* search + count + clear */
 .context-search {
-  margin-top: 12px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding-right: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 10px 0px 10px;
+  background: var(--panel);
 
+  .context-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
 
   input {
     flex: 1;
     padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid var(--border);
-    background: var(--panel);
+    background: var(--soft);
     color: var(--text);
     outline: none;
+    font-size: 13px;
 
     &::placeholder {
       color: var(--muted);
     }
 
     &:focus {
-      border-color: var(--border);
+      background: var(--panel);
       box-shadow: 0 0 0 3px var(--focus);
-    }
-
-    &:disabled {
-      opacity: 0.7;
     }
   }
 
   .context-count {
-    font-size: 12.8px;
+    font-size: 12px;
     color: var(--muted);
-    white-space: nowrap;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    user-select: none;
+  }
+
+  .context-clear {
+    background: var(--bg);
+    padding: 4px 8px;
+  }
+}
+
+.context-header-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .text-btn {
+    background: var(--bg);
+    padding: 4px 8px;
   }
 }
 
@@ -104,32 +328,48 @@
 .context-list {
   display: flex;
   flex-direction: column;
-  scrollbar-gutter: stable;
-  background: var(--bg);
-  border: 1px solid var(--soft-2);
-  overflow: auto;
-  border-radius: 10px;
   gap: 8px;
-  padding: 6px;
-  margin: 12px 0 0;
-
+  overflow: auto;
+  margin: 12px 0;
+  height: calc(100vh - 250px);
 }
 
-.messages {
-  padding-right: 10px;
+.context-list {
+  scrollbar-gutter: stable;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+    background-clip: content-box;
+  }
 }
 
+/* Context items should look like your doc-row style */
 .context-item {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  padding: 12px;
+
+  padding: 10px 10px 10px 12px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--panel);
+  background: transparent;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+
+  transition: background 140ms ease, border-color 140ms ease;
 
   &:hover {
     background: var(--soft);
@@ -137,12 +377,12 @@
 
   &.checked {
     background: var(--soft);
-    border-color: var(--primary);
   }
 
-  &:focus-visible {
-    outline: 2px solid var(--focus);
-    outline-offset: 2px;
+
+  &.checked::before {
+    opacity: 1;
+    transform: scaleY(1);
   }
 }
 
@@ -151,18 +391,21 @@
 }
 
 .context-title {
-  font-size: 14.4px;
-  color: var(--text);
+  font-size: 13.6px;
   font-weight: 700;
+  color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .context-meta {
-  font-size: 12.8px;
+  font-size: 12px;
   color: var(--muted);
-  margin-top: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .empty {
@@ -171,167 +414,9 @@
   padding: 16px 0;
 }
 
-/*  ============================================
-     Assistant Page
-    ============================================ */
-
-.assistant-page {
-  height: calc(100dvh - 140px);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  background: var(--panel);
-  color: var(--text);
-  gap: 12px;
-}
-
-.assistant-topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.assistant-context-toggle {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-
-  border-bottom: 1px solid var(--soft-2);
-  padding: 0px 0px 10px;
-}
-
-.templates {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.messages {
-  overflow-y: auto;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid var(--soft);
-  background-color: var(--bg);
-}
-
-.message {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 12px;
-
-  &.user {
-    align-items: flex-end;
-    color: var(--text);
-
-    .bubble {
-      background: var(--primary);
-      color: var(--white);
-      border: 1px solid transparent;
-    }
-  }
-
-  &.assistant {
-    align-items: flex-start;
-
-    .bubble {
-      background: var(--soft);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-  }
-}
-
-.bubble {
-  max-width: 70%;
-  padding: 10px 14px;
-  border-radius: 14px;
-  font-size: 14px;
-  white-space: pre-wrap;
-}
-
-.sources {
-  margin-top: 8px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--panel);
-  max-width: 72%;
-}
-
-.sources-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 6px;
-  opacity: 0.9;
-}
-
-.sources-list {
-  margin: 0;
-  padding-left: 18px;
-}
-
-.source-item {
-  margin-bottom: 10px;
-}
-
-.source-title {
-  font-size: 13.6px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.source-snippet {
-  font-size: 12.8px;
-  color: var(--muted);
-}
-
-.composer {
-  display: flex;
-  gap: 8px;
-
-  input {
-    flex: 1;
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--text);
-    border-radius: 999px;
-    outline: none;
-
-    &::placeholder {
-      color: var(--muted);
-    }
-  }
-
-  .send-btn {
-    background: var(--primary);
-    color: var(--primary-text);
-    border: 1px solid var(--border);
-    padding: 10px 16px;
-    border-radius: 999px;
-    cursor: pointer;
-
-    &:hover:not(:disabled) {
-      background: var(--primary-hover);
-      border-color: var(--border);
-    }
-
-    &:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-  }
-}
-
+/* error */
 .error {
-  margin-top: 10px;
+  margin: 10px 12px 0;
   padding: 10px 12px;
   border-radius: 12px;
   background: var(--danger-bg);
@@ -339,40 +424,23 @@
   color: var(--danger-text);
 }
 
-.assistant-hint {
-  font-size: 12px;
-  color: var(--muted);
-  margin: 4px 4px 8px;
-}
+/* =========================
+     Responsive
+  ========================= */
 
-/* Responsive */
-@media (max-width: 920px) {
+@media (max-width: 980px) {
   .assistant-shell {
     grid-template-columns: 1fr;
-
-    &.with-context {
-      grid-template-columns: 1fr;
-
-    }
+    grid-template-rows: 1fr auto;
   }
 
-  .context-panel,
+  .context-panel {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    padding: 10px;
+  }
+
   .assistant-page {
-    height: auto;
-    min-height: 520px;
-    max-height: 520px;
-  }
-
-  .context-list {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    max-height: 350px;
-    overflow-y: auto;
-  }
-
-  .bubble,
-  .sources {
-    max-width: 100%;
+    padding: 10px;
   }
 }

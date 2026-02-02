@@ -60,11 +60,7 @@ export default function ContextPanel({
 
   return (
     <aside className="context-panel">
-      <div className="context-header-main">
-        <h2>Context</h2>
-        <p>Select specific documents to narrow context.</p>
-      </div>
-
+      <div className="context-hint"> Select specific documents to narrow context.</div>
       <div className="context-search">
         <input
           value={contextQuery}
@@ -77,7 +73,7 @@ export default function ContextPanel({
       <div className="context-header-hint">
         <div className="context-hint">{hint}</div>
         <button
-          className="secondary-btn"
+          className="text-btn"
           type="button"
           onClick={handleClear}
           disabled={loading}

@@ -11,7 +11,7 @@ export default function Header() {
 
   return (
     <header>
-      <h1>Knowledge Workspace</h1>
+      <h1 className="header-title">Knowledge Workspace</h1>
 
       {isAuthed && (
         <nav>

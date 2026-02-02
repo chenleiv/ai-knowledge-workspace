@@ -106,6 +106,7 @@
 
 .app-layout {
   min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--bg);
@@ -118,12 +119,15 @@
     background: var(--panel);
     border-bottom: 1px solid var(--border);
     padding: 14px 32px;
+    gap: 16px;
+    flex-wrap: wrap;
 
-    h1 {
+    .header-title {
       margin: 0;
       color: var(--text);
       white-space: nowrap;
       font-size: 22px;
+      min-width: 0;
     }
 
     nav {
@@ -170,13 +174,21 @@
       display: flex;
       align-items: center;
       gap: 28px;
+      flex-wrap: wrap;
     }
   }
 
   main {
     flex: 1;
     background: var(--panel);
-    height: calc(100vh - 400px);
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main > * {
+    min-height: 0;
+    flex: 1;
   }
 
   .footer {
@@ -197,18 +209,24 @@
   .app-layout header {
     padding: 12px 14px;
     flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
 
   }
 
-  .app-layout header h1 {
+  .app-layout header .header-title {
     font-size: 17px;
     line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .app-layout header nav {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
+    width: 100%;
   }
 
   .app-layout header nav a {
@@ -216,6 +234,11 @@
     padding: 10px 0;
     border-radius: 14px;
     font-size: 14px;
+  }
+
+  .app-layout header .header-right {
+    justify-content: space-between;
+    gap: 12px;
   }
 }
 

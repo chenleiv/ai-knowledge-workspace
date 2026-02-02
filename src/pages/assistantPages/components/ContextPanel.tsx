@@ -60,7 +60,24 @@ export default function ContextPanel({
 
   return (
     <aside className="context-panel">
-      <div className="context-hint"> Select specific documents to narrow context.</div>
+      {!hasSelection && (
+        <div className="context-header-main">
+          <span>Select specific documents to narrow context.</span>
+        </div>
+      )}
+      {hasSelection && (
+        <div className="context-header-main">
+          <div className="context-hint">{hint}</div>
+          <button
+            className="text-btn"
+            type="button"
+            onClick={handleClear}
+            disabled={loading}
+          >
+            Clear
+          </button>
+        </div>
+      )}
       <div className="context-search">
         <input
           value={contextQuery}
@@ -70,17 +87,7 @@ export default function ContextPanel({
         />
       </div>
 
-      <div className="context-header-hint">
-        <div className="context-hint">{hint}</div>
-        <button
-          className="text-btn"
-          type="button"
-          onClick={handleClear}
-          disabled={loading}
-        >
-          Clear
-        </button>
-      </div>
+
       {error && <div className="error">{error}</div>}
 
       <div className="context-list">

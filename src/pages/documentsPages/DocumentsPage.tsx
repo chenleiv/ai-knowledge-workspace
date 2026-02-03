@@ -183,7 +183,7 @@ export default function DocumentsPage() {
       if (wasActive) {
         setActiveDocId(() => {
           const nextOrdered = orderedDocs
-            .filter((d) => d.id !== doc.id); // זה orderedDocs מה־render הנוכחי
+            .filter((d) => d.id !== doc.id);
           return nextOrdered[0]?.id ?? null;
         });
       }
@@ -335,6 +335,7 @@ export default function DocumentsPage() {
           isCreating={isCreating}
           onCancelCreate={() => onCancelCreate()}
           onCreated={handleCreated}
+          hasDocs={docs.length > 0}
           onSaved={(updated) => {
             setDocs((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
           }}

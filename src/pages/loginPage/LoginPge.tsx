@@ -2,14 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { login } from "../../api/authClient";
 import { useAuth } from "../../auth/useAuth";
-import type { LoginLocationState } from "../../router/locationState";
 import { useStatus } from "../../components/statusBar/useStatus";
 import "./loginPage.scss";
+
+
+export type LoginLocationState = { from?: Location };
+
 
 export default function LoginPage() {
   const nav = useNavigate();
   const location = useLocation();
   const status = useStatus();
+
 
   const { isAuthed, loginSuccess } = useAuth();
 

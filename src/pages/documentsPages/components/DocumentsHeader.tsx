@@ -30,7 +30,7 @@ export default function DocumentsHeader({
     <div className="top-actions" onClick={(e) => e.stopPropagation()}>
       {isAdmin ? (
         <>
-          <div className="buttons">
+          <div className="actions-buttons">
             <button
               className="text-btn"
               type="button"
@@ -43,7 +43,7 @@ export default function DocumentsHeader({
             <ImportMenuButton onImport={onImport} />
           </div>
 
-          <button className="plus-btn text-btn" type="button" onClick={onNew}>
+          <button className="add-btn text-btn" type="button" onClick={onNew}>
             +
           </button>
         </>

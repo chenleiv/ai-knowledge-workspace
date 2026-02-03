@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { DocumentItem, DocumentInput } from "../../../api/documentsClient";
-import { useStatus } from "../../../components/statusBar/useStatus";
 import { createDocument, updateDocument } from "../../../api/documentsClient";
+import { useStatus } from "../../../components/statusBar/useStatus";
 
 type Props = {
     doc: DocumentItem | null;
@@ -10,6 +10,7 @@ type Props = {
     onCancelCreate: () => void;
     onCreated: (doc: DocumentItem) => void;
     onSaved: (doc: DocumentItem) => void;
+    hasDocs: boolean;
 };
 
 function toInput(d: DocumentItem): DocumentInput {
@@ -21,24 +22,32 @@ function toInput(d: DocumentItem): DocumentInput {
     };
 }
 
-export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate, onCreated, onSaved }: Props) {
+function emptyInput(): DocumentInput {
+    return { title: "", category: "", summary: "", content: "" };
+}
+
+export default function DocumentPane({
+    doc,
+    canEdit,
+    isCreating,
+    onCancelCreate,
+    onCreated,
+    onSaved,
+    hasDocs,
+}: Props) {
     const status = useStatus();
+
     const [mode, setMode] = useState<"view" | "edit">("view");
-    const [form, setForm] = useState<DocumentInput>({
-        title: "",
-        category: "",
-        summary: "",
-        content: "",
-    });
-    const [baseline, setBaseline] = useState<DocumentInput>(form);
+    const [form, setForm] = useState<DocumentInput>(emptyInput());
+    const [baseline, setBaseline] = useState<DocumentInput>(emptyInput());
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (isCreating) {
-            setMode("edit");
-            const empty = { title: "", category: "", summary: "", content: "" };
+            const empty = emptyInput();
             setForm(empty);
             setBaseline(empty);
+            setMode("edit");
             return;
         }
 
@@ -51,16 +60,20 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
         setForm(next);
         setBaseline(next);
         setMode("view");
-    }, [doc, isCreating]);
+    }, [isCreating, doc?.id]);
 
     const isDirty = useMemo(
         () => JSON.stringify(form) !== JSON.stringify(baseline),
         [form, baseline]
     );
 
-    async function onSave() {
+    async function handleSave() {
         if (!canEdit) {
-            status.show({ kind: "error", title: "Forbidden", message: "Admins only." });
+            status.show({
+                kind: "error",
+                title: "Forbidden",
+                message: "Admins only.",
+            });
             return;
         }
 
@@ -70,7 +83,11 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
         const content = form.content.trim();
 
         if (!title || !category || !summary || !content) {
-            status.show({ kind: "error", title: "Missing fields", message: "Please fill all fields." });
+            status.show({
+                kind: "error",
+                title: "Missing fields",
+                message: "Please fill all fields.",
+            });
             return;
         }
 
@@ -85,12 +102,20 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
 
             if (!doc) return;
 
-            const updated = await updateDocument(doc.id, { title, category, summary, content });
+            const updated = await updateDocument(doc.id, {
+                title,
+                category,
+                summary,
+                content,
+            });
+
             onSaved(updated);
+
             const next = toInput(updated);
-            setBaseline(next);
             setForm(next);
+            setBaseline(next);
             setMode("view");
+
             status.show({ kind: "success", message: "Saved." });
         } catch (e) {
             status.show({
@@ -104,38 +129,53 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
         }
     }
 
-    function onCancel() {
+    function handleCancel() {
         if (isCreating) {
             onCancelCreate();
             return;
         }
+
         setForm(baseline);
         setMode("view");
     }
 
-    const showEmpty = !isCreating && !doc;
-    if (showEmpty) {
+    if (!isCreating && !doc) {
         return (
             <div className="doc-pane">
                 <div className="doc-pane-empty">
-                    <div className="doc-pane-empty-title">Select a document</div>
-                    <div className="doc-pane-empty-sub">
-                        Select a document on the left to preview and edit it here
-                    </div>
+                    {hasDocs ? (
+                        <>
+                            <div className="doc-pane-empty-title">Select a document</div>
+                            <div className="doc-pane-empty-sub">
+                                Choose a document on the left to preview it here.
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="doc-pane-empty-title">No documents yet</div>
+                            <div className="doc-pane-empty-sub">
+                                Create your first document to get started.
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         );
     }
 
     const paneTitle = isCreating ? "New document" : (doc?.title ?? "");
+    const paneCategory = isCreating ? "" : (doc?.category ?? "");
 
     return (
         <div className="doc-pane">
             <div className="doc-pane-top">
                 <div className="doc-pane-title-container">
                     <h2 className="doc-pane-title">{paneTitle}</h2>
-                    <h4 className="doc-pane-title small">{doc?.category ?? ""}</h4>
+                    {paneCategory ? (
+                        <h4 className="doc-pane-title small">{paneCategory}</h4>
+                    ) : null}
                 </div>
+
                 <div className="doc-pane-actions">
                     {mode === "view" ? (
                         <>
@@ -156,7 +196,7 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
                             <button
                                 type="button"
                                 className="primary-btn"
-                                onClick={onSave}
+                                onClick={handleSave}
                                 disabled={saving || !isDirty}
                             >
                                 {saving ? "Saving..." : "Save"}
@@ -165,7 +205,7 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
                             <button
                                 type="button"
                                 className="primary-btn"
-                                onClick={onCancel}
+                                onClick={handleCancel}
                                 disabled={saving}
                             >
                                 Cancel
@@ -175,57 +215,55 @@ export default function DocumentPane({ doc, canEdit, isCreating, onCancelCreate,
                 </div>
             </div>
 
-            {
-                mode === "view" && doc ? (
-                    <div key={doc.id} className="doc-pane-body doc-pane-anim">
-                        <div className="doc-pane-section">
-                            <div className="doc-pane-label">Summary</div>
-                            <div className="doc-pane-text">{doc.summary}</div>
-                        </div>
-
-                        <div className="doc-pane-section">
-                            <div className="doc-pane-label">Content</div>
-                            <div className="doc-pane-text prewrap">{doc.content}</div>
-                        </div>
+            {mode === "view" && doc ? (
+                <div key={doc.id} className="doc-pane-body doc-pane-anim">
+                    <div className="doc-pane-section">
+                        <div className="doc-pane-label">Summary</div>
+                        <div className="doc-pane-text">{doc.summary}</div>
                     </div>
-                ) : (
-                    <div className="doc-pane-body">
-                        <label className="doc-pane-label">
-                            Title
-                            <input
-                                value={form.title}
-                                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                            />
-                        </label>
 
-                        <label className="doc-pane-label">
-                            Category
-                            <input
-                                value={form.category}
-                                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                            />
-                        </label>
-
-                        <label className="doc-pane-label">
-                            Summary
-                            <textarea
-                                rows={4}
-                                value={form.summary}
-                                onChange={(e) => setForm({ ...form, summary: e.target.value })}
-                            />
-                        </label>
-
-                        <label className="doc-pane-label">
-                            Content
-                            <textarea
-                                rows={16}
-                                value={form.content}
-                                onChange={(e) => setForm({ ...form, content: e.target.value })}
-                            />
-                        </label>
+                    <div className="doc-pane-section">
+                        <div className="doc-pane-label">Content</div>
+                        <div className="doc-pane-text prewrap">{doc.content}</div>
                     </div>
-                )
-            }
-        </div >
+                </div>
+            ) : (
+                <div className="doc-pane-body">
+                    <label className="doc-pane-label">
+                        Title
+                        <input
+                            value={form.title}
+                            onChange={(e) => setForm({ ...form, title: e.target.value })}
+                        />
+                    </label>
+
+                    <label className="doc-pane-label">
+                        Category
+                        <input
+                            value={form.category}
+                            onChange={(e) => setForm({ ...form, category: e.target.value })}
+                        />
+                    </label>
+
+                    <label className="doc-pane-label">
+                        Summary
+                        <textarea
+                            rows={4}
+                            value={form.summary}
+                            onChange={(e) => setForm({ ...form, summary: e.target.value })}
+                        />
+                    </label>
+
+                    <label className="doc-pane-label">
+                        Content
+                        <textarea
+                            rows={16}
+                            value={form.content}
+                            onChange={(e) => setForm({ ...form, content: e.target.value })}
+                        />
+                    </label>
+                </div>
+            )}
+        </div>
     );
 }

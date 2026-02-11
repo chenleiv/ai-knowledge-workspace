@@ -11,7 +11,16 @@ const documentSchema = new mongoose.Schema({
     category: { type: String, required: true },
     summary: { type: String, required: true },
     content: { type: String, required: true },
-}, { timestamps: true });
+}, {
+    timestamps: true,
+    toJSON: {
+        virtuals: true,
+        transform: (doc, ret) => {
+            ret.id = ret._id;
+            return ret;
+        }
+    }
+});
 
 export const User = mongoose.model('User', userSchema);
 export const Document = mongoose.model('Document', documentSchema);

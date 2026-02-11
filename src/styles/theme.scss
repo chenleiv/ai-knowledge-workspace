@@ -1,77 +1,87 @@
 :root {
-    --bg: #f9f8f7; //#f7f7f8;
-    --panel: #ffffff;
+    /* 
+     * Cool & Simple - Light Theme 
+     * Base: Clean Off-White
+     * Primary: Vivid Indigo/Violet
+     */
+    --bg: #f8f9fa;       /* Very light greyish white, cooler than before */
+    --panel: #ffffff;    /* Pure white for cards/panels */
     --card: #ffffff;
 
-    --soft: #f1f1f2;
-    --soft-2: #e9e9eb;
+    --soft: #eff1f5;     /* Light cool grey for hover/subtle backgrounds */
+    --soft-2: #e2e4e9;   /* Slightly darker for borders/inputs */
+    
+    --soft-3: #1e293b;   /* Dark element for contrast (e.g. primary button text if needed) */
+    --white: #ffffff;
 
-    --soft-3: #111113e8;
-    --white: #f2f2f3c6;
+    --text: #1e293b;     /* Slate 800 - softer than pure black */
+    --secondery-text: #475569; /* Slate 600 */
+    --muted: #94a3b8;    /* Slate 400 */
 
-    --text: #2c2c2b;
-    --secondery-text: #111113bb;
-    --muted: #6b6b73;
+    --border: #e2e8f0;   /* Slate 200 */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --overlay: rgba(15, 23, 42, 0.4); /* Slate 900 with opacity */
 
-    --border: #e3e3e6;
-    --shadow: rgba(0, 0, 0, 0.08);
-    --overlay: rgba(0, 0, 0, 0.35);
+    --focus: rgba(99, 102, 241, 0.2); /* Indigo focus ring */
 
-    --focus: rgba(0, 0, 0, 0.12);
+    /* Modern Functional Colors */
+    --success-bg: #ecfdf5;
+    --success-border: #a7f3d0;
+    --success-text: #059669;
 
-    --success-bg: rgba(34, 197, 94, 0.08);
-    --success-border: rgba(34, 197, 94, 0.25);
-    --success-text: #166534;
+    --info-bg: #eff6ff;
+    --info-border: #bfdbfe;
+    --info-text: #2563eb;
 
-    --info-bg: rgba(59, 130, 246, 0.08);
-    --info-border: rgba(59, 130, 246, 0.25);
-    --info-text: #1b3193;
+    --danger-bg: #fef2f2;
+    --danger-border: #fecaca;
+    --danger-text: #dc2626;
 
-    --danger-bg: rgba(220, 38, 38, 0.08);
-    --danger-border: rgba(220, 38, 38, 0.18);
-    --danger-text: #991b1b;
-
-
-
-    /* Keep existing primary for links if needed */
-    --primary: #2e69ff;
+    /* Brand Primary: Indigo */
+    --primary: #6366f1;
     --primary-text: #ffffff;
-    --primary-hover: #2459e6;
+    --primary-hover: #4f46e5;
 }
 
 [data-theme="dark"] {
-    --bg: #191919; //#1f1f1f;
-    --panel: #202020; //  #161616c9;
-    --card: #e2e2e2;
+    /* 
+     * Cool & Simple - Dark Theme
+     * Base: Deep Slate
+     * Primary: Bright Indigo
+     */
+    --bg: #0f172a;       /* Slate 900 - Rich dark blue-grey */
+    --panel: #1e293b;    /* Slate 800 - Lighter for panels */
+    --card: #1e293b;
 
-    --soft: #2c2c2c;
-    --soft-2: #26262a;
-    --soft-3: #ffffff;
+    --soft: #334155;     /* Slate 700 */
+    --soft-2: #475569;   /* Slate 600 */
+    --soft-3: #f8fafc;   /* Light text for contrast */
 
-    --white: #f2f2f3c6;
+    --white: #f8fafc;
 
-    --text: #f2f2f3;
-    --secondery-text: #f2f2f3c6;
-    --muted: #a1a1aa;
-    --border: #2a2a2f;
-    --shadow: rgba(0, 0, 0, 0.55);
-    --overlay: rgba(0, 0, 0, 0.65);
+    --text: #f1f5f9;     /* Slate 100 */
+    --secondery-text: #cbd5e1; /* Slate 300 */
+    --muted: #94a3b8;    /* Slate 400 */
 
-    --primary: #5488fc;
+    --border: #334155;   /* Slate 700 */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+    --overlay: rgba(0, 0, 0, 0.7);
+
+    --primary: #818cf8;  /* Lighter Indigo for dark mode */
     --primary-text: #ffffff;
-    --primary-hover: #4073e0;
+    --primary-hover: #6366f1;
 
-    --focus: rgba(255, 255, 255, 0.14);
+    --focus: rgba(129, 140, 248, 0.25);
 
-    --success-bg: rgba(34, 197, 94, 0.14);
-    --success-border: rgba(34, 197, 94, 0.35);
-    --success-text: #86efac;
+    --success-bg: rgba(6, 78, 59, 0.4);
+    --success-border: rgba(5, 150, 105, 0.4);
+    --success-text: #6ee7b7;
 
-    --info-bg: rgba(59, 130, 246, 0.14);
-    --info-border: rgba(59, 130, 246, 0.35);
-    --info-text: #bfdbfe;
+    --info-bg: rgba(30, 58, 138, 0.4);
+    --info-border: rgba(37, 99, 235, 0.4);
+    --info-text: #93c5fd;
 
-    --danger-bg: rgba(255, 80, 80, 0.12);
-    --danger-border: rgba(255, 80, 80, 0.25);
-    --danger-text: #ffb4b4;
+    --danger-bg: rgba(127, 29, 29, 0.4);
+    --danger-border: rgba(220, 38, 38, 0.4);
+    --danger-text: #fca5a5;
 }

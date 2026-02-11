@@ -10,8 +10,10 @@ export default function Header() {
   const { isAuthed } = useAuth();
 
   return (
-    <header>
-      <h1 className="header-title">Knowledge Workspace</h1>
+    <header className="glass-header">
+      <div className="header-left">
+         <h1 className="header-title">Knowledge Workspace</h1>
+      </div>
 
       {isAuthed && (
         <nav>

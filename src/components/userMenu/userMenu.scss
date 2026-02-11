@@ -4,51 +4,91 @@
 }
 
 .user-menu__trigger {
-    border: 1px solid var(--border);
-    background: var(--soft-2);
+    border: 1px solid transparent;
+    background: var(--soft);
     border-radius: 999px;
-    padding: 6px;
+    /* Circle/Pill */
+    padding: 4px;
+    /* Tighter padding for avatar */
     cursor: pointer;
-    transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
-}
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-.user-menu__trigger:active {
-    transform: scale(0.98);
+    &:hover {
+        background: var(--soft-2);
+        transform: scale(1.05);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--focus);
+    }
+
+    &[aria-expanded="true"] {
+        background: var(--soft-2);
+        box-shadow: 0 0 0 2px var(--focus);
+    }
 }
 
 .user-menu__avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     display: grid;
     place-items: center;
-    font-weight: 700;
-    font-size: 12px;
+    font-weight: 600;
+    font-size: 14px;
     background: var(--primary);
-    color: var(--white);
+    color: var(--primary-text);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .user-menu__panel {
     position: absolute;
     right: 0;
-    top: calc(100% + 10px);
-    width: 260px;
-    background: #161616;
+    top: calc(100% + 8px);
+    width: 240px;
+
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
     border: 1px solid var(--border);
-    border-radius: 14px;
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+    border-radius: 16px;
+    box-shadow: var(--shadow), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
     overflow: hidden;
-    z-index: 50;
+    z-index: 1000;
+
+    transform-origin: top right;
+    animation: menu-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+    [data-theme="dark"] & {
+        background: rgba(30, 41, 59, 0.9);
+    }
+}
+
+@keyframes menu-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .user-menu__header {
-    padding: 12px 12px 8px 12px;
-    background-color: var(--panel);
+    padding: 16px;
+    background: var(--soft-bg);
+    /* Use soft background if available, else transparent */
+    border-bottom: 1px solid var(--border);
 }
 
 .user-menu__email {
-    font-size: 13px;
+    font-size: 0.9rem;
     font-weight: 600;
+    color: var(--text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -56,51 +96,59 @@
 
 .user-menu__role {
     display: inline-flex;
-    margin-top: 6px;
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
+    margin-top: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: var(--soft-2);
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
+    letter-spacing: 0.05em;
 
-.user-menu__spacer {
-    border-bottom: 1px solid var(--border);
+    &.admin {
+        background: var(--primary);
+        color: var(--primary-text);
+    }
 }
 
 .user-menu__items {
-    display: grid;
-
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .user-menu__item {
     width: 100%;
     text-align: left;
-    border: 1px solid transparent;
-    background: var(--panel);
-    color: inherit;
-    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.9rem;
+    font-weight: 500;
     text-decoration: none;
-    transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
-    border-bottom: 1px solid var(--soft-2);
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
 
-    &:last-child {
-        border-bottom: none;
-    }
-}
-
-.user-menu__item:hover {
     &:hover {
-        color: var(--text);
         background: var(--soft);
-        border-color: var(--border);
+        color: var(--primary);
     }
-}
 
-.user-menu__item:active {
-    transform: scale(0.99);
+    &:active {
+        transform: scale(0.98);
+    }
+
+    &.danger {
+        color: var(--danger-text);
+
+        &:hover {
+            background: var(--danger-bg);
+        }
+    }
 }

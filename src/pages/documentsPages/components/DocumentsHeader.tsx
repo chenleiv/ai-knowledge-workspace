@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ImportMenuButton from "./ImportMenuButton";
+import { FilePlusCorner } from "lucide-react";
 
 type Props = {
   onNew: () => void;
@@ -44,7 +45,7 @@ export default function DocumentsHeader({
           </div>
 
           <button className="add-btn text-btn" type="button" onClick={onNew}>
-            +
+            <FilePlusCorner />
           </button>
         </>
       ) : (

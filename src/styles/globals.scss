@@ -1,4 +1,5 @@
 @use "../components/menu/menu";
+@import url('https://fonts.googleapis.com/css2?family=Internal:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 * {
   box-sizing: border-box;
@@ -12,6 +13,7 @@ body,
 }
 
 @media (min-width: 681px) {
+
   html,
   body,
   #root {
@@ -21,21 +23,32 @@ body,
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-    sans-serif;
+  /* Use Outfit as primary, fallback to system */
+  font-family: 'Outfit', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Selection */
+::selection {
+  background: var(--primary);
+  color: var(--primary-text);
 }
 
 a {
   color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 input,
 textarea,
 select,
 button {
-  font: inherit;
+  font-family: inherit;
 }
 
 input,
@@ -45,23 +58,30 @@ select {
   color: var(--text);
   border: 1px solid var(--border);
   outline: none;
-  border-radius: 12px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  /* Slightly sharper radius for modern look */
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
 
   &::placeholder {
     color: var(--muted);
   }
 
   &:focus {
-    border-color: var(--border);
-    box-shadow: 0 0 0 3px var(--focus);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--focus);
+  }
+
+  &:hover:not(:focus) {
+    border-color: var(--soft-2);
   }
 }
 
-/* ========= Scrollbar (WebKit: Chrome/Safari/Edge) ========= */
+/* ========= Modern Slim Scrollbar ========= */
 *::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
 }
 
 *::-webkit-scrollbar-track {
@@ -69,33 +89,17 @@ select {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgba(127, 127, 140, 0.35);
-  border-radius: 999px;
-  border: 3px solid transparent;
-  /* makes it look thinner */
-  background-clip: content-box;
+  background: var(--soft-2);
+  border-radius: 99px;
+  transition: background 0.2s ease;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(127, 127, 140, 0.55);
-  background-clip: content-box;
+  background: var(--muted);
 }
 
-/* ========= Scrollbar (Firefox) ========= */
+/* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(127, 127, 140, 0.45) transparent;
-}
-
-/* Optional: only show thumb on hover (WebKit only) */
-.context-list::-webkit-scrollbar-thumb,
-.messages::-webkit-scrollbar-thumb {
-  background: rgba(127, 127, 140, 0.25);
-  background-clip: content-box;
-}
-
-.context-list:hover::-webkit-scrollbar-thumb,
-.messages:hover::-webkit-scrollbar-thumb {
-  background: rgba(127, 127, 140, 0.45);
-  background-clip: content-box;
+  scrollbar-color: var(--soft-2) transparent;
 }

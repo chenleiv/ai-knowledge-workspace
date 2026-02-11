@@ -16,10 +16,11 @@
     background: var(--panel);
     display: flex;
     flex-direction: column;
-    padding: 0;
+    padding: 0px 0px 14px 0px;
   }
 
   .documents-pane {
+    padding: 0px 0px 14px 14px;
     min-height: 0;
     display: flex;
   }
@@ -50,8 +51,8 @@
 
     .top-actions {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: flex-end;
 
       .actions-buttons {
         display: flex;
@@ -60,7 +61,6 @@
       }
 
       .add-btn {
-        // font-size: 24px;
         padding: 0;
       }
     }
@@ -261,7 +261,7 @@
   }
 
   .doc-pane-top {
-    padding: 12px 14px;
+    padding: 0px 6px 12px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
@@ -274,6 +274,13 @@
     font-size: 22px;
     letter-spacing: 0.01em;
     color: var(--text);
+
+  }
+
+  .small {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--muted);
   }
 
   .doc-pane-actions {
@@ -290,7 +297,7 @@
 
   .doc-pane-body {
     overflow: auto;
-    padding: 18px 18px 26px;
+    padding: 12px 6px 26px;
     display: flex;
     flex-direction: column;
     gap: 14px;

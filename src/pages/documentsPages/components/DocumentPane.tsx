@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { DocumentItem, DocumentInput } from "../../../api/documentsClient";
 import { createDocument, updateDocument } from "../../../api/documentsClient";
 import { useStatus } from "../../../components/statusBar/useStatus";
+import { EditIcon } from "lucide-react";
 
 type Props = {
     doc: DocumentItem | null;
@@ -60,7 +61,7 @@ export default function DocumentPane({
         setForm(next);
         setBaseline(next);
         setMode("view");
-    }, [isCreating, doc?.id]);
+    }, [isCreating, doc]);
 
     const isDirty = useMemo(
         () => JSON.stringify(form) !== JSON.stringify(baseline),
@@ -182,12 +183,12 @@ export default function DocumentPane({
                             {canEdit && !isCreating ? (
                                 <button
                                     type="button"
-                                    className="icon-btn doc-pane-edit"
+                                    className="icon-btn"
                                     onClick={() => setMode("edit")}
                                     title="Edit"
                                     aria-label="Edit"
                                 >
-                                    ✎
+                                    <EditIcon />
                                 </button>
                             ) : null}
                         </>

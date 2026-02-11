@@ -4,25 +4,36 @@
      * Base: Clean Off-White
      * Primary: Vivid Indigo/Violet
      */
-    --bg: #f8f9fa;       /* Very light greyish white, cooler than before */
-    --panel: #ffffff;    /* Pure white for cards/panels */
+    --bg: #f8f9fa;
+    /* Very light greyish white, cooler than before */
+    --panel: #ffffff;
+    /* Pure white for cards/panels */
     --card: #ffffff;
 
-    --soft: #eff1f5;     /* Light cool grey for hover/subtle backgrounds */
-    --soft-2: #e2e4e9;   /* Slightly darker for borders/inputs */
-    
-    --soft-3: #1e293b;   /* Dark element for contrast (e.g. primary button text if needed) */
+    --soft: #eff1f5;
+    /* Light cool grey for hover/subtle backgrounds */
+    --soft-2: #e2e4e9;
+    /* Slightly darker for borders/inputs */
+
+    --soft-3: #1e293b;
+    /* Dark element for contrast (e.g. primary button text if needed) */
     --white: #ffffff;
 
-    --text: #1e293b;     /* Slate 800 - softer than pure black */
-    --secondery-text: #475569; /* Slate 600 */
-    --muted: #94a3b8;    /* Slate 400 */
+    --text: #1e293b;
+    /* Slate 800 - softer than pure black */
+    --secondery-text: #475569;
+    /* Slate 600 */
+    --muted: #94a3b8;
+    /* Slate 400 */
 
-    --border: #e2e8f0;   /* Slate 200 */
+    --border: #e2e8f0;
+    /* Slate 200 */
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    --overlay: rgba(15, 23, 42, 0.4); /* Slate 900 with opacity */
+    --overlay: rgba(15, 23, 42, 0.4);
+    /* Slate 900 with opacity */
 
-    --focus: rgba(99, 102, 241, 0.2); /* Indigo focus ring */
+    --focus: rgba(99, 102, 241, 0.2);
+    /* Indigo focus ring */
 
     /* Modern Functional Colors */
     --success-bg: #ecfdf5;
@@ -49,25 +60,35 @@
      * Base: Deep Slate
      * Primary: Bright Indigo
      */
-    --bg: #0f172a;       /* Slate 900 - Rich dark blue-grey */
-    --panel: #1e293b;    /* Slate 800 - Lighter for panels */
+    --bg: #0f172a;
+    /* Slate 900 - Rich dark blue-grey */
+    --panel: #1e293b;
+    /* Slate 800 - Lighter for panels */
     --card: #1e293b;
 
-    --soft: #334155;     /* Slate 700 */
-    --soft-2: #475569;   /* Slate 600 */
-    --soft-3: #f8fafc;   /* Light text for contrast */
+    --soft: #334155;
+    /* Slate 700 */
+    --soft-2: #475569;
+    /* Slate 600 */
+    --soft-3: #f8fafc;
+    /* Light text for contrast */
 
     --white: #f8fafc;
 
-    --text: #f1f5f9;     /* Slate 100 */
-    --secondery-text: #cbd5e1; /* Slate 300 */
-    --muted: #94a3b8;    /* Slate 400 */
+    --text: #f1f5f9;
+    /* Slate 100 */
+    --secondery-text: #cbd5e1;
+    /* Slate 300 */
+    --muted: #94a3b8;
+    /* Slate 400 */
 
-    --border: #334155;   /* Slate 700 */
+    --border: #334155;
+    /* Slate 700 */
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
     --overlay: rgba(0, 0, 0, 0.7);
 
-    --primary: #818cf8;  /* Lighter Indigo for dark mode */
+    --primary: #818cf8;
+    /* Lighter Indigo for dark mode */
     --primary-text: #ffffff;
     --primary-hover: #6366f1;
 

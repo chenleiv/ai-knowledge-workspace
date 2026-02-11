@@ -14,7 +14,7 @@
   /* Pill shape */
   padding: 10px 20px;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 14px;
   letter-spacing: 0.01em;
   cursor: pointer;
   user-select: none;
@@ -65,11 +65,10 @@
   background: none;
   border: none;
   padding: 6px 10px;
-  font-size: 0.9rem;
+  font-size: 14px;
   font-weight: 500;
   color: var(--muted);
   cursor: pointer;
-  border-radius: 6px;
   transition: all 0.2s ease;
 
   &:hover {
@@ -161,7 +160,7 @@
       margin: 0;
       color: var(--text);
       font-weight: 700;
-      font-size: 1.25rem;
+      font-size: 20px;
       letter-spacing: -0.02em;
       white-space: nowrap;
     }
@@ -180,7 +179,7 @@
         padding: 6px 16px;
         border-radius: 99px;
         font-weight: 500;
-        font-size: 0.9rem;
+        font-size: 14px;
         transition: all 0.2s ease;
 
         &:hover {
@@ -216,7 +215,7 @@
     padding: 24px;
     background: var(--bg);
     border-top: 1px solid var(--border);
-    font-size: 0.85rem;
+    font-size: 14px;
     color: var(--muted);
     text-align: center;
   }
@@ -247,7 +246,7 @@
 
     .header-title {
       text-align: center;
-      font-size: 1.1rem;
+      font-size: 18px;
     }
 
     nav {

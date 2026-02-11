@@ -62,7 +62,7 @@ export default function ContextPanel({
     <aside className="context-panel">
       {!hasSelection && (
         <div className="context-header-main">
-          <span>Select specific documents to narrow context.</span>
+          <div className="context-hint">Select specific documents to narrow context.</div>
         </div>
       )}
       {hasSelection && (

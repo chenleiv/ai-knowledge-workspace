@@ -85,7 +85,7 @@
       color: var(--text);
       outline: none;
 
-      font-size: 13px;
+      font-size: 12px;
       transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
 
       &::placeholder {
@@ -185,7 +185,7 @@
   }
 
   .doc-row-title {
-    font-size: 13.6px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--text);
     overflow: hidden;
@@ -322,7 +322,7 @@
     }
 
     .doc-pane-empty-sub {
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.5;
     }
   }
@@ -333,7 +333,7 @@
 
   .doc-pane-label {
     display: block;
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.10em;
     color: var(--muted);

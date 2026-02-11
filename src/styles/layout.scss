@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 99px;
+  border-radius: 8px;
   /* Pill shape */
   padding: 10px 20px;
   font-weight: 500;
@@ -92,7 +92,7 @@
 
 .icon-btn {
   padding: 8px;
-  border-radius: 12px;
+  border-radius: 8px;
   /* Soft square for icons */
   background: transparent;
   color: var(--text);
@@ -171,13 +171,13 @@
       background: var(--soft);
       /* Pill background for nav */
       padding: 4px;
-      border-radius: 99px;
+      border-radius: 8px;
 
       a {
         text-decoration: none;
         color: var(--muted);
         padding: 6px 16px;
-        border-radius: 99px;
+        border-radius: 8px;
         font-weight: 500;
         font-size: 14px;
         transition: all 0.2s ease;

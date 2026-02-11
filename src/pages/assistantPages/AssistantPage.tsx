@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import "./assistantPage.scss";
 
 import { listDocuments, type DocumentItem } from "../../api/documentsClient";
+import { chatWithAI } from "../../api/aiClient";
 import type { ChatMessage, SourceRef } from "./types";
 import { CHAT_KEY, CONTEXT_KEY, buildSnippet, scoreDoc, uid } from "./utils";
 
@@ -121,6 +122,7 @@ export default function AssistantPage() {
     try {
       const contextDocs = selectedDocs.length > 0 ? selectedDocs : docs;
 
+      // For RAG, we still rank locally to pick top 3 relevant docs to send as context
       const ranked = contextDocs
         .map((d) => ({ doc: d, score: scoreDoc(d, question) }))
         .sort((a, b) => b.score - a.score);
@@ -130,33 +132,32 @@ export default function AssistantPage() {
         .slice(0, 3)
         .map((x) => x.doc);
 
-      const sources: SourceRef[] =
-        top.length === 0
-          ? []
-          : top.map((d) => ({
-            id: d.id,
-            title: d.title,
-            snippet: buildSnippet(d.content || d.summary || "", question),
-          }));
+      // Call the real AI endpoint
+      const response = await chatWithAI(question, top);
 
-      let answer: string;
-
-      if (contextDocs.length === 0) {
-        answer =
-          "No documents available yet. Create documents first, then ask again.";
-      } else if (top.length === 0) {
-        answer =
-          selectedDocs.length > 0
-            ? "I could not find this in the selected documents."
-            : "I could not find this in your documents.";
-      } else {
-        answer =
-          "Here is a mock, document-grounded answer based on retrieved sources. Next step: connect a real LLM + RAG for better reasoning and citations.";
-      }
+      const sources: SourceRef[] = response.sources.map((s) => ({
+        id: s.id,
+        title: s.title,
+        snippet: buildSnippet(contextDocs.find(d => d.id === s.id)?.content || "", question),
+      }));
 
       setMessages((prev) => [
         ...prev,
-        { id: uid(), role: "assistant", text: answer, sources },
+        {
+          id: uid(),
+          role: "assistant",
+          text: response.answer,
+          sources
+        },
+      ]);
+    } catch (e) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: uid(),
+          role: "assistant",
+          text: e instanceof Error ? e.message : "Sorry, I encountered an error connecting to the AI service."
+        },
       ]);
     } finally {
       setIsSending(false);

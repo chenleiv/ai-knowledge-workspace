@@ -1,7 +1,0 @@
-name = "ai-knowledge-workspace"
-compatibility_date = "2024-12-01"
-
-[[d1_databases]]
-binding = "ai_workspace"
-database_name = "ai-workspace"
-database_id = "729a39df-d2ea-4980-81bd-44b06c07aee0"

@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "tsc -b && vite build",
+    "build:backend": "cd backend && npm install",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "cd backend && node index.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

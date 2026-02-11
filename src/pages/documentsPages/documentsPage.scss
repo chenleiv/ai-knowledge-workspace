@@ -35,7 +35,7 @@
     display: flex;
     flex-direction: column;
     flex: 1;
-    border-radius: 14px;
+    border-radius: 8px;
     overflow: hidden;
     background: var(--panel);
     border: 1px solid var(--border);
@@ -60,8 +60,18 @@
         gap: 10px;
       }
 
+
+      .text-btn {
+        padding: 6px 10px 6px 0;
+      }
+
       .add-btn {
         padding: 0;
+      }
+
+      svg {
+        width: 22px;
+        height: 22px;
       }
     }
   }
@@ -115,7 +125,7 @@
 
     &::-webkit-scrollbar-thumb {
       background: var(--border);
-      border-radius: 999px;
+      border-radius: 8px;
       border: 3px solid transparent;
       background-clip: content-box;
     }
@@ -228,7 +238,7 @@
     cursor: pointer;
 
     padding: 6px 8px;
-    border-radius: 10px;
+    border-radius: 8px;
     line-height: 1;
 
     transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
@@ -255,7 +265,7 @@
     background: var(--bg);
     border: 1px solid var(--border);
     overflow: hidden;
-    border-radius: 14px;
+    border-radius: 8px;
     padding: 14px;
     min-height: 0;
   }

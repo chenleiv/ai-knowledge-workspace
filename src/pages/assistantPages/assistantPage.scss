@@ -62,7 +62,7 @@
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text);
-  border-radius: 99px;
+  border-radius: 8px;
   padding: 6px 12px;
   cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
@@ -87,7 +87,7 @@
   min-height: 0;
   overflow: auto;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--soft);
   background: var(--bg);
 }
@@ -101,7 +101,7 @@
 
   &::-webkit-scrollbar-thumb {
     background: var(--border);
-    border-radius: 99px;
+    border-radius: 8px;
     border: 3px solid transparent;
     background-clip: content-box;
   }
@@ -121,7 +121,7 @@
   .bubble {
     max-width: 900px;
     padding: 12px 14px;
-    border-radius: 14px;
+    border-radius: 8px;
     border: 1px solid var(--border);
     background: var(--soft);
     color: var(--text);
@@ -143,7 +143,7 @@
 .sources {
   max-width: 900px;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   background: transparent;
   padding: 10px 12px;
 }
@@ -189,7 +189,7 @@
   input {
     flex: 1;
     padding: 10px 12px;
-    border-radius: 12px;
+    border-radius: 8px;
     border: 1px solid var(--border);
     background: var(--soft);
     color: var(--text);
@@ -211,7 +211,7 @@
     color: var(--primary-text);
     border: 1px solid transparent;
     padding: 10px 14px;
-    border-radius: 12px;
+    border-radius: 8px;
     cursor: pointer;
     transition: transform 140ms ease, background 140ms ease, opacity 140ms ease;
 
@@ -254,7 +254,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  border-radius: 14px;
+  border-radius: 8px;
   overflow: hidden;
   background: var(--panel);
   border: 1px solid var(--border);
@@ -302,7 +302,7 @@
   input {
     flex: 1;
     padding: 10px 12px;
-    border-radius: 12px;
+    border-radius: 8px;
     border: 1px solid var(--border);
     background: var(--soft);
     color: var(--text);
@@ -357,7 +357,7 @@
 
   &::-webkit-scrollbar-thumb {
     background: var(--border);
-    border-radius: 99px;
+    border-radius: 8px;
     border: 3px solid transparent;
     background-clip: content-box;
   }
@@ -376,7 +376,7 @@
   gap: 10px;
 
   padding: 10px 10px 10px 12px;
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--panel);
   border: 1px solid var(--border);
   cursor: pointer;
@@ -433,7 +433,7 @@
 .error {
   margin: 10px 12px 0;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--danger-bg);
   border: 1px solid var(--danger-border);
   color: var(--danger-text);

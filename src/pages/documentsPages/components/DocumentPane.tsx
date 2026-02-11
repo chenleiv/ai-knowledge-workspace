@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { DocumentItem, DocumentInput } from "../../../api/documentsClient";
 import { createDocument, updateDocument } from "../../../api/documentsClient";
 import { useStatus } from "../../../components/statusBar/useStatus";
-import { EditIcon } from "lucide-react";
+import { SquarePenIcon } from "lucide-react";
 
 type Props = {
     doc: DocumentItem | null;
@@ -16,15 +16,33 @@ type Props = {
 
 function toInput(d: DocumentItem): DocumentInput {
     return {
-        title: d.title,
-        category: d.category,
-        summary: d.summary,
-        content: d.content,
+        title: d.title ?? "",
+        category: d.category ?? "",
+        summary: d.summary ?? "",
+        content: d.content ?? "",
     };
 }
 
 function emptyInput(): DocumentInput {
     return { title: "", category: "", summary: "", content: "" };
+}
+
+function normalizeInput(i: DocumentInput): DocumentInput {
+    return {
+        title: i.title.trim(),
+        category: i.category.trim(),
+        summary: i.summary.trim(),
+        content: i.content.trim(),
+    };
+}
+
+function isSameInput(a: DocumentInput, b: DocumentInput): boolean {
+    return (
+        a.title === b.title &&
+        a.category === b.category &&
+        a.summary === b.summary &&
+        a.content === b.content
+    );
 }
 
 export default function DocumentPane({
@@ -40,50 +58,62 @@ export default function DocumentPane({
 
     const [mode, setMode] = useState<"view" | "edit">("view");
     const [form, setForm] = useState<DocumentInput>(emptyInput());
-    const [baseline, setBaseline] = useState<DocumentInput>(emptyInput());
     const [saving, setSaving] = useState(false);
 
+    // Baseline kept in a ref so it doesn't trigger re-renders and stays stable.
+    const baselineRef = useRef<DocumentInput>(emptyInput());
+
+    // Track which doc the current form belongs to (prevents overwriting drafts).
+    const activeDocIdRef = useRef<number | null>(null);
+
     useEffect(() => {
+        // Creating mode: always reset to empty + edit
         if (isCreating) {
             const empty = emptyInput();
+            baselineRef.current = empty;
+            activeDocIdRef.current = null;
             setForm(empty);
-            setBaseline(empty);
             setMode("edit");
             return;
         }
 
+        // No doc selected: view mode, keep form as-is (doesn't matter)
         if (!doc) {
+            activeDocIdRef.current = null;
             setMode("view");
             return;
         }
 
-        const next = toInput(doc);
-        setForm(next);
-        setBaseline(next);
-        setMode("view");
-    }, [isCreating, doc]);
+        // If we are editing the same doc, don't override the user's draft.
+        const incomingId = doc.id;
+        const isSameDoc = activeDocIdRef.current === incomingId;
 
-    const isDirty = useMemo(
-        () => JSON.stringify(form) !== JSON.stringify(baseline),
-        [form, baseline]
-    );
+        if (mode === "edit" && isSameDoc) return;
+
+        // Otherwise, sync form with the selected doc
+        const next = toInput(doc);
+        baselineRef.current = next;
+        activeDocIdRef.current = incomingId;
+        setForm(next);
+        setMode("view");
+    }, [isCreating, doc, mode]);
+
+    const isDirty = useMemo(() => {
+        // Compare normalized so trailing spaces don't cause "dirty" flicker.
+        return !isSameInput(normalizeInput(form), normalizeInput(baselineRef.current));
+    }, [form]);
+
+    const canSave = canEdit && !saving && isDirty;
 
     async function handleSave() {
         if (!canEdit) {
-            status.show({
-                kind: "error",
-                title: "Forbidden",
-                message: "Admins only.",
-            });
+            status.show({ kind: "error", title: "Forbidden", message: "Admins only." });
             return;
         }
 
-        const title = form.title.trim();
-        const category = form.category.trim();
-        const summary = form.summary.trim();
-        const content = form.content.trim();
+        const cleaned = normalizeInput(form);
 
-        if (!title || !category || !summary || !content) {
+        if (!cleaned.title || !cleaned.category || !cleaned.summary || !cleaned.content) {
             status.show({
                 kind: "error",
                 title: "Missing fields",
@@ -95,26 +125,28 @@ export default function DocumentPane({
         setSaving(true);
         try {
             if (isCreating) {
-                const created = await createDocument({ title, category, summary, content });
+                const created = await createDocument(cleaned);
                 onCreated(created);
                 status.show({ kind: "success", message: "Document created." });
+
+                // After creation, baseline becomes the saved version
+                const next = toInput(created);
+                baselineRef.current = next;
+                activeDocIdRef.current = created.id;
+                setForm(next);
+                setMode("view");
                 return;
             }
 
             if (!doc) return;
 
-            const updated = await updateDocument(doc.id, {
-                title,
-                category,
-                summary,
-                content,
-            });
-
+            const updated = await updateDocument(doc.id, cleaned);
             onSaved(updated);
 
             const next = toInput(updated);
+            baselineRef.current = next;
+            activeDocIdRef.current = updated.id;
             setForm(next);
-            setBaseline(next);
             setMode("view");
 
             status.show({ kind: "success", message: "Saved." });
@@ -135,8 +167,7 @@ export default function DocumentPane({
             onCancelCreate();
             return;
         }
-
-        setForm(baseline);
+        setForm(baselineRef.current);
         setMode("view");
     }
 
@@ -172,9 +203,7 @@ export default function DocumentPane({
             <div className="doc-pane-top">
                 <div className="doc-pane-title-container">
                     <h2 className="doc-pane-title">{paneTitle}</h2>
-                    {paneCategory ? (
-                        <h4 className="doc-pane-title small">{paneCategory}</h4>
-                    ) : null}
+                    {paneCategory ? <h4 className="doc-pane-title small">{paneCategory}</h4> : null}
                 </div>
 
                 <div className="doc-pane-actions">
@@ -183,12 +212,12 @@ export default function DocumentPane({
                             {canEdit && !isCreating ? (
                                 <button
                                     type="button"
-                                    className="icon-btn"
+                                    className="icon-btn doc-pane-edit"
                                     onClick={() => setMode("edit")}
                                     title="Edit"
                                     aria-label="Edit"
                                 >
-                                    <EditIcon />
+                                    <SquarePenIcon />
                                 </button>
                             ) : null}
                         </>
@@ -198,7 +227,7 @@ export default function DocumentPane({
                                 type="button"
                                 className="primary-btn"
                                 onClick={handleSave}
-                                disabled={saving || !isDirty}
+                                disabled={!canSave}
                             >
                                 {saving ? "Saving..." : "Save"}
                             </button>

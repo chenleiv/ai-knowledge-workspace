@@ -1,0 +1,17 @@
+import mongoose from 'mongoose';
+
+const userSchema = new mongoose.Schema({
+    email: { type: String, required: true, unique: true },
+    password_hash: { type: String, required: true },
+    role: { type: String, enum: ['admin', 'viewer'], default: 'viewer' },
+}, { timestamps: true });
+
+const documentSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    category: { type: String, required: true },
+    summary: { type: String, required: true },
+    content: { type: String, required: true },
+}, { timestamps: true });
+
+export const User = mongoose.model('User', userSchema);
+export const Document = mongoose.model('Document', documentSchema);

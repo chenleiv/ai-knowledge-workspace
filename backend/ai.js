@@ -22,31 +22,31 @@ router.post('/api/ai/chat', getCurrentUser, async (req, res) => {
     }
 
     try {
-        // Construct prompt with optional context
-        let prompt = `You are a helpful Knowledge Workspace assistant.`;
+        // Construct messages array for chatCompletion
+        const messages = [
+            { role: 'system', content: 'You are a helpful Knowledge Workspace assistant.' }
+        ];
 
         if (context && context.length > 0) {
-            prompt += `\n\nUse the following relevant documents to help answer the user's question:\n`;
+            let contextText = 'Use the following relevant documents to help answer the user\'s question:\n';
             context.forEach((doc, idx) => {
-                prompt += `${idx + 1}. [${doc.title}] ${doc.content}\n`;
+                contextText += `${idx + 1}. [${doc.title}] ${doc.content}\n`;
             });
+            messages.push({ role: 'system', content: contextText });
         }
 
-        prompt += `\n\nUser: ${message}\nAssistant:`;
+        messages.push({ role: 'user', content: message });
 
-        // Using Llama-3-8B-Instruct for high quality inference
-        const response = await hf.textGeneration({
+        // Using chatCompletion which is the modern standard for Llama-3-Instruct
+        const response = await hf.chatCompletion({
             model: 'meta-llama/Meta-Llama-3-8B-Instruct',
-            inputs: prompt,
-            parameters: {
-                max_new_tokens: 500,
-                temperature: 0.7,
-                return_full_text: false,
-            }
+            messages: messages,
+            max_tokens: 500,
+            temperature: 0.7,
         });
 
         res.json({
-            answer: response.generated_text.trim(),
+            answer: response.choices[0].message.content.trim(),
             sources: context ? context.map(c => ({ id: c.id, title: c.title })) : []
         });
 

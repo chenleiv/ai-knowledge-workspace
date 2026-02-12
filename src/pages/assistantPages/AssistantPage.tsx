@@ -186,7 +186,7 @@ export default function AssistantPage() {
 
       <section className="assistant-page">
         <div className="assistant-page-inner">
-          <MessagesList messages={messages} />
+          <MessagesList messages={messages} isThinking={isSending} />
           <div className="assistant-topbar">
             <TemplatesBar onApply={applyTemplate} />
             <button

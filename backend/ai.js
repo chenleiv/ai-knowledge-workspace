@@ -21,9 +21,7 @@ router.post('/api/ai/chat', getCurrentUser, async (req, res) => {
     }
 
     // Initialize client here where process.env is guaranteed to be populated
-    const apiKey = process.env.HUGGINGFACE_API_KEY;
-    console.log('Using HF Key:', apiKey ? `${apiKey.slice(0, 5)}...` : 'undefined');
-    const hf = new HfInference(apiKey);
+    const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
     try {
         // Construct messages array for chatCompletion

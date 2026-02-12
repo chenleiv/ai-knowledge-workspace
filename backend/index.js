@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 
 import authRouter, { getCurrentUser, requireAdmin, seedUsersIfEmpty } from './auth.js';
 import aiRouter from './ai.js';
-import { User, Document } from './models.js';
+import { Document } from './models.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

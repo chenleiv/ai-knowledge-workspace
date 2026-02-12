@@ -41,13 +41,12 @@ router.post('/api/ai/chat', getCurrentUser, async (req, res) => {
 
         messages.push({ role: 'user', content: message });
 
-        // Using Mistral-7B which has excellent free tier availability
+        // Llama-3 should work now that the API Key is correctly loaded!
         const response = await hf.chatCompletion({
-            model: 'mistralai/Mistral-7B-Instruct-v0.2',
+            model: 'meta-llama/Meta-Llama-3-8B-Instruct',
             messages: messages,
             max_tokens: 500,
             temperature: 0.7,
-            // provider: "together" // Let auto-router find the best free provider
         });
 
         res.json({

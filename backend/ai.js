@@ -5,7 +5,6 @@ import { getCurrentUser } from './auth.js';
 const router = express.Router();
 
 // Initialize HF client with API token from env
-const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
 router.post('/api/ai/chat', getCurrentUser, async (req, res) => {
     const { message, context } = req.body;
@@ -20,6 +19,11 @@ router.post('/api/ai/chat', getCurrentUser, async (req, res) => {
             detail: 'HUGGINGFACE_API_KEY is missing in backend .env file. Please add it to enable AI features.'
         });
     }
+
+    // Initialize client here where process.env is guaranteed to be populated
+    const apiKey = process.env.HUGGINGFACE_API_KEY;
+    console.log('Using HF Key:', apiKey ? `${apiKey.slice(0, 5)}...` : 'undefined');
+    const hf = new HfInference(apiKey);
 
     try {
         // Construct messages array for chatCompletion
@@ -37,12 +41,13 @@ router.post('/api/ai/chat', getCurrentUser, async (req, res) => {
 
         messages.push({ role: 'user', content: message });
 
-        // Using chatCompletion which is the modern standard for Llama-3-Instruct
+        // Using Mistral-7B which has excellent free tier availability
         const response = await hf.chatCompletion({
-            model: 'meta-llama/Meta-Llama-3-8B-Instruct',
+            model: 'mistralai/Mistral-7B-Instruct-v0.2',
             messages: messages,
             max_tokens: 500,
             temperature: 0.7,
+            // provider: "together" // Let auto-router find the best free provider
         });
 
         res.json({

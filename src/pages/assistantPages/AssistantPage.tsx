@@ -28,6 +28,7 @@ export default function AssistantPage() {
         id: uid(),
         role: "assistant",
         text: "Select documents on the left, then ask something. I will respond using selected sources (mock for now).",
+        isTyped: true,
       },
     ])
   );
@@ -147,7 +148,8 @@ export default function AssistantPage() {
           id: uid(),
           role: "assistant",
           text: response.answer,
-          sources
+          sources,
+          isTyped: false // Start typing
         },
       ]);
     } catch (e) {
@@ -156,13 +158,20 @@ export default function AssistantPage() {
         {
           id: uid(),
           role: "assistant",
-          text: e instanceof Error ? e.message : "Sorry, I encountered an error connecting to the AI service."
+          text: e instanceof Error ? e.message : "Sorry, I encountered an error connecting to the AI service.",
+          isTyped: false
         },
       ]);
     } finally {
       setIsSending(false);
     }
   }
+
+  const handleTypingComplete = useCallback((id: string) => {
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, isTyped: true } : m))
+    );
+  }, []);
 
   return (
     <div
@@ -186,7 +195,7 @@ export default function AssistantPage() {
 
       <section className="assistant-page">
         <div className="assistant-page-inner">
-          <MessagesList messages={messages} isThinking={isSending} />
+          <MessagesList messages={messages} isThinking={isSending} onTypingComplete={handleTypingComplete} />
           <div className="assistant-topbar">
             <TemplatesBar onApply={applyTemplate} />
             <button

@@ -11,4 +11,5 @@ export type ChatMessage = {
   role: Role;
   text: string;
   sources?: SourceRef[];
+  isTyped?: boolean;
 };

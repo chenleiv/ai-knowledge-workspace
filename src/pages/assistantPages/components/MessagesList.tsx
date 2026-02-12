@@ -5,9 +5,10 @@ import TypewriterText from "./TypewriterText";
 type Props = {
   messages: ChatMessage[];
   isThinking?: boolean;
+  onTypingComplete?: (id: string) => void;
 };
 
-export default function MessagesList({ messages, isThinking }: Props) {
+export default function MessagesList({ messages, isThinking, onTypingComplete }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
@@ -24,8 +25,11 @@ export default function MessagesList({ messages, isThinking }: Props) {
         return (
           <div key={m.id} className={`message ${m.role}`}>
             <div className="bubble">
-              {isLastAssistantMessage ? (
-                <TypewriterText text={m.text} />
+              {isLastAssistantMessage && m.isTyped === false ? (
+                <TypewriterText
+                  text={m.text}
+                  onComplete={() => onTypingComplete?.(m.id)}
+                />
               ) : (
                 m.text
               )}

@@ -5,10 +5,10 @@ import { listDocuments, type DocumentItem } from "../../api/documentsClient";
 import { chatWithAI } from "../../api/aiClient";
 import type { ChatMessage, SourceRef } from "./types";
 import { CHAT_KEY, CONTEXT_KEY, buildSnippet, scoreDoc, uid } from "./utils";
+import { PanelRight, X } from "lucide-react";
 
 import ContextPanel from "./components/ContextPanel";
 import MessagesList from "./components/MessagesList";
-import TemplatesBar from "./components/TemplatesBar";
 import Composer from "./components/Composer";
 import { loadJson, saveJson } from "../../utils/storage";
 
@@ -96,18 +96,7 @@ export default function AssistantPage() {
     setMessages([]);
   }
 
-  function applyTemplate(kind: "summarize" | "actions" | "interview") {
-    if (kind === "summarize")
-      setInput("Summarize the selected documents in 6 bullet points.");
-    if (kind === "actions")
-      setInput(
-        "Extract action items from the selected documents. Return a checklist."
-      );
-    if (kind === "interview")
-      setInput(
-        "Generate 12 interview questions based on the selected documents, with short model answers."
-      );
-  }
+
 
   async function send() {
     const question = input.trim();
@@ -178,7 +167,12 @@ export default function AssistantPage() {
       className={`assistant-shell ${showContextPanel ? "with-context" : "no-context"
         }`}
     >
-      <aside className="context-panel-container">
+      <aside className={`context-panel-container ${showContextPanel ? "mobile-open" : ""}`}>
+        <div className="mobile-context-close">
+          <button onClick={() => setIsContextOpen(false)} className="icon-btn">
+            <X />
+          </button>
+        </div>
         <div className="context-panel-inner">
           <ContextPanel
             docs={docs}
@@ -197,7 +191,14 @@ export default function AssistantPage() {
         <div className="assistant-page-inner">
           <MessagesList messages={messages} isThinking={isSending} onTypingComplete={handleTypingComplete} />
           <div className="assistant-topbar">
-            <TemplatesBar onApply={applyTemplate} />
+            <button
+              type="button"
+              className="icon-btn mobile-only-btn"
+              onClick={() => setIsContextOpen(!isContextOpen)}
+              title="Toggle Context"
+            >
+              <PanelRight />
+            </button>
             <button
               type="button"
               className="text-btn"
@@ -216,8 +217,6 @@ export default function AssistantPage() {
           />
         </div>
       </section>
-
-
     </div>
   );
 }

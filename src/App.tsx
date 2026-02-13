@@ -8,6 +8,7 @@ import UsersPage from "./pages/loginPage/UsersPage";
 import "./components/confirmModal/confirmDialog.scss";
 
 import Header from "./components/header/Header";
+import MobileNav from "./components/mobileNav/MobileNav";
 
 import { useAuth } from "./auth/useAuth";
 import RequireAuth from "./auth/RequireAuth";
@@ -43,6 +44,8 @@ function App() {
           />
         </Routes>
       </main>
+
+      <MobileNav />
     </div>
   );
 }

@@ -87,6 +87,37 @@ export default function DocumentsPage() {
     }
   }, [location, navigate]);
 
+  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
+
+  // Update view when active doc changes
+  useEffect(() => {
+    if (activeDocId !== null) {
+      setMobileView("detail");
+    }
+  }, [activeDocId]);
+
+  function handleBackToList() {
+    setMobileView("list");
+    setActiveDocId(null);
+    dismissHint();
+  }
+
+  // Mobile hint state
+  const [showMobileHint, setShowMobileHint] = useState(false);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("documents_mobile_hint");
+    // Show hint if in detail view and hasn't seen it
+    if (!hasSeen && mobileView === "detail") {
+      setShowMobileHint(true);
+    }
+  }, [mobileView]);
+
+  function dismissHint() {
+    setShowMobileHint(false);
+    localStorage.setItem("documents_mobile_hint", "true");
+  }
+
   function handleCreated(doc: DocumentItem) {
     setIsCreating(false);
 
@@ -100,6 +131,7 @@ export default function DocumentsPage() {
     });
 
     setActiveDocId(doc.id);
+    setMobileView("detail");
   }
 
   function openCreate() {
@@ -107,6 +139,7 @@ export default function DocumentsPage() {
     lastActiveDocIdRef.current = activeDocId ?? null;
     setIsCreating(true);
     setActiveDocId(null);
+    setMobileView("detail"); // Switch to detail view for creation
   }
 
   function onCancelCreate() {
@@ -117,11 +150,20 @@ export default function DocumentsPage() {
       (orderedDocs[0]?.id ?? null);
 
     setActiveDocId(fallback);
+    // If we fallback to a doc, stay in detail, otherwise list? 
+    // Usually cancelling creation might mean going back to list if we were in list before?
+    // But create was opened "on top".
+    if (fallback) {
+      setMobileView("detail");
+    } else {
+      setMobileView("list");
+    }
   }
 
   function openDocument(id: number) {
     setIsCreating(false);
     setActiveDocId(id);
+    setMobileView("detail");
   }
 
   function onDragEnd(event: DragEndEvent) {
@@ -186,6 +228,7 @@ export default function DocumentsPage() {
             .filter((d) => d.id !== doc.id);
           return nextOrdered[0]?.id ?? null;
         });
+        setMobileView("list");
       }
     } catch (e) {
       status.show({
@@ -299,7 +342,7 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="documents-layout" role="presentation">
+    <div className={`documents-layout ${mobileView === "detail" ? "mobile-view-detail" : "mobile-view-list"}`} role="presentation">
       <div className="documents-sidebar">
         <DocumentsSidebar
           isAdmin={isAdmin}
@@ -339,6 +382,9 @@ export default function DocumentsPage() {
           onSaved={(updated) => {
             setDocs((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
           }}
+          onBack={handleBackToList}
+          showMobileHint={showMobileHint}
+          onDismissHint={dismissHint}
         />
       </section>
     </div>

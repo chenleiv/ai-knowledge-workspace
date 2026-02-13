@@ -30,7 +30,7 @@
 .assistant-topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   font-size: 14px;
 
@@ -51,36 +51,7 @@
   font-size: 12px;
 }
 
-.templates {
-  display: flex;
-  gap: 10px;
-  flex-wrap: nowrap;
-}
 
-
-.template-btn {
-  border: 1px solid var(--border);
-  background: var(--panel);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
-
-  &:hover {
-    background: var(--soft);
-    border-color: rgba(127, 127, 127, 0.25);
-  }
-
-  &:active {
-    transform: translateY(1px);
-  }
-
-  &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--focus);
-  }
-}
 
 .messages {
   flex: 1;
@@ -250,7 +221,7 @@
 .composer {
   display: flex;
   gap: 8px;
-  padding: 12px 14px 0 0;
+  padding: 12px 0 0 0;
   border-top: 1px solid var(--border);
   background: var(--panel);
 
@@ -278,7 +249,7 @@
     background: var(--primary-hover);
     color: var(--primary-text);
     border: 1px solid transparent;
-    padding: 10px 14px;
+    padding: 10px 24px;
     border-radius: 8px;
     cursor: pointer;
     transition: transform 140ms ease, background 140ms ease, opacity 140ms ease;
@@ -518,25 +489,83 @@
   }
 
   .assistant-topbar {
+    justify-content: space-between;
+
     button {
       padding: 6px 10px;
     }
   }
 }
 
-@media (max-width: 680px) {
-  .assistant-shell {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
+.mobile-only-btn,
+.mobile-context-close {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-only-btn {
+    display: inline-flex !important;
+    margin-right: 8px;
   }
 
-  .context-panel {
-    border-left: 0;
-    border-top: 1px solid var(--border);
-    padding: 10px;
+  .assistant-shell {
+    display: block;
+    padding: 0;
+    height: calc(100vh - 80px - 80px);
+    position: relative;
+
+    // Hide sidebar gap/grid behavior
+    &.with-context {
+      overflow: hidden; // Prevent body scroll when drawer is open?
+    }
+  }
+
+
+
+  .context-panel-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh; // Full viewport height (covering header too?)
+    // Or just below header?
+    // Let's cover everything for a modal-like experience or just main content area.
+    // If we want to cover everything, z-index must be high.
+    z-index: 2000;
+    background: var(--bg);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    // Adjust padding/layout for mobile container
+    display: flex;
+    flex-direction: column;
+
+    .mobile-context-close {
+      display: flex !important;
+      justify-content: flex-end;
+      padding: 12px 12px 0;
+    }
+
+    .context-panel-inner {
+      border-radius: 0;
+      border: 0;
+      border-bottom: 1px solid var(--border);
+    }
+  }
+
+  // When shell has .with-context, we slide the drawer in
+  .assistant-shell.with-context .context-panel-container {
+    transform: translateX(0);
   }
 
   .assistant-page {
-    padding: 10px;
+    height: 100%;
+    padding: 0;
+
+
+    .assistant-page-inner {
+      padding: 16px;
+    }
+
   }
 }

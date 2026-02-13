@@ -91,7 +91,7 @@
       border-radius: 12px;
 
       border: 1px solid var(--border);
-      background: var(--soft);
+      background: var(--bg);
       color: var(--text);
       outline: none;
 
@@ -114,7 +114,7 @@
     overflow: auto;
     background: var(--bg);
     border-top: 1px solid var(--border);
-    padding: 16px;
+    padding: 16px 22px 16px 26px;
     min-height: 0;
     flex: 1;
 
@@ -266,7 +266,7 @@
     border: 1px solid var(--border);
     overflow: hidden;
     border-radius: 8px;
-    padding: 14px;
+    padding: 14px 2px 14px 14px;
     min-height: 0;
   }
 

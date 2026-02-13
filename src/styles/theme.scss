@@ -2,7 +2,7 @@
     /* 
      * Cool & Simple - Light Theme 
      * Base: Clean Off-White
-     * Primary: Vivid Indigo/Violet
+     * Primary: Terracotta
      */
     --bg: #f8f9fa;
     /* Very light greyish white, cooler than before */
@@ -32,75 +32,76 @@
     --overlay: rgba(15, 23, 42, 0.4);
     /* Slate 900 with opacity */
 
-    --focus: rgba(99, 102, 241, 0.2);
-    /* Indigo focus ring */
+    --focus: rgba(178, 101, 81, 0.2);
+    /* Terracotta focus ring */
 
     /* Modern Functional Colors */
     --success-bg: #ecfdf5;
     --success-border: #a7f3d0;
     --success-text: #059669;
 
-    --info-bg: #eff6ff;
-    --info-border: #bfdbfe;
-    --info-text: #2563eb;
+    --info-bg: #fff5f2;
+    --info-border: #f5d0c7;
+    --info-text: #b26551;
 
     --danger-bg: #fef2f2;
     --danger-border: #fecaca;
     --danger-text: #dc2626;
 
-    /* Brand Primary: Indigo */
-    --primary: #6366f1;
+    /* Brand Primary: Terracotta */
+    --primary: #b26551;
     --primary-text: #ffffff;
-    --primary-hover: #4f46e5;
+    --primary-hover: #965544;
 }
 
 [data-theme="dark"] {
     /* 
      * Cool & Simple - Dark Theme
      * Base: Deep Slate
-     * Primary: Bright Indigo
+     * Primary: Bright Terracotta
      */
-    --bg: #0f172a;
-    /* Slate 900 - Rich dark blue-grey */
-    --panel: #1e293b;
-    /* Slate 800 - Lighter for panels */
-    --card: #1e293b;
+    --bg: #131314;
+    /* Gemini Dark Background */
+    --panel: #1e1f20;
+    /* Gemini Surface */
+    --card: #1e1f20;
 
-    --soft: #334155;
-    /* Slate 700 */
-    --soft-2: #475569;
-    /* Slate 600 */
-    --soft-3: #f8fafc;
-    /* Light text for contrast */
+    --soft: #2d2e31;
+    /* Gemini Soft/UI elements */
+    --soft-2: #444746;
+    /* Gemini Borders/Outlines */
+    --soft-3: #e3e3e3;
+    /* High contrast text/icon */
 
-    --white: #f8fafc;
+    --white: #ffffff;
 
-    --text: #f1f5f9;
+    --text: #e3e3e3;
     /* Slate 100 */
     --secondery-text: #cbd5e1;
     /* Slate 300 */
     --muted: #94a3b8;
     /* Slate 400 */
 
-    --border: #334155;
+    --border: #131314bc;
+
     /* Slate 700 */
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
     --overlay: rgba(0, 0, 0, 0.7);
 
-    --primary: #818cf8;
-    /* Lighter Indigo for dark mode */
+    --primary: #cf7d6a;
+    /* Lighter Terracotta for dark mode */
     --primary-text: #ffffff;
-    --primary-hover: #6366f1;
+    --primary-hover: #b26551;
 
-    --focus: rgba(129, 140, 248, 0.25);
+    --focus: rgba(207, 125, 106, 0.25);
 
     --success-bg: rgba(6, 78, 59, 0.4);
     --success-border: rgba(5, 150, 105, 0.4);
     --success-text: #6ee7b7;
 
-    --info-bg: rgba(30, 58, 138, 0.4);
-    --info-border: rgba(37, 99, 235, 0.4);
-    --info-text: #93c5fd;
+    --info-bg: rgba(178, 101, 81, 0.15);
+    --info-border: rgba(178, 101, 81, 0.3);
+    --info-text: #f0d5ce;
 
     --danger-bg: rgba(127, 29, 29, 0.4);
     --danger-border: rgba(220, 38, 38, 0.4);

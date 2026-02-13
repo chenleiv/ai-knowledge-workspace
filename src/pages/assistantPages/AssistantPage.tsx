@@ -27,7 +27,7 @@ export default function AssistantPage() {
       {
         id: uid(),
         role: "assistant",
-        text: "Select documents on the left, then ask something. I will respond using selected sources (mock for now).",
+        text: "Select documents on the left to focus my answer on specific sources, or ask me anything to search across your entire library.",
         isTyped: true,
       },
     ])

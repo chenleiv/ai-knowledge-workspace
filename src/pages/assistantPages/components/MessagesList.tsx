@@ -34,20 +34,6 @@ export default function MessagesList({ messages, isThinking, onTypingComplete }:
                 m.text
               )}
             </div>
-
-            {m.role === "assistant" && m.sources && m.sources.length > 0 && (
-              <div className="sources">
-                <div className="sources-title">Used sources</div>
-                <ul className="sources-list">
-                  {m.sources.map((s) => (
-                    <li key={s.id} className="source-item">
-                      <div className="source-title">{s.title}</div>
-                      <div className="source-snippet">{s.snippet}</div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         );
       })}

@@ -69,11 +69,8 @@ export default function AssistantPage() {
     saveJson(CHAT_KEY, messages);
   }, [messages]);
 
-  useEffect(() => {
-    if (selectedIds.length > 0 || contextQuery.trim().length > 0) {
-      setIsContextOpen(true);
-    }
-  }, [selectedIds, contextQuery]);
+  // Removed useEffect syncing selectedIds -> setIsContextOpen.
+  // Instead, we will open it explicitly when user adds to selection.
   const showContextPanel = isContextOpen;
 
   function toggleSelected(id: number) {
@@ -82,6 +79,10 @@ export default function AssistantPage() {
         ? prev.filter((x) => x !== id)
         : [...prev, id];
       saveJson(CONTEXT_KEY, next);
+      // Explicitly open panel if we added something (and it wasn't open)
+      if (next.length > prev.length) {
+        setIsContextOpen(true);
+      }
       return next;
     });
   }
@@ -181,7 +182,10 @@ export default function AssistantPage() {
             selectedIds={selectedIds}
             contextQuery={contextQuery}
             onToggleSelected={toggleSelected}
-            onChangeQuery={setContextQuery}
+            onChangeQuery={(q) => {
+              setContextQuery(q);
+              if (q.trim().length > 0) setIsContextOpen(true);
+            }}
             onClearSelection={onClearSelection}
           />
         </div>

@@ -15,14 +15,6 @@ export function saveJson<T>(key: string, value: T): void {
   }
 }
 
-export function removeJson(key: string): void {
-  try {
-    localStorage.removeItem(key);
-  } catch {
-    // ignore
-  }
-}
-
 export function scopedKey(baseKey: string, userEmail?: string | null): string {
   const user = userEmail?.trim().toLowerCase() || "anonymous";
   const env = window.location.host;

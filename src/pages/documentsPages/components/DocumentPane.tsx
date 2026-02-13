@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import type { DocumentItem, DocumentInput } from "../../../api/documentsClient";
 import { createDocument, updateDocument } from "../../../api/documentsClient";
 import { useStatus } from "../../../components/statusBar/useStatus";
@@ -62,52 +62,29 @@ export default function DocumentPane({
 }: Props) {
     const status = useStatus();
 
-    const [mode, setMode] = useState<"view" | "edit">("view");
-    const [form, setForm] = useState<DocumentInput>(emptyInput());
+    // Initialize state from props. The parent key change will handle resets.
+    const [mode, setMode] = useState<"view" | "edit">(isCreating ? "edit" : "view");
+
+    // Initial form state
+    const [form, setForm] = useState<DocumentInput>(() => {
+        if (isCreating) return emptyInput();
+        if (doc) return toInput(doc);
+        return emptyInput();
+    });
+
     const [saving, setSaving] = useState(false);
 
-    // Baseline kept in a ref so it doesn't trigger re-renders and stays stable.
-    const baselineRef = useRef<DocumentInput>(emptyInput());
-
-    // Track which doc the current form belongs to (prevents overwriting drafts).
-    const activeDocIdRef = useRef<number | null>(null);
-
-    useEffect(() => {
-        // Creating mode: always reset to empty + edit
-        if (isCreating) {
-            const empty = emptyInput();
-            baselineRef.current = empty;
-            activeDocIdRef.current = null;
-            setForm(empty);
-            setMode("edit");
-            return;
-        }
-
-        // No doc selected: view mode, keep form as-is (doesn't matter)
-        if (!doc) {
-            activeDocIdRef.current = null;
-            setMode("view");
-            return;
-        }
-
-        // If we are editing the same doc, don't override the user's draft.
-        const incomingId = doc.id;
-        const isSameDoc = activeDocIdRef.current === incomingId;
-
-        if (mode === "edit" && isSameDoc) return;
-
-        // Otherwise, sync form with the selected doc
-        const next = toInput(doc);
-        baselineRef.current = next;
-        activeDocIdRef.current = incomingId;
-        setForm(next);
-        setMode("view");
-    }, [isCreating, doc, mode]);
+    // Baseline for dirty checking
+    const baseline = useMemo(() => {
+        if (isCreating) return emptyInput();
+        if (doc) return toInput(doc);
+        return emptyInput();
+    }, [isCreating, doc]);
 
     const isDirty = useMemo(() => {
         // Compare normalized so trailing spaces don't cause "dirty" flicker.
-        return !isSameInput(normalizeInput(form), normalizeInput(baselineRef.current));
-    }, [form]);
+        return !isSameInput(normalizeInput(form), normalizeInput(baseline));
+    }, [form, baseline]);
 
     const canSave = canEdit && !saving && isDirty;
 
@@ -134,13 +111,7 @@ export default function DocumentPane({
                 const created = await createDocument(cleaned);
                 onCreated(created);
                 status.show({ kind: "success", message: "Document created." });
-
-                // After creation, baseline becomes the saved version
-                const next = toInput(created);
-                baselineRef.current = next;
-                activeDocIdRef.current = created.id;
-                setForm(next);
-                setMode("view");
+                // Parent will likely change state/key, remounting this component.
                 return;
             }
 
@@ -148,11 +119,10 @@ export default function DocumentPane({
 
             const updated = await updateDocument(doc.id, cleaned);
             onSaved(updated);
-
-            const next = toInput(updated);
-            baselineRef.current = next;
-            activeDocIdRef.current = updated.id;
-            setForm(next);
+            // We rely on parent passing new 'doc' prop. 
+            // However, we should exit edit mode immediately and show the updated data.
+            // Since `doc` prop might take a tick to update, we can update local form.
+            setForm(toInput(updated));
             setMode("view");
 
             status.show({ kind: "success", message: "Saved." });
@@ -173,7 +143,7 @@ export default function DocumentPane({
             onCancelCreate();
             return;
         }
-        setForm(baselineRef.current);
+        setForm(baseline);
         setMode("view");
     }
 

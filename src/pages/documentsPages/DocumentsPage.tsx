@@ -89,12 +89,7 @@ export default function DocumentsPage() {
 
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
 
-  // Update view when active doc changes
-  useEffect(() => {
-    if (activeDocId !== null) {
-      setMobileView("detail");
-    }
-  }, [activeDocId]);
+
 
   function handleBackToList() {
     setMobileView("list");
@@ -373,6 +368,7 @@ export default function DocumentsPage() {
 
       <section className="documents-pane">
         <DocumentPane
+          key={isCreating ? "creating" : (activeDoc?.id ?? "empty")}
           doc={activeDoc}
           canEdit={isAdmin}
           isCreating={isCreating}

@@ -40,9 +40,9 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
   const api: StatusApi = useMemo(() => ({ show, clear }), [show, clear]);
 
   return (
-    <StatusContext.Provider value={api}>
+    <StatusContext value={api}>
       {children}
       <StatusBar message={msg} onClose={clear} />
-    </StatusContext.Provider>
+    </StatusContext>
   );
 }

@@ -48,7 +48,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
   const cancelLabel = options.cancelLabel ?? "Cancel";
   const variant = options.variant ?? "primary";
   return (
-    <ConfirmContext.Provider value={value}>
+    <ConfirmContext value={value}>
       {children}
       <ConfirmDialog
         open={open}
@@ -60,6 +60,6 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
         onConfirm={() => close(true)}
         onCancel={() => close(false)}
       />
-    </ConfirmContext.Provider>
+    </ConfirmContext>
   );
 }

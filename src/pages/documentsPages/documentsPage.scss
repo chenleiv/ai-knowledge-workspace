@@ -274,7 +274,7 @@
     padding: 0px 6px 12px;
     border-bottom: 1px solid var(--border);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
   }
@@ -297,6 +297,10 @@
     display: flex;
     align-items: center;
     gap: 10px;
+
+    .primary-btn {
+      padding: 8px 10px;
+    }
   }
 
   .doc-pane-actions-right {
@@ -449,6 +453,10 @@
       .documents-pane {
         display: none;
       }
+    }
+
+    .doc-pane-title {
+      font-size: 18px;
     }
 
     &.mobile-view-detail {

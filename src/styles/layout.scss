@@ -142,8 +142,7 @@
     justify-content: space-between;
     align-items: center;
 
-    background: rgba(255, 255, 255, 0.95);
-    /* Almost opaque white */
+    background: var(--bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
@@ -151,13 +150,6 @@
     padding: 16px 32px;
     gap: 16px;
     transition: all 0.3s ease;
-
-    [data-theme="dark"] & {
-      background: rgba(19, 19, 20, 0.9);
-      /* Gemini Dark #131314 with opacity */
-      border-bottom-color: transparent;
-      /* Seamless header in dark mode usually */
-    }
 
     .header-title {
       margin: 0;
@@ -172,13 +164,12 @@
       display: flex;
       gap: 8px;
       background: var(--soft);
-      /* Pill background for nav */
       padding: 4px;
       border-radius: 8px;
 
       a {
         text-decoration: none;
-        color: var(--muted);
+        color: var(---text-sec);
         padding: 6px 16px;
         border-radius: 8px;
         font-weight: 500;
@@ -186,7 +177,8 @@
         transition: all 0.2s ease;
 
         &:hover {
-          color: var(--text);
+          // color: var(--text);
+          background: var(--panel);
         }
 
         &.is-active,

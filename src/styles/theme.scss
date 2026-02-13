@@ -1,106 +1,108 @@
 :root {
     /* 
-     * Gemini Light
-     * Base: Pure White & Soft Blue-Grays
-     * Primary: Gooogle Blue / Gemini Gradient Feel
+     * Cool & Simple - Light Theme 
+     * Base: Clean Off-White
+     * Primary: Vivid Indigo/Violet
      */
-    --bg: #ffffff;
-    --panel: #f0f4f9;
-    /* Gemini Input/Panel BG */
+    --bg: #f8f9fa;
+    /* Very light greyish white, cooler than before */
+    --panel: #ffffff;
+    /* Pure white for cards/panels */
     --card: #ffffff;
 
-    --soft: #e9eef6;
-    /* Light blue-gray hover */
-    --soft-2: #dde3ea;
-    /* Borders */
-    --soft-3: #0b57d0;
-    /* Strong Blue */
+    --soft: #eff1f5;
+    /* Light cool grey for hover/subtle backgrounds */
+    --soft-2: #e2e4e9;
+    /* Slightly darker for borders/inputs */
 
+    --soft-3: #1e293b;
+    /* Dark element for contrast (e.g. primary button text if needed) */
     --white: #ffffff;
 
-    --text: #1f1f1f;
-    /* Near Black */
-    --secondery-text: #444746;
-    /* Dark Gray */
-    --muted: #727775;
-    /* Muted Gray */
+    --text: #1e293b;
+    /* Slate 800 - softer than pure black */
+    --secondery-text: #475569;
+    /* Slate 600 */
+    --muted: #94a3b8;
+    /* Slate 400 */
 
-    --border: #e0e3e1;
-    --shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
-    --overlay: rgba(0, 0, 0, 0.4);
+    --border: #e2e8f0;
+    /* Slate 200 */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --overlay: rgba(15, 23, 42, 0.4);
+    /* Slate 900 with opacity */
 
-    --focus: rgba(11, 87, 208, 0.2);
+    --focus: rgba(99, 102, 241, 0.2);
+    /* Indigo focus ring */
 
-    /* Gemini Actions */
-    --primary: #0b57d0;
-    /* Deep Google Blue */
+    /* Modern Functional Colors */
+    --success-bg: #ecfdf5;
+    --success-border: #a7f3d0;
+    --success-text: #059669;
+
+    --info-bg: #eff6ff;
+    --info-border: #bfdbfe;
+    --info-text: #2563eb;
+
+    --danger-bg: #fef2f2;
+    --danger-border: #fecaca;
+    --danger-text: #dc2626;
+
+    /* Brand Primary: Indigo */
+    --primary: #6366f1;
     --primary-text: #ffffff;
-    --primary-hover: #0842a0;
-
-    --success-bg: #c4eed0;
-    --success-border: #6dd58c;
-    --success-text: #0f5132;
-
-    --info-bg: #d3e3fd;
-    --info-border: #a8c7fa;
-    --info-text: #044492;
-
-    --danger-bg: #f9dedc;
-    --danger-border: #f2b8b5;
-    --danger-text: #b3261e;
-
-    --accent: #1967d2;
+    --primary-hover: #4f46e5;
 }
 
 [data-theme="dark"] {
     /* 
-     * Gemini Dark
-     * Base: Deep Charcoal / Anthracite (#131314)
-     * Accents: Soft Pastel Blue (#a8c7fa)
+     * Cool & Simple - Dark Theme
+     * Base: Deep Slate
+     * Primary: Bright Indigo
      */
-    --bg: #131314;
-    /* Official Dark BG */
-    --panel: #1e1f20;
-    /* Secondary Container */
-    --card: #1e1f20;
+    --bg: #0f172a;
+    /* Slate 900 - Rich dark blue-grey */
+    --panel: #1e293b;
+    /* Slate 800 - Lighter for panels */
+    --card: #1e293b;
 
-    --soft: #28292a;
-    /* Hover state */
-    --soft-2: #3F4042;
-    /* Borders/input */
-    --soft-3: #e3e3e3;
+    --soft: #334155;
+    /* Slate 700 */
+    --soft-2: #475569;
+    /* Slate 600 */
+    --soft-3: #f8fafc;
+    /* Light text for contrast */
 
-    --white: #ffffff;
+    --white: #f8fafc;
 
-    --text: #e3e3e3;
-    /* Near White */
-    --secondery-text: #c4c7c5;
-    /* Light Gray */
-    --muted: #8e918f;
-    /* Muted Gray */
+    --text: #f1f5f9;
+    /* Slate 100 */
+    --secondery-text: #cbd5e1;
+    /* Slate 300 */
+    --muted: #94a3b8;
+    /* Slate 400 */
 
-    --border: #444746;
-    --shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    --border: #334155;
+    /* Slate 700 */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
     --overlay: rgba(0, 0, 0, 0.7);
 
-    /* Gemini Dark Accents */
-    --primary: #a8c7fa;
-    /* Soft Blue */
-    --primary-text: #042d60;
-    /* Dark Blue Text on Light Blue Button */
-    --primary-hover: #d3e3fd;
+    --primary: #818cf8;
+    /* Lighter Indigo for dark mode */
+    --primary-text: #ffffff;
+    --primary-hover: #6366f1;
 
-    --focus: rgba(168, 199, 250, 0.2);
+    --focus: rgba(129, 140, 248, 0.25);
 
-    --success-bg: #0f5132;
-    --success-border: #6dd58c;
-    --success-text: #c4eed0;
+    --success-bg: rgba(6, 78, 59, 0.4);
+    --success-border: rgba(5, 150, 105, 0.4);
+    --success-text: #6ee7b7;
 
-    --info-bg: #044492;
-    --info-border: #a8c7fa;
-    --info-text: #d3e3fd;
+    --info-bg: rgba(30, 58, 138, 0.4);
+    --info-border: rgba(37, 99, 235, 0.4);
+    --info-text: #93c5fd;
 
-    --danger-bg: #8c1d18;
-    --danger-border: #f2b8b5;
-    --danger-text: #f9dedc;
+    --danger-bg: rgba(127, 29, 29, 0.4);
+    --danger-border: rgba(220, 38, 38, 0.4);
+    --danger-text: #fca5a5;
 }

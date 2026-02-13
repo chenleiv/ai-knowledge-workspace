@@ -325,7 +325,7 @@
   display: grid;
   gap: 8px;
   padding: 14px 14px 18px;
-  background: var(--bg);
+  background: var(--panel);
   border-bottom: 1px solid var(--border);
 
   .context-row {
@@ -497,6 +497,8 @@
 
     button {
       padding: 0;
+      color: var(--info-text);
+
     }
   }
 }

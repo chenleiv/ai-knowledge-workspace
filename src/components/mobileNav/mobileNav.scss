@@ -1,9 +1,9 @@
 .mobile-nav {
     position: fixed;
-    bottom: 12px;
+    bottom: 6px;
     left: 8px;
     right: 8px;
-    height: 72px;
+    height: 70px;
     background: rgba(var(--bg-rgb), 0.85);
     background: color-mix(in srgb, var(--panel) 85%, transparent);
     backdrop-filter: blur(12px);

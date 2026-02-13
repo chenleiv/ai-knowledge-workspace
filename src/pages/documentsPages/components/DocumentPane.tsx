@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import type { DocumentItem, DocumentInput } from "../../../api/documentsClient";
 import { createDocument, updateDocument } from "../../../api/documentsClient";
 import { useStatus } from "../../../components/statusBar/useStatus";
-import { ChevronLeft, SquarePenIcon, X } from "lucide-react";
+import { SquarePenIcon, X } from "lucide-react";
 
 type Props = {
     doc: DocumentItem | null;

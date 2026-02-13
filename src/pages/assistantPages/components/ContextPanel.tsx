@@ -41,7 +41,7 @@ export default function ContextPanel({
   const hasSelection = selectedIds.length > 0;
 
   const hint = hasSelection
-    ? `Use only selected documents. (${selectedIds.length} selected)`
+    ? `Use selected documents. (${selectedIds.length} selected)`
     : "No selection — Use all documents.";
 
   const isSelected = useCallback(

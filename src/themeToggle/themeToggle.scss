@@ -43,8 +43,8 @@
     /* Dark Mode State */
     &.dark .thumb {
         transform: translateX(20px);
-        background: var(--soft-3);
-        color: var(--white);
+        background: var(--white);
+        color: var(--text);
     }
 
     /* Active press effect */

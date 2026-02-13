@@ -1,109 +1,85 @@
 :root {
+
     /* 
-     * Cool & Simple - Light Theme 
-     * Base: Clean Off-White
-     * Primary: Terracotta
+     * Material Dark - Analytics Dashboard
      */
-    --bg: #f8f9fa;
-    /* Very light greyish white, cooler than before */
-    --panel: #ffffff;
-    /* Pure white for cards/panels */
-    --card: #ffffff;
+    --bg: #121212;
+    /* Direct background */
+    --panel: #1e1e1e;
+    /* Surface level */
+    --card: #242424;
+    /* Elevated surface */
 
-    --soft: #eff1f5;
-    /* Light cool grey for hover/subtle backgrounds */
-    --soft-2: #e2e4e9;
-    /* Slightly darker for borders/inputs */
-
-    --soft-3: #1e293b;
-    /* Dark element for contrast (e.g. primary button text if needed) */
-    --white: #ffffff;
-
-    --text: #1e293b;
-    /* Slate 800 - softer than pure black */
-    --secondery-text: #475569;
-    /* Slate 600 */
-    --muted: #6b6b73;
-    /* Slate 400 */
-
-    --border: #e2e8f0;
-    /* Slate 200 */
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    --overlay: rgba(15, 23, 42, 0.4);
-    /* Slate 900 with opacity */
-
-    --focus: rgba(59, 130, 246, 0.4);
-    /* Blue focus ring */
-
-    /* Modern Functional Colors */
-    --success-bg: #ecfdf5;
-    --success-border: #a7f3d0;
-    --success-text: #059669;
-
-    --info-bg: #eff6ff;
-    --info-border: #bfdbfe;
-    --info-text: #1d4ed8;
-
-    --danger-bg: #fef2f2;
-    --danger-border: #fecaca;
-    --danger-text: #dc2626;
-
-    /* Brand Primary: Blue */
-    --primary: #3b82f6;
-    --primary-text: #ffffff;
-    --primary-hover: #2563eb;
-}
-
-[data-theme="dark"] {
-    /* 
-     * Cool & Simple - Dark Theme
-     * Base: Deep Slate
-     * Primary: Bright Blue
-     */
-    --bg: #131314;
-    /* Gemini Dark Background */
-    --panel: #1e1f20;
-    /* Gemini Surface */
-    --card: #1e1f20;
-
-    --soft: #2d2e31;
-    /* Gemini Soft/UI elements */
-    --soft-2: #444746;
-    /* Gemini Borders/Outlines */
-    --soft-3: #e3e3e3;
-    /* High contrast text/icon */
+    --soft: #2c2c2c;
+    --soft-2: #383838;
+    --soft-3: color-mix(in srgb, #66a5eb 25%, var(--bg));
+    /* Primary Purple in dark mode */
 
     --white: #ffffff;
 
-    --text: #e3e3e3;
-    /* Slate 100 */
-    --secondery-text: #cbd5e1;
-    /* Slate 300 */
-    --muted: #94a3b8;
-    /* Slate 400 */
+    --text: #ffffff;
+    --secondery-text: #b0b0b0;
+    --muted: #c3c2c2;
 
-    --border: #131314bc;
-
-    /* Slate 700 */
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+    --border: #3c3c3c;
+    --shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     --overlay: rgba(0, 0, 0, 0.7);
 
-    --primary: #60a5fa;
-    /* Lighter Blue for dark mode */
-    --primary-text: #ffffff;
-    --primary-hover: #3b82f6;
+    --primary: #84aedd;
+    --primary-bg: color-mix(in srgb, var(--primary) 16%, var(--bg));
+    --primary-text: #000000;
+    --primary-hover: #74a9ffdb;
 
-    --focus: rgba(96, 165, 250, 0.4);
+    --focus: #cddef14f;
 
-    --success-bg: rgba(6, 78, 59, 0.4);
-    --success-border: rgba(5, 150, 105, 0.4);
-    --success-text: #6ee7b7;
+    --success-bg: #6b6d6e5c;
+    --success-border: #86d8fcdb;
+    --success-text: #81c784;
 
-    --info-bg: rgba(59, 130, 246, 0.15);
-    --info-border: rgba(59, 130, 246, 0.3);
-    --info-text: #dbeafe;
+    --info-bg: #3f4247db;
+    --info-border: #86d8fcdb;
+    --info-text: #90caf9;
 
-    --danger-bg: rgba(127, 29, 29, 0.4);
-    --danger-border: rgba(220, 38, 38, 0.4);
-    --danger-text: #fca5a5;
+    --danger-bg: color-mix(in srgb, #66a5eb 25%, var(--bg));
+    --danger-border: #86d8fcdb;
+    --danger-text: #e57373;
+
+}
+
+[data-theme="light"] {
+    --bg: #f7f7f8;
+    --panel: #ffffff;
+    --card: #ffffff;
+
+    --soft: #f1f1f2;
+    --soft-2: #e9e9eb;
+
+    --soft-3: #111113c8;
+
+    --text: #111113;
+    --secondery-text: #111113bb;
+    --muted: #6b6b73;
+
+    --info-bg: color-mix(in srgb, var(--primary) 8%, var(--bg));
+    --info-border: #86d8fcdb;
+    --info-text: #90caf9;
+
+    --primary-bg: color-mix(in srgb, var(--primary) 8%, var(--bg));
+    --primary-hover: #007affe8;
+    --primary-border: #86d8fcdb;
+    --primary-text: #ececec;
+
+    --border: #e3e3e6;
+    --shadow: rgba(0, 0, 0, 0.08);
+    --overlay: rgba(0, 0, 0, 0.35);
+
+    --focus: rgba(0, 0, 0, 0.12);
+
+    --danger-bg: rgba(220, 38, 38, 0.08);
+    --danger-border: rgba(220, 38, 38, 0.18);
+    --danger-text: #991b1b;
+
+    /* Keep existing primary for links if needed */
+    --primary: #007aff;
+
 }

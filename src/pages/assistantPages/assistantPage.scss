@@ -102,7 +102,7 @@
   }
 
   &.greeting .bubble {
-    background: color-mix(in srgb, var(--primary) 8%, var(--bg));
+    background: var(--info-bg);
     border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--border));
   }
 
@@ -244,6 +244,7 @@
   .send-btn {
     background: var(--primary-hover);
     color: var(--primary-text);
+    font-weight: 700;
     border: 1px solid transparent;
     padding: 10px 24px;
     border-radius: 8px;

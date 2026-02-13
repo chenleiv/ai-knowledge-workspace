@@ -491,8 +491,16 @@
   .assistant-topbar {
     justify-content: space-between;
 
+    .mobile-only-btn {
+      margin: 0;
+
+      span {
+        color: var(--muted);
+      }
+    }
+
     button {
-      padding: 6px 10px;
+      padding: 0;
     }
   }
 }
@@ -525,7 +533,7 @@
   .assistant-shell {
     display: block;
     padding: 0;
-    height: calc(100vh - 80px - 80px);
+    height: calc(100vh - 80px - 100px);
     position: relative;
 
     // Hide sidebar gap/grid behavior
@@ -555,9 +563,7 @@
     flex-direction: column;
 
     .mobile-context-close {
-      display: flex !important;
-      justify-content: flex-end;
-      padding: 12px 12px 0;
+      display: none !important;
     }
 
     .context-panel-inner {
@@ -581,5 +587,46 @@
       padding: 16px;
     }
 
+  }
+}
+
+// Default to hidden to prevent grid layout issues on desktop
+.mobile-context-close-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  // ... existing mobile styles ...
+
+  .mobile-context-close-btn {
+    display: flex;
+    position: fixed;
+    top: auto;
+    bottom: 140px;
+    /* Moved up slightly */
+    right: 0;
+    transform: none;
+    z-index: 9999;
+    /* Ensure it's on top of everything */
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 12px 8px 12px 10px;
+    background: rgba(var(--bg-rgb), 0.95);
+    /* More opaque */
+    background: color-mix(in srgb, var(--panel) 95%, transparent);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-right: 0;
+    border-radius: 12px 0 0 12px;
+    box-shadow: -2px 4px 16px rgba(0, 0, 0, 0.25);
+    color: var(--text);
+    cursor: pointer;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
   }
 }

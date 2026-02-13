@@ -430,23 +430,62 @@
 
 
 
+// Default to hidden to prevent grid layout issues on desktop
+.mobile-back-wrapper {
+  display: none;
+}
+
 @media (max-width: 768px) {
 
   .mobile-back-wrapper {
+    display: flex;
+    position: fixed;
+    top: auto;
+    bottom: 140px;
+    right: 0;
+    left: auto;
+    transform: none;
+    z-index: 9999;
+    margin: 0;
+
     .icon-btn {
-      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 12px 8px 12px 10px;
+      background: rgba(var(--bg-rgb), 0.95);
+      background: color-mix(in srgb, var(--panel) 95%, transparent);
+
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-right: 0;
+      border-radius: 12px 0 0 12px;
+      box-shadow: -2px 4px 16px rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      width: auto;
+      cursor: pointer;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    /* Text removed from JSX, so styles not needed, but keeping empty or removing is fine */
+    .back-text {
+      display: none;
     }
   }
 
   .mobile-only-btn {
     display: inline-flex !important;
-    margin-right: 8px;
+    /* margin-right removed as it is now fixed */
   }
 
   .documents-layout {
     display: block; // Use block instead of grid for mobile
     padding: 16px;
-    height: calc(100vh - 80px - 80px); // Adjust for header + mobile nav
+    height: calc(100vh - 80px - 100px); // Adjust for header + mobile nav
 
     &.mobile-view-list {
       .documents-sidebar {

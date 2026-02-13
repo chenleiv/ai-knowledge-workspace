@@ -169,11 +169,7 @@ export default function AssistantPage() {
         }`}
     >
       <aside className={`context-panel-container ${showContextPanel ? "mobile-open" : ""}`}>
-        <div className="mobile-context-close">
-          <button onClick={() => setIsContextOpen(false)} className="icon-btn">
-            <X />
-          </button>
-        </div>
+
         <div className="context-panel-inner">
           <ContextPanel
             docs={docs}
@@ -191,19 +187,20 @@ export default function AssistantPage() {
         </div>
       </aside>
 
+      {showContextPanel && (
+        <button
+          onClick={() => setIsContextOpen(false)}
+          className="mobile-context-close-btn"
+          aria-label="Close context"
+        >
+          <X />
+        </button>
+      )}
+
       <section className="assistant-page">
         <div className="assistant-page-inner">
           <MessagesList messages={messages} isThinking={isSending} onTypingComplete={handleTypingComplete} />
           <div className="assistant-topbar">
-            <button
-              type="button"
-              className="icon-btn mobile-only-btn"
-              onClick={() => setIsContextOpen(!isContextOpen)}
-              title="Toggle Context"
-            >
-              <PanelRight />
-              <span>Documents</span>
-            </button>
             <button
               type="button"
               className="text-btn"
@@ -211,6 +208,16 @@ export default function AssistantPage() {
               disabled={messages.length === 0}
             >
               Clear chat
+            </button>
+
+            <button
+              type="button"
+              className="icon-btn mobile-only-btn"
+              onClick={() => setIsContextOpen(!isContextOpen)}
+              title="Toggle Context"
+            >
+              <span>Documents</span>
+              <PanelRight />
             </button>
           </div>
 

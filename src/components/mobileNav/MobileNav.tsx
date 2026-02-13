@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { FileText, Sparkles } from "lucide-react";
 import "./mobileNav.scss";
 import { useAuth } from "../../auth/useAuth";
 
@@ -15,7 +16,9 @@ export default function MobileNav() {
                     `mobile-nav-item${isActive ? " is-active" : ""}`
                 }
             >
-                <div className="icon">📄</div>
+                <div className="icon">
+                    <FileText />
+                </div>
                 <span>Documents</span>
             </NavLink>
             <NavLink
@@ -24,7 +27,9 @@ export default function MobileNav() {
                     `mobile-nav-item${isActive ? " is-active" : ""}`
                 }
             >
-                <div className="icon">✨</div>
+                <div className="icon">
+                    <Sparkles />
+                </div>
                 <span>Assistant</span>
             </NavLink>
         </nav>

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import type { DocumentItem, DocumentInput } from "../../../api/documentsClient";
 import { createDocument, updateDocument } from "../../../api/documentsClient";
 import { useStatus } from "../../../components/statusBar/useStatus";
-import { ChevronLeft, SquarePenIcon } from "lucide-react";
+import { ChevronLeft, SquarePenIcon, X } from "lucide-react";
 
 type Props = {
     doc: DocumentItem | null;
@@ -176,29 +176,29 @@ export default function DocumentPane({
 
     return (
         <div className="doc-pane">
-            <div className="doc-pane-top">
-                <div className="doc-pane-title-container" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {onBack && (
-                        <div className="mobile-back-wrapper mobile-only-btn" style={{ position: "relative" }}>
-                            <button
-                                type="button"
-                                className="icon-btn"
-                                onClick={() => {
-                                    onBack();
-                                    onDismissHint?.();
-                                }}
-                                aria-label="Back"
-                            >
-                                <ChevronLeft />
-                            </button>
-                            {showMobileHint && (
-                                <div className="mobile-hint-bubble" onClick={onDismissHint}>
-                                    Tap to return
-                                    <div className="arrow-up-left"></div>
-                                </div>
-                            )}
+            {onBack && (
+                <div className="mobile-back-wrapper">
+                    <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={() => {
+                            onBack();
+                            onDismissHint?.();
+                        }}
+                        aria-label="Back"
+                    >
+                        <X size={20} />
+                    </button>
+                    {showMobileHint && (
+                        <div className="mobile-hint-bubble" onClick={onDismissHint}>
+                            Tap to return
+                            <div className="arrow-up-left"></div>
                         </div>
                     )}
+                </div>
+            )}
+            <div className="doc-pane-top">
+                <div className="doc-pane-title-container" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div>
                         <h2 className="doc-pane-title">{paneTitle}</h2>
                         {paneCategory ? <h4 className="doc-pane-title small">{paneCategory}</h4> : null}

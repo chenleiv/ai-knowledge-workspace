@@ -5,12 +5,14 @@ import { listDocuments, type DocumentItem } from "../../api/documentsClient";
 import { chatWithAI } from "../../api/aiClient";
 import type { ChatMessage, SourceRef } from "./types";
 import { CHAT_KEY, CONTEXT_KEY, buildSnippet, scoreDoc, uid } from "./utils";
-import { PanelRight, X } from "lucide-react";
+import { Check, PanelRight } from "lucide-react";
 
 import ContextPanel from "./components/ContextPanel";
 import MessagesList from "./components/MessagesList";
 import Composer from "./components/Composer";
 import { loadJson, saveJson } from "../../utils/storage";
+
+const INITIAL_GREETING = "Select documents on the left to focus my answer on specific sources, or ask me anything to search across your entire library.";
 
 export default function AssistantPage() {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
@@ -27,8 +29,9 @@ export default function AssistantPage() {
       {
         id: uid(),
         role: "assistant",
-        text: "Select documents on the left to focus my answer on specific sources, or ask me anything to search across your entire library.",
+        text: INITIAL_GREETING,
         isTyped: true,
+        isGreeting: true,
       },
     ])
   );
@@ -94,7 +97,13 @@ export default function AssistantPage() {
   }, [docs, selectedIds]);
 
   function clearChat() {
-    setMessages([]);
+    setMessages([{
+      id: uid(),
+      role: "assistant",
+      text: INITIAL_GREETING,
+      isTyped: true,
+      isGreeting: true,
+    }]);
   }
 
 
@@ -103,10 +112,16 @@ export default function AssistantPage() {
     const question = input.trim();
     if (!question) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { id: uid(), role: "user", text: question },
-    ]);
+    setMessages((prev) => {
+      // If the only message is the initial greeting, remove it so the chat starts fresh
+      const isInitial = prev.length === 1 && prev[0].role === "assistant" && prev[0].text === INITIAL_GREETING;
+      const history = isInitial ? [] : prev;
+
+      return [
+        ...history,
+        { id: uid(), role: "user", text: question },
+      ];
+    });
     setInput("");
     setIsSending(true);
 
@@ -193,7 +208,7 @@ export default function AssistantPage() {
           className="mobile-context-close-btn"
           aria-label="Close context"
         >
-          <X />
+          <Check />
         </button>
       )}
 

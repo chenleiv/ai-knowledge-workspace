@@ -23,7 +23,7 @@ export default function MessagesList({ messages, isThinking, onTypingComplete }:
         const isLastAssistantMessage = m.role === "assistant" && idx === messages.length - 1;
 
         return (
-          <div key={m.id} className={`message ${m.role}`}>
+          <div key={m.id} className={`message ${m.role} ${m.isGreeting ? "greeting" : ""}`}>
             <div className="bubble">
               {isLastAssistantMessage && m.isTyped === false ? (
                 <TypewriterText

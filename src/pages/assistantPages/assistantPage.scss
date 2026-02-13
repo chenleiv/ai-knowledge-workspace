@@ -101,6 +101,11 @@
     background: var(--soft);
   }
 
+  &.greeting .bubble {
+    background: color-mix(in srgb, var(--primary) 8%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--border));
+  }
+
   &.thinking {
     .bubble {
       display: flex;

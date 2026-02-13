@@ -12,4 +12,5 @@ export type ChatMessage = {
   text: string;
   sources?: SourceRef[];
   isTyped?: boolean;
+  isGreeting?: boolean;
 };

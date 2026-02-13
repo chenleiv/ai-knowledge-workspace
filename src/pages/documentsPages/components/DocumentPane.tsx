@@ -187,7 +187,7 @@ export default function DocumentPane({
                         }}
                         aria-label="Back"
                     >
-                        <X size={20} />
+                        <X />
                     </button>
                     {showMobileHint && (
                         <div className="mobile-hint-bubble" onClick={onDismissHint}>

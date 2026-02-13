@@ -202,6 +202,7 @@ export default function AssistantPage() {
               title="Toggle Context"
             >
               <PanelRight />
+              <span>Documents</span>
             </button>
             <button
               type="button"

@@ -505,8 +505,22 @@
 @media (max-width: 768px) {
   .mobile-only-btn {
     display: inline-flex !important;
+    font-weight: 500;
     margin-right: 8px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    /* Prominent styling for mobile discovery */
+    // background: var(--soft);
+    border: 1px solid var(--muted);
+    color: var(--primary);
+    border-radius: 8px;
+    padding: 8px;
+
+    animation: context-btn-pulse 10s infinite;
   }
+
 
   .assistant-shell {
     display: block;

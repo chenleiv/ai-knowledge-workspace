@@ -428,7 +428,16 @@
   display: none !important;
 }
 
+
+
 @media (max-width: 768px) {
+
+  .mobile-back-wrapper {
+    .icon-btn {
+      padding: 0;
+    }
+  }
+
   .mobile-only-btn {
     display: inline-flex !important;
     margin-right: 8px;
@@ -471,6 +480,17 @@
 
         .doc-pane {
           border-radius: 12px;
+
+          .doc-pane-top {
+            align-items: center;
+          }
+
+          .doc-pane-edit {
+            svg {
+              width: 28px;
+              height: 28px;
+            }
+          }
         }
       }
     }

@@ -32,33 +32,33 @@
     --overlay: rgba(15, 23, 42, 0.4);
     /* Slate 900 with opacity */
 
-    --focus: rgba(178, 101, 81, 0.2);
-    /* Terracotta focus ring */
+    --focus: rgba(59, 130, 246, 0.4);
+    /* Blue focus ring */
 
     /* Modern Functional Colors */
     --success-bg: #ecfdf5;
     --success-border: #a7f3d0;
     --success-text: #059669;
 
-    --info-bg: #fff5f2;
-    --info-border: #f5d0c7;
-    --info-text: #b26551;
+    --info-bg: #eff6ff;
+    --info-border: #bfdbfe;
+    --info-text: #1d4ed8;
 
     --danger-bg: #fef2f2;
     --danger-border: #fecaca;
     --danger-text: #dc2626;
 
-    /* Brand Primary: Terracotta */
-    --primary: #b26551;
+    /* Brand Primary: Blue */
+    --primary: #3b82f6;
     --primary-text: #ffffff;
-    --primary-hover: #965544;
+    --primary-hover: #2563eb;
 }
 
 [data-theme="dark"] {
     /* 
      * Cool & Simple - Dark Theme
      * Base: Deep Slate
-     * Primary: Bright Terracotta
+     * Primary: Bright Blue
      */
     --bg: #131314;
     /* Gemini Dark Background */
@@ -88,20 +88,20 @@
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
     --overlay: rgba(0, 0, 0, 0.7);
 
-    --primary: #cf7d6a;
-    /* Lighter Terracotta for dark mode */
+    --primary: #60a5fa;
+    /* Lighter Blue for dark mode */
     --primary-text: #ffffff;
-    --primary-hover: #b26551;
+    --primary-hover: #3b82f6;
 
-    --focus: rgba(207, 125, 106, 0.25);
+    --focus: rgba(96, 165, 250, 0.4);
 
     --success-bg: rgba(6, 78, 59, 0.4);
     --success-border: rgba(5, 150, 105, 0.4);
     --success-text: #6ee7b7;
 
-    --info-bg: rgba(178, 101, 81, 0.15);
-    --info-border: rgba(178, 101, 81, 0.3);
-    --info-text: #f0d5ce;
+    --info-bg: rgba(59, 130, 246, 0.15);
+    --info-border: rgba(59, 130, 246, 0.3);
+    --info-text: #dbeafe;
 
     --danger-bg: rgba(127, 29, 29, 0.4);
     --danger-border: rgba(220, 38, 38, 0.4);

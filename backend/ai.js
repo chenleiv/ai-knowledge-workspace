@@ -26,7 +26,7 @@ router.post('/api/ai/chat', getCurrentUser, async (req, res) => {
     try {
         // Construct messages array for chatCompletion
         const messages = [
-            { role: 'system', content: 'You are a helpful Knowledge Workspace assistant.' }
+            { role: 'system', content: 'You are a helpful Knowledge Workspace assistant. Please keep your answers concise and to the point, ideally under 50 words unless the user asks for a detailed explanation.' }
         ];
 
         if (context && context.length > 0) {
@@ -43,7 +43,7 @@ router.post('/api/ai/chat', getCurrentUser, async (req, res) => {
         const response = await hf.chatCompletion({
             model: 'meta-llama/Meta-Llama-3-8B-Instruct',
             messages: messages,
-            max_tokens: 500,
+            max_tokens: 150,
             temperature: 0.7,
         });
 

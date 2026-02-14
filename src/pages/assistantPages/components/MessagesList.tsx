@@ -8,7 +8,11 @@ type Props = {
   onTypingComplete?: (id: string) => void;
 };
 
-export default function MessagesList({ messages, isThinking, onTypingComplete }: Props) {
+export default function MessagesList({
+  messages,
+  isThinking,
+  onTypingComplete,
+}: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
@@ -19,12 +23,18 @@ export default function MessagesList({ messages, isThinking, onTypingComplete }:
   return (
     <div ref={containerRef} className="messages">
       {messages.map((m, idx) => {
-        const isLastAssistantMessage = m.role === "assistant" && idx === messages.length - 1;
+        const isLastAssistantMessage =
+          m.role === "assistant" && idx === messages.length - 1;
 
         return (
-          <div key={m.id} className={`message ${m.role} ${m.isGreeting ? "greeting" : ""}`}>
+          <div
+            key={m.id}
+            className={`message ${m.role} ${m.isGreeting ? "greeting" : ""}`}
+          >
             <div className="bubble">
-              {isLastAssistantMessage && m.isTyped === false ? (
+              {isLastAssistantMessage &&
+              m.isTyped === false &&
+              typeof m.text === "string" ? (
                 <TypewriterText
                   text={m.text}
                   onComplete={() => onTypingComplete?.(m.id)}
@@ -40,7 +50,9 @@ export default function MessagesList({ messages, isThinking, onTypingComplete }:
       {isThinking && (
         <div className="message assistant thinking">
           <div className="bubble">
-            <span /><span /><span />
+            <span />
+            <span />
+            <span />
           </div>
         </div>
       )}

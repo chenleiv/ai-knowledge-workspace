@@ -6,7 +6,7 @@ import { chatWithAI } from "../../api/aiClient";
 import type { ChatMessage, SourceRef } from "./types";
 import { CHAT_KEY, CONTEXT_KEY, buildSnippet, scoreDoc, uid } from "./utils";
 import { sameArray } from "../documentsPages/utils/ordering";
-import { Check, PanelLeft, PanelRight } from "lucide-react";
+import { Check, PanelLeft } from "lucide-react";
 
 import ContextPanel from "./components/ContextPanel";
 import MessagesList from "./components/MessagesList";

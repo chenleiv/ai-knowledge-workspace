@@ -12,8 +12,6 @@ type Props = {
   onEdit: () => void;
   onCancel: () => void;
   onBack?: (() => void) | undefined;
-  showMobileHint?: boolean | undefined;
-  onDismissHint?: (() => void) | undefined;
 };
 
 export const DocumentHeader: React.FC<Props> = ({
@@ -27,8 +25,6 @@ export const DocumentHeader: React.FC<Props> = ({
   onEdit,
   onCancel,
   onBack,
-  showMobileHint,
-  onDismissHint,
 }) => {
   return (
     <div className="doc-pane-top-wrapper">
@@ -39,7 +35,6 @@ export const DocumentHeader: React.FC<Props> = ({
             className="icon-btn"
             onClick={() => {
               onBack();
-              onDismissHint?.();
             }}
             aria-label="Back"
           >

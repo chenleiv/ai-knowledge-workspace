@@ -30,13 +30,13 @@ const toInput = (d: DocumentItem): DocumentInput =>
   DOCUMENT_FIELDS.reduce((acc, field) => {
     acc[field] = d[field] ?? "";
     return acc;
-  }, {} as any);
+  }, {} as DocumentInput);
 
 const emptyInput = (): DocumentInput =>
   DOCUMENT_FIELDS.reduce((acc, field) => {
     acc[field] = "";
     return acc;
-  }, {} as any);
+  }, {} as DocumentInput);
 
 const isSameInput = (a: DocumentInput, b: DocumentInput): boolean =>
   DOCUMENT_FIELDS.every((key) => normalize(a[key]) === normalize(b[key]));
@@ -53,8 +53,6 @@ export default function DocumentPane({
   onSaved,
   hasDocs,
   onBack,
-  showMobileHint,
-  onDismissHint,
   onDirtyChange,
 }: Props) {
   const status = useStatus();
@@ -93,7 +91,7 @@ export default function DocumentPane({
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  const [error, saveAction, isPending] = useActionState(
+  const [, saveAction, isPending] = useActionState(
     async (_prev: string | null, formData: FormData) => {
       if (!canEdit) {
         const msg = "Admins only.";
@@ -202,8 +200,6 @@ export default function DocumentPane({
         onEdit={() => setMode("edit")}
         onCancel={handleCancel}
         onBack={handleBack}
-        showMobileHint={showMobileHint}
-        onDismissHint={onDismissHint}
       />
 
       {mode === "view" && doc ? (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ImportMenuButton from "./ImportMenuButton";
-import { FilePlusCorner } from "lucide-react";
+import { FilePlusCorner, Star } from "lucide-react";
 
 type Props = {
   onNew: () => void;
@@ -29,35 +29,24 @@ export default function DocumentsHeader({
 
   return (
     <div className="top-actions" onClick={(e) => e.stopPropagation()}>
-      {isAdmin ? (
-        <>
-          <div className="actions-buttons">
-            <button
-              className="text-btn"
-              type="button"
-              onClick={handleExport}
-              disabled={isExporting}
-            >
-              {isExporting ? "Exporting..." : "Export"}
-            </button>
+      <div className="actions-buttons">
+        {isAdmin && <ImportMenuButton onImport={onImport} />}
 
-            <ImportMenuButton onImport={onImport} />
-          </div>
-
-          <button className="add-btn text-btn" type="button" onClick={onNew}>
-            <FilePlusCorner />
-          </button>
-        </>
-      ) : (
         <button
           className="text-btn"
           type="button"
           onClick={handleExport}
           disabled={isExporting}
         >
-          {isExporting ? "Exporting..." : "Export JSON"}
+          {isExporting ? "Exporting..." : "Export"}
         </button>
-      )}
+      </div>
+      <div className="add-btn favorite-buttons text-btn">
+        <Star />
+      </div>
+      <button className="add-btn text-btn" type="button" onClick={onNew}>
+        <FilePlusCorner />
+      </button>
     </div>
   );
 }

@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 import authRouter, { getCurrentUser, requireAdmin, seedUsersIfEmpty } from './auth.js';
 import aiRouter from './ai.js';
 import { Document } from './models.js';
+import fs from 'fs';
 
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -196,15 +197,30 @@ app.delete('/api/documents/:id', requireAdmin, async (req, res) => {
 
 // --- Static Hosting (Professional Production Setup) ---
 const distPath = path.resolve(__dirname, '../dist');
-console.log('Serving static files from:', distPath);
+
+// Diagnostic startup logs
+console.log('--- Startup Diagnostics ---');
+console.log('Current Working Directory (CWD):', process.cwd());
+console.log('__dirname:', __dirname);
+console.log('Calculated distPath:', distPath);
+console.log('dist directory exists:', fs.existsSync(distPath));
+if (fs.existsSync(distPath)) {
+    console.log('dist contents:', fs.readdirSync(distPath));
+    const indexHtmlPath = path.join(distPath, 'index.html');
+    console.log('index.html exists:', fs.existsSync(indexHtmlPath));
+}
+console.log('---------------------------');
+
 app.use(express.static(distPath));
 
 // Handle SPA routing: return index.html for all non-api routes
 app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'), (err) => {
+    const indexPath = path.join(distPath, 'index.html');
+    res.sendFile(indexPath, (err) => {
         if (err) {
             console.error('Error sending index.html:', err);
-            res.status(500).send('Frontend build (index.html) is missing or inaccessible.');
+            // In diagnostic mode, we send the path back to help debugging
+            res.status(500).send(`Frontend error: index.html not found at path: ${indexPath}. CWD: ${process.cwd()}`);
         }
     });
 });

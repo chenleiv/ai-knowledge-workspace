@@ -20,6 +20,7 @@ type Props = {
   showMobileHint?: boolean;
   onDismissHint?: () => void;
   onDirtyChange?: (isDirty: boolean) => void;
+  loading?: boolean;
 };
 
 const DOCUMENT_FIELDS = ["title", "category", "summary", "content"] as const;
@@ -54,6 +55,7 @@ export default function DocumentPane({
   hasDocs,
   onBack,
   onDirtyChange,
+  loading,
 }: Props) {
   const status = useStatus();
   const confirm = useConfirm();
@@ -181,7 +183,7 @@ export default function DocumentPane({
   };
 
   if (!isCreating && !doc) {
-    return <EmptyPane hasDocs={hasDocs} />;
+    return <EmptyPane hasDocs={hasDocs} loading={loading} />;
   }
 
   const paneTitle = isCreating ? "New document" : (doc?.title ?? "");

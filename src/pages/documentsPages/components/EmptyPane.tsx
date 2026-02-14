@@ -1,14 +1,18 @@
 import React from "react";
+import { DocumentDetailSkeleton } from "../../../components/skeleton/Skeleton";
 
 type Props = {
   hasDocs: boolean;
+  loading?: boolean | undefined;
 };
 
-export const EmptyPane: React.FC<Props> = ({ hasDocs }) => {
+export const EmptyPane: React.FC<Props> = ({ hasDocs, loading }) => {
   return (
     <div className="doc-pane">
       <div className="doc-pane-empty">
-        {hasDocs ? (
+        {loading ? (
+          <DocumentDetailSkeleton />
+        ) : hasDocs ? (
           <div className="doc-pane-empty-title">Select a document</div>
         ) : (
           <>

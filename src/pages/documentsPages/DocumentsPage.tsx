@@ -34,7 +34,13 @@ export default function DocumentsPage() {
   const isAdmin = user?.role === "admin";
 
   const [query, setQuery] = useState("");
-  const { docs, setDocs, loadDocuments, error: docsError } = useDocuments();
+  const {
+    docs,
+    setDocs,
+    loadDocuments,
+    loading: docsLoading,
+    error: docsError,
+  } = useDocuments();
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<number[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -381,6 +387,7 @@ export default function DocumentsPage() {
             onToggleFavorite={toggleFavorite}
             onDelete={onDelete}
             onDragEnd={onDragEnd}
+            loading={docsLoading}
           />
         </DocumentsSidebar>
       </div>
@@ -394,6 +401,7 @@ export default function DocumentsPage() {
           onCancelCreate={() => onCancelCreate()}
           onCreated={handleCreated}
           hasDocs={docs.length > 0}
+          loading={docsLoading}
           onSaved={(updated) => {
             setDocs((prev) =>
               prev.map((d) => (d.id === updated.id ? updated : d)),

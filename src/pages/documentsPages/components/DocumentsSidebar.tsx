@@ -3,72 +3,69 @@ import InlineBanner from "../../../components/banners/InlineBanner";
 import DocumentsHeader from "./DocumentsHeader";
 
 type Props = {
-    isAdmin: boolean;
+  isAdmin: boolean;
 
-    query: string;
-    onQueryChange: (v: string) => void;
+  query: string;
+  onQueryChange: (v: string) => void;
 
-    error: string | null;
+  error: string | null;
 
-    showForbidden: boolean;
-    onCloseForbidden: () => void;
+  showForbidden: boolean;
+  onCloseForbidden: () => void;
 
-    onNew: () => void;
-    onExport: () => void;
-    onImport: (mode: "merge" | "replace") => void;
-
-    children: React.ReactNode;
+  onNew: () => void;
+  onExport: () => void;
+  onImport: (mode: "merge" | "replace") => void;
+  children: React.ReactNode;
 };
 
 export default function DocumentsSidebar({
-    isAdmin,
-    query,
-    onQueryChange,
-    error,
-    showForbidden,
-    onCloseForbidden,
-    onNew,
-    onExport,
-    onImport,
-    children,
+  isAdmin,
+  query,
+  onQueryChange,
+  error,
+  showForbidden,
+  onCloseForbidden,
+  onNew,
+  onExport,
+  onImport,
+  children,
 }: Props) {
-    return (
-        <div className="documents-sidebar-inner">
-            {showForbidden && (
-                <InlineBanner type="error">
-                    <div className="banner">
-                        <span>This section is available to admins only.</span>
-                        <button onClick={onCloseForbidden} type="button">
-                            ✕
-                        </button>
-                    </div>
-                </InlineBanner>
-            )}
+  return (
+    <div className="documents-sidebar-inner">
+      {showForbidden && (
+        <InlineBanner type="error">
+          <div className="banner">
+            <span>This section is available to admins only.</span>
+            <button onClick={onCloseForbidden} type="button">
+              ✕
+            </button>
+          </div>
+        </InlineBanner>
+      )}
 
-            {/* Sticky area */}
-            <div className="sidebar-top">
-                <DocumentsHeader
-                    onNew={onNew}
-                    onExport={onExport}
-                    onImport={onImport}
-                    isAdmin={isAdmin}
-                />
+      {/* Sticky area */}
+      <div className="sidebar-top">
+        <DocumentsHeader
+          onNew={onNew}
+          onExport={onExport}
+          onImport={onImport}
+          isAdmin={isAdmin}
+        />
 
-                <div className="search-row">
-                    <input
-                        type="text"
-                        placeholder="Search title, category, summary, content..."
-                        value={query}
-                        onChange={(e) => onQueryChange(e.target.value)}
-                    />
-                </div>
-
-                {error ? <div className="error">{error}</div> : null}
-            </div>
-
-            <div className="sidebar-list">
-                {children}
-            </div>
+        <div className="search-row">
+          <input
+            type="text"
+            placeholder="Search title, category, summary, content..."
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+          />
         </div>
-    );
+
+        {error ? <div className="error">{error}</div> : null}
+      </div>
+
+      <div className="sidebar-list">{children}</div>
+    </div>
+  );
 }

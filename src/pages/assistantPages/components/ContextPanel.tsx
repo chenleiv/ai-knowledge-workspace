@@ -1,5 +1,6 @@
-import { } from "react";
+import {} from "react";
 import type { DocumentItem } from "../../../api/documentsClient";
+import { DocumentRowSkeleton } from "../../../components/skeleton/Skeleton";
 
 type Props = {
   docs: DocumentItem[];
@@ -60,7 +61,9 @@ export default function ContextPanel({
     <aside className="context-panel">
       {!hasSelection && (
         <div className="context-header-main">
-          <div className="context-hint">Select documents to narrow context.</div>
+          <div className="context-hint">
+            Select documents to narrow context.
+          </div>
         </div>
       )}
       {hasSelection && (
@@ -85,10 +88,17 @@ export default function ContextPanel({
         />
       </div>
 
-
       {error && <div className="error">{error}</div>}
 
       <div className="context-list">
+        {loading && docs.length === 0 && (
+          <>
+            <DocumentRowSkeleton />
+            <DocumentRowSkeleton />
+            <DocumentRowSkeleton />
+          </>
+        )}
+
         {filteredDocs.map((d) => {
           const checked = isSelected(d.id);
 

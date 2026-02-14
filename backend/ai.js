@@ -1,29 +1,26 @@
 import express from 'express';
 import { HfInference } from '@huggingface/inference';
 import { getCurrentUser } from './auth.js';
+import { aiChatSchema } from './schemas.js';
 
 const router = express.Router();
 
 // Initialize HF client with API token from env
 
 router.post('/api/ai/chat', getCurrentUser, async (req, res) => {
-    const { message, context } = req.body;
-
-    if (!message) {
-        return res.status(400).json({ detail: 'Message is required' });
-    }
-
-    // Check if API key is missing
-    if (!process.env.HUGGINGFACE_API_KEY) {
-        return res.status(500).json({
-            detail: 'HUGGINGFACE_API_KEY is missing in backend .env file. Please add it to enable AI features.'
-        });
-    }
-
-    // Initialize client here where process.env is guaranteed to be populated
-    const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
-
     try {
+        const { message, context } = aiChatSchema.parse(req.body);
+
+        // Check if API key is missing
+        if (!process.env.HUGGINGFACE_API_KEY) {
+            return res.status(500).json({
+                detail: 'HUGGINGFACE_API_KEY is missing in backend .env file. Please add it to enable AI features.'
+            });
+        }
+
+        // Initialize client here where process.env is guaranteed to be populated
+        const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
+
         // Construct messages array for chatCompletion
         const messages = [
             { role: 'system', content: 'You are a helpful Knowledge Workspace assistant. Please keep your answers concise and to the point, ideally under 50 words unless the user asks for a detailed explanation.' }
@@ -53,6 +50,9 @@ router.post('/api/ai/chat', getCurrentUser, async (req, res) => {
         });
 
     } catch (error) {
+        if (error.name === 'ZodError') {
+            return res.status(400).json({ detail: 'Validation failed', errors: error.errors });
+        }
         console.error('HF Inference Error:', error);
         res.status(500).json({
             detail: 'Error communicating with AI service. Please try again later.',

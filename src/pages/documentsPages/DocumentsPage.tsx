@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DocumentsList from "./components/DocumentList";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -7,7 +7,6 @@ import "./documentsPage.scss";
 import {
   deleteDocument,
   importDocumentsBulk,
-  listDocuments,
   type DocumentItem,
 } from "../../api/documentsClient";
 import useConfirm from "../../hooks/useConfirm";
@@ -20,6 +19,7 @@ import { saveJson, scopedKey } from "../../utils/storage";
 import { useStatus } from "../../components/statusBar/useStatus";
 import DocumentPane from "./components/DocumentPane";
 import DocumentsSidebar from "./components/DocumentsSidebar";
+import { useDocuments } from "../../context/DocumentsContext";
 
 export default function DocumentsPage() {
   const { user } = useAuth();
@@ -34,7 +34,7 @@ export default function DocumentsPage() {
   const isAdmin = user?.role === "admin";
 
   const [query, setQuery] = useState("");
-  const [docs, setDocs] = useState<DocumentItem[]>([]);
+  const { docs, setDocs, loadDocuments, error: docsError } = useDocuments();
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<number[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -51,33 +51,36 @@ export default function DocumentsPage() {
     return docs.find((d) => d.id === activeDocId) ?? null;
   })();
 
-  async function load() {
+  const load = useCallback(async () => {
     setError(null);
+    await loadDocuments();
+  }, [loadDocuments]);
 
-    try {
-      const data = await listDocuments();
-      setDocs(data);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
+  useEffect(() => {
+    if (docs.length > 0) {
       setOrder((prev) => {
-        const next = normalizeOrder(prev, data);
+        const next = normalizeOrder(prev, docs);
         if (!sameArray(next, prev)) saveJson(orderKey, next);
         return next;
       });
 
       setActiveDocId((prev) => {
         if (prev == null) {
-          return data.length > 0 ? data[0].id : null;
+          return docs.length > 0 ? docs[0].id : null;
         }
-        return data.some((d) => d.id === prev) ? prev : (data[0]?.id ?? null);
+        return docs.some((d) => d.id === prev) ? prev : (docs[0]?.id ?? null);
       });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load documents");
     }
-  }
+  }, [docs, orderKey]);
 
+  // Handle errors from the context if any
   useEffect(() => {
-    void load();
-  }, [load]);
+    if (docsError) setError(docsError);
+  }, [docsError]);
 
   useEffect(() => {
     if ((location.state as { forbidden?: boolean } | null)?.forbidden) {

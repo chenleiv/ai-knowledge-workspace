@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import "./assistantPage.scss";
 
-import { listDocuments, type DocumentItem } from "../../api/documentsClient";
+import { useDocuments } from "../../context/DocumentsContext";
 import { chatWithAI } from "../../api/aiClient";
 import type { ChatMessage, SourceRef } from "./types";
 import { CHAT_KEY, CONTEXT_KEY, buildSnippet, scoreDoc, uid } from "./utils";
+import { sameArray } from "../documentsPages/utils/ordering";
 import { Check, PanelRight } from "lucide-react";
 
 import ContextPanel from "./components/ContextPanel";
@@ -16,9 +17,7 @@ const INITIAL_GREETING =
   "Select documents on the left to focus my answer on specific sources, or ask me anything to search across your entire library.";
 
 export default function AssistantPage() {
-  const [docs, setDocs] = useState<DocumentItem[]>([]);
-  const [docsLoading, setDocsLoading] = useState(false);
-  const [docsError, setDocsError] = useState<string | null>(null);
+  const { docs, loading: docsLoading, error: docsError, loadDocuments } = useDocuments();
 
   const [contextQuery, setContextQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>(
@@ -45,29 +44,10 @@ export default function AssistantPage() {
     setSelectedIds([]);
     saveJson(CONTEXT_KEY, []);
   }
-  async function load() {
-    setDocsLoading(true);
-    setDocsError(null);
-    try {
-      const data = await listDocuments();
-      setDocs(data);
-
-      const ids = new Set(data.map((d) => d.id));
-      setSelectedIds((prev) => {
-        const next = prev.filter((id) => ids.has(id));
-        saveJson(CONTEXT_KEY, next);
-        return next;
-      });
-    } catch (e) {
-      setDocsError(e instanceof Error ? e.message : "Failed to load documents");
-    } finally {
-      setDocsLoading(false);
-    }
-  }
 
   useEffect(() => {
-    void load();
-  }, []);
+    void loadDocuments();
+  }, [loadDocuments]);
 
   useEffect(() => {
     saveJson(CHAT_KEY, messages);
@@ -93,6 +73,17 @@ export default function AssistantPage() {
     const set = new Set(selectedIds);
     return docs.filter((d) => set.has(d.id));
   })();
+
+  useEffect(() => {
+    if (docs.length > 0) {
+      const ids = new Set(docs.map((d) => d.id));
+      setSelectedIds((prev) => {
+        const next = prev.filter((id) => ids.has(id));
+        if (!sameArray(next, prev)) saveJson(CONTEXT_KEY, next);
+        return next;
+      });
+    }
+  }, [docs]);
 
   function clearChat() {
     setMessages([

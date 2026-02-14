@@ -10,7 +10,9 @@ export function loadJson<T>(key: string, fallback: T): T {
 export function saveJson<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {}
+  } catch {
+    // Ignore storage errors (e.g. quota exceeded or private mode)
+  }
 }
 
 export function scopedKey(baseKey: string, userEmail?: string | null): string {

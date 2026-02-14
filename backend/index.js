@@ -1,21 +1,37 @@
+import './loadEnv.js';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 import authRouter, { getCurrentUser, requireAdmin, seedUsersIfEmpty } from './auth.js';
 import aiRouter from './ai.js';
 import { Document } from './models.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-dotenv.config({ path: path.join(__dirname, '.env') });
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { documentSchema, importBulkSchema } from './schemas.js';
 
 const app = express();
+
+// Security Headers
+app.use(helmet());
+
+// Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { detail: 'Too many requests, please try again later.' }
+});
+app.use('/api/', limiter);
+
 const PORT = process.env.PORT || 8000;
 
 // Connect to MongoDB
@@ -38,13 +54,19 @@ const allowOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-    origin: allowOrigins,
+    origin: (origin, callback) => {
+        if (!origin || allowOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '10kb' })); // Limit body size
 app.use(cookieParser());
 
 // Auth routes
@@ -83,21 +105,29 @@ app.get('/api/documents/:id', getCurrentUser, async (req, res) => {
 
 app.post('/api/documents', requireAdmin, async (req, res) => {
     try {
-        const newDoc = await Document.create(req.body);
+        const validated = documentSchema.parse(req.body);
+        const newDoc = await Document.create(validated);
         res.json(newDoc);
     } catch (err) {
+        if (err.name === 'ZodError') {
+            return res.status(400).json({ detail: 'Validation failed', errors: err.errors });
+        }
         res.status(500).json({ detail: 'Error creating document' });
     }
 });
 
 app.put('/api/documents/:id', requireAdmin, async (req, res) => {
     try {
-        const updated = await Document.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const validated = documentSchema.parse(req.body);
+        const updated = await Document.findByIdAndUpdate(req.params.id, validated, { new: true });
         if (!updated) {
             return res.status(404).json({ detail: 'Not found' });
         }
         res.json(updated);
     } catch (err) {
+        if (err.name === 'ZodError') {
+            return res.status(400).json({ detail: 'Validation failed', errors: err.errors });
+        }
         res.status(500).json({ detail: 'Error updating document' });
     }
 });
@@ -126,8 +156,8 @@ app.get('/api/documents/export', requireAdmin, async (req, res) => {
 });
 
 app.post('/api/documents/import-bulk', requireAdmin, async (req, res) => {
-    const { mode, documents } = req.body;
     try {
+        const { mode, documents } = importBulkSchema.parse(req.body);
         if (mode === 'replace') {
             await Document.deleteMany({});
         }
@@ -139,6 +169,9 @@ app.post('/api/documents/import-bulk', requireAdmin, async (req, res) => {
         const result = await Document.find();
         res.json(result);
     } catch (err) {
+        if (err.name === 'ZodError') {
+            return res.status(400).json({ detail: 'Validation failed', errors: err.errors });
+        }
         res.status(500).json({ detail: 'Import failed' });
     }
 });

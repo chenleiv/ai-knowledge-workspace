@@ -1,120 +1,101 @@
 # AI Knowledge Workspace
 
-A full-stack knowledge management workspace designed to explore document organization, retrieval, and AI-assisted querying.
+A modern, full-stack knowledge management workspace optimized for AI-assisted document organization, retrieval, and querying.
 
-This project demonstrates a modern frontend architecture combined with a lightweight backend, with a clear path toward LLM-based retrieval (RAG).
+This project features a **React 19** frontend with mobile-first navigation and a **Node.js** backend, designed with a clear path toward LLM-based retrieval (RAG).
 
-## Features
+## ✨ Key Features
 
-### Documents
+### 📱 Experience
 
-- Create, edit, delete documents
-- Categorization and summaries
-- Favorites support
-- Drag & drop reordering (persistent)
-- Import / Export documents as JSON
-- Safe destructive actions with confirmation modals
+- **Mobile-First Design**: Bottom-bar navigation tailored for mobile devices.
+- **Dynamic UI**: Fluid transitions and premium aesthetics using CSS variables.
+- **Theme Support**: Integrated Light / Dark mode.
 
-### Assistant
+### 📄 Document Management
 
-- Select documents as context
-- Ask questions based on selected documents
-- Prepared architecture for LLM / RAG integration
+- **Smart Organization**: Create, edit, and categorize documents with ease.
+- **Drag & Drop**: Persistent reordering powered by `@dnd-kit`.
+- **Interactivity**: Favorites support and safe destructive actions with confirmation modals.
+- **Portability**: Import and export your knowledge base as JSON.
 
-### UI / UX
+### 🤖 AI-Ready Assistant
 
-- Light / Dark theme toggle
-- Consistent menu & modal components
-- Keyboard-accessible confirmation dialogs
-- Clean, neutral design inspired by modern AI tools
+- **Contextual Querying**: Select specific documents to provide context for the AI.
+- **React 19 Powered**: Leverages the latest React features like `useActionState` and the **React Compiler** for optimized performance.
+- **Scalable Architecture**: Built to integrate seamlessly with LLMs and RAG pipelines.
 
 ---
 
-## Architecture Overview
+## 🛠️ Architecture Overview
 
 ### Frontend
 
-- React + TypeScript
-- Vite
-- Modular component structure
-- Centralized theme system (CSS variables)
-- Reusable UI primitives (Menu, ConfirmDialog)
-- Custom hooks: useConfirm, useTheme
+- **React 19**: Utilizing the newest hooks and the React Compiler for automatic memoization.
+- **Vite**: Ultra-fast development and build tooling.
+- **Styling**: SCSS with a centralized theme system for maximum flexibility.
+- **Routing**: `react-router-dom` v7 for modern navigation.
 
 ### Backend
 
-- Python + FastAPI
-- JSON-based persistence (simple and explicit)
-- Clear separation of responsibilities:
-  - data
-  - persistence
-  - retrieval (prepared for AI usage)
+- **Node.js + Express**: Scalable and fast middleware layer.
+- **MongoDB + Mongoose**: Reliable data persistence and flexible schema management.
+- **Security**: JWT-based authentication and `bcryptjs` for password hashing.
+- **AI Integration**: Prepared for `@huggingface/inference` and local-only LLM experimentation.
 
 ---
 
 ## ⚙️ Environment Setup
 
-### Frontend
+### 🚀 Quick Start
 
-Install dependencies and start the dev server:
+1. **Install Dependencies**:
 
-```bash
-npm install
-npm run dev
-```
+   ```bash
+   npm install
+   ```
 
-Create a `.env` file (based on `.env.example`) and set:
-VITE_API_BASE=http://127.0.0.1:8000
+2. **Backend Configuration**:
+   Create a `.env` file in the root directory and configure your MongoDB URI and JWT secrets (see `.env.example`).
 
-### Backend
-
-Navigate to the backend folder and start the server:
-
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
+3. **Start Development Servers**:
+   ```bash
+   # Start both frontend and backend (Vite + Node --watch)
+   npm run dev
+   ```
 
 ---
 
-## Roadmap
+## 📂 Project Structure
 
-- Vector embeddings
-- Semantic search
-- RAG pipeline (documents → embeddings → LLM)
-- Local-only LLM experimentation
-
----
-
-## Why This Project
-
-This workspace was built as a learning and exploration platform:
-Frontend architecture & UX decisions, Safe data handling, Preparing real-world AI workflows without over-engineering.
-
-- This repository is intended for demonstration and learning purposes.
-  LLM functionality is designed to run locally and is not deployed publicly.
-
----
-
-## Project Structure (Simplified)
-
-````md
 ```text
-frontend/
-  src/
-    components/
-    pages/
-    hooks/
-    api/
-    styles/
-    themeToggle/
+frontend/ (Root)
+  ├── src/
+  │   ├── components/       # Reusable UI primitives (Menu, Nav, Modals)
+  │   │   └── mobileNav/    # Mobile-first navigation bar
+  │   ├── pages/            # Page-level components (Documents, Login)
+  │   ├── hooks/            # Custom React hooks (useConfirm, useTheme)
+  │   ├── api/              # API interaction layer
+  │   └── styles/           # Global styles and theme tokens
+  └── package.json
 
 backend/
-  main.py
-  data/
-  lib/
-  storage/
-
+  ├── index.js              # Server entry point
+  ├── auth.js               # Authentication logic
+  ├── models.js             # Mongoose schemas
+  └── ai.js                 # AI/LLM integration logic
 ```
-````
+
+---
+
+## 🚀 Roadmap
+
+- [x] React 19 Migration & React Compiler Integration
+- [x] Mobile-First Navigation UI
+- [ ] Vector Embeddings & Semantic Search
+
+---
+
+## Why This Project?
+
+Built as a high-performance learning platform, this workspace focuses on modern React patterns, clean architecture, and preparing real-world AI workflows without unnecessary complexity.

@@ -206,6 +206,12 @@ console.log('Calculated distPath:', distPath);
 console.log('dist directory exists:', fs.existsSync(distPath));
 if (fs.existsSync(distPath)) {
     console.log('dist contents:', fs.readdirSync(distPath));
+    const assetsPath = path.join(distPath, 'assets');
+    if (fs.existsSync(assetsPath)) {
+        console.log('assets contents:', fs.readdirSync(assetsPath));
+    } else {
+        console.log('assets directory MISSING');
+    }
     const indexHtmlPath = path.join(distPath, 'index.html');
     console.log('index.html exists:', fs.existsSync(indexHtmlPath));
 }

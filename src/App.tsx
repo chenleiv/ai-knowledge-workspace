@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import DocumentsPage from "./pages/documentsPages/DocumentsPage";
 import AssistantPage from "./pages/assistantPages/AssistantPage";
-import LoginPage from "./pages/loginPage/LoginPge";
+import LoginPage from "./pages/loginPage/LoginPage";
 import UsersPage from "./pages/loginPage/UsersPage";
 
 import "./components/confirmModal/confirmDialog.scss";

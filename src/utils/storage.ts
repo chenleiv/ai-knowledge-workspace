@@ -11,7 +11,7 @@ export function saveJson<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Ignore storage errors (e.g. quota exceeded or private mode)
+    // Ignore storage errors
   }
 }
 

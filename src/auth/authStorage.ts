@@ -1,17 +1,13 @@
+import { loadJson, saveJson } from "../utils/storage";
 import type { AuthUser } from "./authTypes";
 import { AUTH_USER_KEY } from "./authTypes";
 
 export function loadUserFromStorage(): AuthUser | null {
-  try {
-    const raw = localStorage.getItem(AUTH_USER_KEY);
-    return raw ? (JSON.parse(raw) as AuthUser) : null;
-  } catch {
-    return null;
-  }
+  return loadJson<AuthUser | null>(AUTH_USER_KEY, null);
 }
 
 export function saveUserToStorage(user: AuthUser) {
-  localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+  saveJson(AUTH_USER_KEY, user);
 }
 
 export function clearUserFromStorage() {

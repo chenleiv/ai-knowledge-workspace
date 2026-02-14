@@ -23,27 +23,13 @@ type Props = {
   loading?: boolean;
 };
 
-const DOCUMENT_FIELDS = ["title", "category", "summary", "content"] as const;
-
-const normalize = (val: string | null | undefined) => (val || "").trim();
-
-const toInput = (d: DocumentItem): DocumentInput =>
-  DOCUMENT_FIELDS.reduce((acc, field) => {
-    acc[field] = d[field] ?? "";
-    return acc;
-  }, {} as DocumentInput);
-
-const emptyInput = (): DocumentInput =>
-  DOCUMENT_FIELDS.reduce((acc, field) => {
-    acc[field] = "";
-    return acc;
-  }, {} as DocumentInput);
-
-const isSameInput = (a: DocumentInput, b: DocumentInput): boolean =>
-  DOCUMENT_FIELDS.every((key) => normalize(a[key]) === normalize(b[key]));
-
-const isInputValid = (i: DocumentInput): boolean =>
-  DOCUMENT_FIELDS.every((key) => !!normalize(i[key]));
+import {
+  DOCUMENT_FIELDS,
+  toInput,
+  emptyInput,
+  isSameInput,
+  isInputValid,
+} from "../utils/documentForm";
 
 export default function DocumentPane({
   doc,
@@ -101,12 +87,10 @@ export default function DocumentPane({
         return msg;
       }
 
-      const cleaned: DocumentInput = {
-        title: (formData.get("title") as string).trim(),
-        category: (formData.get("category") as string).trim(),
-        summary: (formData.get("summary") as string).trim(),
-        content: (formData.get("content") as string).trim(),
-      };
+      const cleaned: DocumentInput = DOCUMENT_FIELDS.reduce((acc, field) => {
+        acc[field] = (formData.get(field) as string).trim();
+        return acc;
+      }, {} as DocumentInput);
 
       if (!isInputValid(cleaned)) {
         const msg = "Please fill all fields.";

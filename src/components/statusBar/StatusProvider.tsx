@@ -24,7 +24,7 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
 
     const full: StatusMessage = {
       id: uid(),
-      timeoutMs: next.kind === "error" ? 0 : 2500,
+      timeoutMs: next.kind === "error" ? 20000 : 1000,
       ...next,
     };
     setMsg(full);

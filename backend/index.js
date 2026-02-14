@@ -20,12 +20,38 @@ import { documentSchema, importBulkSchema } from './schemas.js';
 
 const app = express();
 
+// --- Static Hosting (Prioritized to avoid middleware interference) ---
+const distPath = path.resolve(__dirname, '../dist');
+
+// Diagnostic startup logs
+console.log('--- Startup Diagnostics ---');
+console.log('Current Working Directory (CWD):', process.cwd());
+console.log('__dirname:', __dirname);
+console.log('Calculated distPath:', distPath);
+console.log('dist directory exists:', fs.existsSync(distPath));
+if (fs.existsSync(distPath)) {
+    console.log('dist contents:', fs.readdirSync(distPath));
+    const assetsPath = path.join(distPath, 'assets');
+    if (fs.existsSync(assetsPath)) {
+        console.log('assets contents:', fs.readdirSync(assetsPath));
+    }
+}
+console.log('---------------------------');
+
+// Simple Request Logger
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
+app.use(express.static(distPath));
+
 // Security Headers
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-            "script-src": ["'self'", "'unsafe-inline'"], // Allow theme-detection script
+            "script-src": ["'self'", "'unsafe-inline'"],
             "connect-src": ["'self'", "https://*"],
             "img-src": ["'self'", "data:", "https://*"],
         },
@@ -195,29 +221,7 @@ app.delete('/api/documents/:id', requireAdmin, async (req, res) => {
 });
 
 
-// --- Static Hosting (Professional Production Setup) ---
-const distPath = path.resolve(__dirname, '../dist');
-
-// Diagnostic startup logs
-console.log('--- Startup Diagnostics ---');
-console.log('Current Working Directory (CWD):', process.cwd());
-console.log('__dirname:', __dirname);
-console.log('Calculated distPath:', distPath);
-console.log('dist directory exists:', fs.existsSync(distPath));
-if (fs.existsSync(distPath)) {
-    console.log('dist contents:', fs.readdirSync(distPath));
-    const assetsPath = path.join(distPath, 'assets');
-    if (fs.existsSync(assetsPath)) {
-        console.log('assets contents:', fs.readdirSync(assetsPath));
-    } else {
-        console.log('assets directory MISSING');
-    }
-    const indexHtmlPath = path.join(distPath, 'index.html');
-    console.log('index.html exists:', fs.existsSync(indexHtmlPath));
-}
-console.log('---------------------------');
-
-app.use(express.static(distPath));
+// --- Moved to top ---
 
 // Handle SPA routing: return index.html for all non-api routes
 app.get('*', (req, res) => {

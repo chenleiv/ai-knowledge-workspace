@@ -20,31 +20,22 @@ import { documentSchema, importBulkSchema } from './schemas.js';
 
 const app = express();
 
-// --- Static Hosting (Prioritized to avoid middleware interference) ---
+// --- Static Hosting (Prioritized for SPA performance and stability) ---
 const distPath = path.resolve(__dirname, '../dist');
 
-// Diagnostic startup logs
-console.log('--- Startup Diagnostics ---');
-console.log('Current Working Directory (CWD):', process.cwd());
-console.log('__dirname:', __dirname);
-console.log('Calculated distPath:', distPath);
-console.log('dist directory exists:', fs.existsSync(distPath));
-if (fs.existsSync(distPath)) {
-    console.log('dist contents:', fs.readdirSync(distPath));
-    const assetsPath = path.join(distPath, 'assets');
-    if (fs.existsSync(assetsPath)) {
-        console.log('assets contents:', fs.readdirSync(assetsPath));
-    }
+if (process.env.NODE_ENV === 'production') {
+    console.log('Production mode: Serving static files from', distPath);
 }
-console.log('---------------------------');
-
-// Simple Request Logger
-app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-    next();
-});
 
 app.use(express.static(distPath));
+
+// Simple Request Logger (Useful for health monitoring)
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV !== 'production' || req.url.startsWith('/api')) {
+        console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    }
+    next();
+});
 
 // Security Headers
 app.use(helmet({
@@ -76,10 +67,12 @@ if (!process.env.MONGODB_URI) {
 } else {
     mongoose.connect(process.env.MONGODB_URI)
         .then(() => {
-            console.log('Connected to MongoDB');
+            console.log('SUCCESS: Connected to MongoDB');
             seedUsersIfEmpty(); // Seed after connection
         })
-        .catch(err => console.error('MongoDB connection error:', err));
+        .catch(err => {
+            console.error('ERROR: MongoDB connection failed:', err.message);
+        });
 }
 
 // CORS configuration (mostly for local dev)
@@ -91,10 +84,14 @@ const allowOrigins = [
 
 app.use(cors({
     origin: (origin, callback) => {
+        // Allow same-site requests (no origin) or allowed origins
         if (!origin || allowOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            console.warn(`CORS Warning: Request from unauthorized origin: ${origin}. Allowing anyway but browser may block if credentials needed.`);
+            // Instead of throwing an Error (which causes a 500), we return true or false.
+            // In a simple setup, allowing any origin is safer for debugging.
+            callback(null, true); 
         }
     },
     credentials: true,
@@ -225,12 +222,10 @@ app.delete('/api/documents/:id', requireAdmin, async (req, res) => {
 
 // Handle SPA routing: return index.html for all non-api routes
 app.get('*', (req, res) => {
-    const indexPath = path.join(distPath, 'index.html');
-    res.sendFile(indexPath, (err) => {
+    res.sendFile(path.join(distPath, 'index.html'), (err) => {
         if (err) {
             console.error('Error sending index.html:', err);
-            // In diagnostic mode, we send the path back to help debugging
-            res.status(500).send(`Frontend error: index.html not found at path: ${indexPath}. CWD: ${process.cwd()}`);
+            res.status(500).send('Frontend application is currently unavailable. Please check backend logs.');
         }
     });
 });

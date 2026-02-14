@@ -80,77 +80,15 @@ app.get('/health', (req, res) => {
     res.json({ ok: true });
 });
 
-// --- Documents CRUD ---
-
-app.get('/api/documents', getCurrentUser, async (req, res) => {
-    try {
-        const docs = await Document.find().sort({ createdAt: -1 });
-        res.json(docs);
-    } catch (err) {
-        res.status(500).json({ detail: 'Error fetching documents' });
-    }
-});
-
-app.get('/api/documents/:id', getCurrentUser, async (req, res) => {
-    try {
-        const doc = await Document.findById(req.params.id);
-        if (!doc) {
-            return res.status(404).json({ detail: 'Not found' });
-        }
-        res.json(doc);
-    } catch (err) {
-        res.status(500).json({ detail: 'Error fetching document' });
-    }
-});
-
-app.post('/api/documents', requireAdmin, async (req, res) => {
-    try {
-        const validated = documentSchema.parse(req.body);
-        const newDoc = await Document.create(validated);
-        res.json(newDoc);
-    } catch (err) {
-        if (err.name === 'ZodError') {
-            return res.status(400).json({ detail: 'Validation failed', errors: err.errors });
-        }
-        res.status(500).json({ detail: 'Error creating document' });
-    }
-});
-
-app.put('/api/documents/:id', requireAdmin, async (req, res) => {
-    try {
-        const validated = documentSchema.parse(req.body);
-        const updated = await Document.findByIdAndUpdate(req.params.id, validated, { new: true });
-        if (!updated) {
-            return res.status(404).json({ detail: 'Not found' });
-        }
-        res.json(updated);
-    } catch (err) {
-        if (err.name === 'ZodError') {
-            return res.status(400).json({ detail: 'Validation failed', errors: err.errors });
-        }
-        res.status(500).json({ detail: 'Error updating document' });
-    }
-});
-
-app.delete('/api/documents/:id', requireAdmin, async (req, res) => {
-    try {
-        const deleted = await Document.findByIdAndDelete(req.params.id);
-        if (!deleted) {
-            return res.status(404).json({ detail: 'Not found' });
-        }
-        res.status(204).send();
-    } catch (err) {
-        res.status(500).json({ detail: 'Error deleting document' });
-    }
-});
-
 // --- Admin tools (export/import) ---
 
 app.get('/api/documents/export', requireAdmin, async (req, res) => {
     try {
         const docs = await Document.find();
+        console.log('exporting docs', docs);
         res.json(docs);
     } catch (err) {
+        console.error('Export failed:', err);
         res.status(500).json({ detail: 'Export failed' });
     }
 });
@@ -169,12 +107,83 @@ app.post('/api/documents/import-bulk', requireAdmin, async (req, res) => {
         const result = await Document.find();
         res.json(result);
     } catch (err) {
+        console.error('Import failed:', err);
         if (err.name === 'ZodError') {
             return res.status(400).json({ detail: 'Validation failed', errors: err.errors });
         }
         res.status(500).json({ detail: 'Import failed' });
     }
 });
+
+// --- Documents CRUD ---
+
+app.get('/api/documents', getCurrentUser, async (req, res) => {
+    try {
+        const docs = await Document.find().sort({ createdAt: -1 });
+        res.json(docs);
+    } catch (err) {
+        console.error('Error fetching documents:', err);
+        res.status(500).json({ detail: 'Error fetching documents' });
+    }
+});
+
+app.get('/api/documents/:id', getCurrentUser, async (req, res) => {
+    try {
+        const doc = await Document.findById(req.params.id);
+        if (!doc) {
+            return res.status(404).json({ detail: 'Not found' });
+        }
+        res.json(doc);
+    } catch (err) {
+        console.error('Error fetching document by ID:', err);
+        res.status(500).json({ detail: 'Error fetching document' });
+    }
+});
+
+app.post('/api/documents', requireAdmin, async (req, res) => {
+    try {
+        const validated = documentSchema.parse(req.body);
+        const newDoc = await Document.create(validated);
+        res.json(newDoc);
+    } catch (err) {
+        console.error('Error creating document:', err);
+        if (err.name === 'ZodError') {
+            return res.status(400).json({ detail: 'Validation failed', errors: err.errors });
+        }
+        res.status(500).json({ detail: 'Error creating document' });
+    }
+});
+
+app.put('/api/documents/:id', requireAdmin, async (req, res) => {
+    try {
+        const validated = documentSchema.parse(req.body);
+        const updated = await Document.findByIdAndUpdate(req.params.id, validated, { new: true });
+        if (!updated) {
+            return res.status(404).json({ detail: 'Not found' });
+        }
+        res.json(updated);
+    } catch (err) {
+        console.error('Error updating document:', err);
+        if (err.name === 'ZodError') {
+            return res.status(400).json({ detail: 'Validation failed', errors: err.errors });
+        }
+        res.status(500).json({ detail: 'Error updating document' });
+    }
+});
+
+app.delete('/api/documents/:id', requireAdmin, async (req, res) => {
+    try {
+        const deleted = await Document.findByIdAndDelete(req.params.id);
+        if (!deleted) {
+            return res.status(404).json({ detail: 'Not found' });
+        }
+        res.status(204).send();
+    } catch (err) {
+        console.error('Error deleting document:', err);
+        res.status(500).json({ detail: 'Error deleting document' });
+    }
+});
+
 
 // --- Static Hosting (Professional Production Setup) ---
 const distPath = path.join(__dirname, '../dist');

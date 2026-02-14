@@ -28,7 +28,7 @@ export const DocumentHeader: React.FC<Props> = ({
 }) => {
   return (
     <div className="doc-pane-top-wrapper">
-      {onBack && (
+      {onBack && !isCreating && (
         <div className="mobile-back-wrapper">
           <button
             type="button"

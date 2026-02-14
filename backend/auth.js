@@ -11,7 +11,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'dev-secret-change-me') {
     console.error('CRITICAL: JWT_SECRET is not set or is using the default value. This is a severe security risk.');
     if (process.env.NODE_ENV === 'production') {
-        throw new Error('JWT_SECRET must be set in production');
+        console.error('ACTION REQUIRED: Set a unique JWT_SECRET in your production environment variables (e.g., in Render dashboard).');
+        throw new Error('JWT_SECRET must be set in production for security.');
     }
 }
 

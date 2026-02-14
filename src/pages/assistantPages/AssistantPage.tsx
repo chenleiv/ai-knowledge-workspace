@@ -251,8 +251,7 @@ export default function AssistantPage() {
               onClick={() => setIsContextOpen(!isContextOpen)}
               title="Toggle Context"
             >
-              <span>Documents</span>
-              <PanelLeft />
+              <PanelLeft size={24} />
             </button>
           </div>
 

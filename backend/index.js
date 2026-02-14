@@ -20,7 +20,16 @@ import { documentSchema, importBulkSchema } from './schemas.js';
 const app = express();
 
 // Security Headers
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            "script-src": ["'self'", "'unsafe-inline'"], // Allow theme-detection script
+            "connect-src": ["'self'", "https://*"],
+            "img-src": ["'self'", "data:", "https://*"],
+        },
+    },
+}));
 
 // Rate Limiting
 const limiter = rateLimit({
@@ -186,12 +195,18 @@ app.delete('/api/documents/:id', requireAdmin, async (req, res) => {
 
 
 // --- Static Hosting (Professional Production Setup) ---
-const distPath = path.join(__dirname, '../dist');
+const distPath = path.resolve(__dirname, '../dist');
+console.log('Serving static files from:', distPath);
 app.use(express.static(distPath));
 
 // Handle SPA routing: return index.html for all non-api routes
 app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
+    res.sendFile(path.join(distPath, 'index.html'), (err) => {
+        if (err) {
+            console.error('Error sending index.html:', err);
+            res.status(500).send('Frontend build (index.html) is missing or inaccessible.');
+        }
+    });
 });
 
 app.listen(PORT, () => {

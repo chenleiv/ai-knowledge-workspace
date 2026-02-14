@@ -36,6 +36,7 @@ export default function AssistantPage() {
         </button>
       </div>
       <div className="initial-greeting-desktop">
+        <p className="greeting-title">How can I help you?</p>
         To focus my search, you can select specific documents from the list.
       </div>
     </div>

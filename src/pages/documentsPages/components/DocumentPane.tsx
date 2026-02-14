@@ -62,10 +62,8 @@ export default function DocumentPane({
 }: Props) {
     const status = useStatus();
 
-    // Initialize state from props. The parent key change will handle resets.
     const [mode, setMode] = useState<"view" | "edit">(isCreating ? "edit" : "view");
 
-    // Initial form state
     const [form, setForm] = useState<DocumentInput>(() => {
         if (isCreating) return emptyInput();
         if (doc) return toInput(doc);
@@ -74,7 +72,6 @@ export default function DocumentPane({
 
     const [saving, setSaving] = useState(false);
 
-    // Baseline for dirty checking
     const baseline = useMemo(() => {
         if (isCreating) return emptyInput();
         if (doc) return toInput(doc);
@@ -82,7 +79,6 @@ export default function DocumentPane({
     }, [isCreating, doc]);
 
     const isDirty = useMemo(() => {
-        // Compare normalized so trailing spaces don't cause "dirty" flicker.
         return !isSameInput(normalizeInput(form), normalizeInput(baseline));
     }, [form, baseline]);
 
@@ -111,7 +107,6 @@ export default function DocumentPane({
                 const created = await createDocument(cleaned);
                 onCreated(created);
                 status.show({ kind: "success", message: "Document created." });
-                // Parent will likely change state/key, remounting this component.
                 return;
             }
 
@@ -119,9 +114,6 @@ export default function DocumentPane({
 
             const updated = await updateDocument(doc.id, cleaned);
             onSaved(updated);
-            // We rely on parent passing new 'doc' prop. 
-            // However, we should exit edit mode immediately and show the updated data.
-            // Since `doc` prop might take a tick to update, we can update local form.
             setForm(toInput(updated));
             setMode("view");
 
@@ -198,7 +190,7 @@ export default function DocumentPane({
                 </div>
             )}
             <div className="doc-pane-top">
-                <div className="doc-pane-title-container" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="doc-pane-title-container">
                     <div>
                         <h2 className="doc-pane-title">{paneTitle}</h2>
                         {paneCategory ? <h4 className="doc-pane-title small">{paneCategory}</h4> : null}

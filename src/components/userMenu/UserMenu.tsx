@@ -5,12 +5,12 @@ import { useAuth } from "../../auth/useAuth";
 type MenuItem =
   | { type: "link"; label: string; to: string; show?: boolean }
   | {
-      type: "action";
-      label: string;
-      onClick: () => Promise<void> | void;
-      danger?: boolean;
-      show?: boolean;
-    };
+    type: "action";
+    label: string;
+    onClick: () => Promise<void> | void;
+    danger?: boolean;
+    show?: boolean;
+  };
 
 function getInitials(email: string) {
   const name = (email || "").split("@")[0] || "U";
@@ -55,7 +55,6 @@ export default function UserMenu() {
     [isAdmin, isLoggingOut, logout, nav]
   );
 
-  // Only keep visible items
   const visible = items.filter((it) => it.show !== false);
 
   useEffect(() => {

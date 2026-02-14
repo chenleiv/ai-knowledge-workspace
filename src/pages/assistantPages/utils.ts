@@ -52,11 +52,10 @@ export function scoreDoc(doc: DocumentItem, query: string) {
     if (content.includes(t)) score += 2;
   }
 
-  // Small boost if multiple tokens match anywhere
   const combined = `${title}\n${category}\n${summary}\n${content}`;
   const hits = tokens.reduce(
     (acc, t) => acc + (combined.includes(t) ? 1 : 0),
-    0
+    0,
   );
   if (hits >= 2) score += 2;
   if (hits >= 4) score += 4;

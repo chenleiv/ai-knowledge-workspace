@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { FileText, Sparkles } from "lucide-react";
+import { FileText, MessageSquare } from "lucide-react";
 import "./mobileNav.scss";
 import { useAuth } from "../../auth/useAuth";
 
@@ -28,7 +28,7 @@ export default function MobileNav() {
                 }
             >
                 <div className="icon">
-                    <Sparkles />
+                    <MessageSquare />
                 </div>
                 <span>Assistant</span>
             </NavLink>

@@ -6,7 +6,7 @@ type Props = {
   loading: boolean;
   error: string | null;
 
-  selectedIds: number[]; // empty => "All documents"
+  selectedIds: number[];
   contextQuery: string;
 
   onToggleSelected: (id: number) => void;

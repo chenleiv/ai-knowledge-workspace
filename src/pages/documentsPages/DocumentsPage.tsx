@@ -37,7 +37,6 @@ export default function DocumentsPage() {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<number[]>([]);
-  // const [paneMode, setPaneMode] = useState<DrawerMode>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
@@ -97,12 +96,10 @@ export default function DocumentsPage() {
     dismissHint();
   }
 
-  // Mobile hint state
   const [showMobileHint, setShowMobileHint] = useState(false);
 
   useEffect(() => {
     const hasSeen = localStorage.getItem("documents_mobile_hint");
-    // Show hint if in detail view and hasn't seen it
     if (!hasSeen && mobileView === "detail") {
       setShowMobileHint(true);
     }
@@ -134,7 +131,7 @@ export default function DocumentsPage() {
     lastActiveDocIdRef.current = activeDocId ?? null;
     setIsCreating(true);
     setActiveDocId(null);
-    setMobileView("detail"); // Switch to detail view for creation
+    setMobileView("detail");
   }
 
   function onCancelCreate() {
@@ -145,9 +142,6 @@ export default function DocumentsPage() {
       (orderedDocs[0]?.id ?? null);
 
     setActiveDocId(fallback);
-    // If we fallback to a doc, stay in detail, otherwise list? 
-    // Usually cancelling creation might mean going back to list if we were in list before?
-    // But create was opened "on top".
     if (fallback) {
       setMobileView("detail");
     } else {

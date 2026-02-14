@@ -12,7 +12,8 @@ import MessagesList from "./components/MessagesList";
 import Composer from "./components/Composer";
 import { loadJson, saveJson } from "../../utils/storage";
 
-const INITIAL_GREETING = "Select documents on the left to focus my answer on specific sources, or ask me anything to search across your entire library.";
+const INITIAL_GREETING =
+  "Select documents on the left to focus my answer on specific sources, or ask me anything to search across your entire library.";
 
 export default function AssistantPage() {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
@@ -21,7 +22,7 @@ export default function AssistantPage() {
 
   const [contextQuery, setContextQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>(
-    loadJson<number[]>(CONTEXT_KEY, [])
+    loadJson<number[]>(CONTEXT_KEY, []),
   );
 
   const [messages, setMessages] = useState<ChatMessage[]>(
@@ -33,7 +34,7 @@ export default function AssistantPage() {
         isTyped: true,
         isGreeting: true,
       },
-    ])
+    ]),
   );
 
   const [input, setInput] = useState("");
@@ -72,8 +73,6 @@ export default function AssistantPage() {
     saveJson(CHAT_KEY, messages);
   }, [messages]);
 
-  // Removed useEffect syncing selectedIds -> setIsContextOpen.
-  // Instead, we will open it explicitly when user adds to selection.
   const showContextPanel = isContextOpen;
 
   function toggleSelected(id: number) {
@@ -82,7 +81,6 @@ export default function AssistantPage() {
         ? prev.filter((x) => x !== id)
         : [...prev, id];
       saveJson(CONTEXT_KEY, next);
-      // Explicitly open panel if we added something (and it wasn't open)
       if (next.length > prev.length) {
         setIsContextOpen(true);
       }
@@ -97,30 +95,29 @@ export default function AssistantPage() {
   }, [docs, selectedIds]);
 
   function clearChat() {
-    setMessages([{
-      id: uid(),
-      role: "assistant",
-      text: INITIAL_GREETING,
-      isTyped: true,
-      isGreeting: true,
-    }]);
+    setMessages([
+      {
+        id: uid(),
+        role: "assistant",
+        text: INITIAL_GREETING,
+        isTyped: true,
+        isGreeting: true,
+      },
+    ]);
   }
-
-
 
   async function send() {
     const question = input.trim();
     if (!question) return;
 
     setMessages((prev) => {
-      // If the only message is the initial greeting, remove it so the chat starts fresh
-      const isInitial = prev.length === 1 && prev[0].role === "assistant" && prev[0].text === INITIAL_GREETING;
+      const isInitial =
+        prev.length === 1 &&
+        prev[0].role === "assistant" &&
+        prev[0].text === INITIAL_GREETING;
       const history = isInitial ? [] : prev;
 
-      return [
-        ...history,
-        { id: uid(), role: "user", text: question },
-      ];
+      return [...history, { id: uid(), role: "user", text: question }];
     });
     setInput("");
     setIsSending(true);
@@ -128,7 +125,6 @@ export default function AssistantPage() {
     try {
       const contextDocs = selectedDocs.length > 0 ? selectedDocs : docs;
 
-      // For RAG, we still rank locally to pick top 3 relevant docs to send as context
       const ranked = contextDocs
         .map((d) => ({ doc: d, score: scoreDoc(d, question) }))
         .sort((a, b) => b.score - a.score);
@@ -138,13 +134,15 @@ export default function AssistantPage() {
         .slice(0, 3)
         .map((x) => x.doc);
 
-      // Call the real AI endpoint
       const response = await chatWithAI(question, top);
 
       const sources: SourceRef[] = response.sources.map((s) => ({
         id: s.id,
         title: s.title,
-        snippet: buildSnippet(contextDocs.find(d => d.id === s.id)?.content || "", question),
+        snippet: buildSnippet(
+          contextDocs.find((d) => d.id === s.id)?.content || "",
+          question,
+        ),
       }));
 
       setMessages((prev) => [
@@ -154,7 +152,7 @@ export default function AssistantPage() {
           role: "assistant",
           text: response.answer,
           sources,
-          isTyped: false // Start typing
+          isTyped: false,
         },
       ]);
     } catch (e) {
@@ -163,8 +161,11 @@ export default function AssistantPage() {
         {
           id: uid(),
           role: "assistant",
-          text: e instanceof Error ? e.message : "Sorry, I encountered an error connecting to the AI service.",
-          isTyped: false
+          text:
+            e instanceof Error
+              ? e.message
+              : "Sorry, I encountered an error connecting to the AI service.",
+          isTyped: false,
         },
       ]);
     } finally {
@@ -174,7 +175,7 @@ export default function AssistantPage() {
 
   const handleTypingComplete = useCallback((id: string) => {
     setMessages((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, isTyped: true } : m))
+      prev.map((m) => (m.id === id ? { ...m, isTyped: true } : m)),
     );
   }, []);
 
@@ -183,8 +184,9 @@ export default function AssistantPage() {
       className={`assistant-shell ${showContextPanel ? "with-context" : "no-context"
         }`}
     >
-      <aside className={`context-panel-container ${showContextPanel ? "mobile-open" : ""}`}>
-
+      <aside
+        className={`context-panel-container ${showContextPanel ? "mobile-open" : ""}`}
+      >
         <div className="context-panel-inner">
           <ContextPanel
             docs={docs}
@@ -214,7 +216,11 @@ export default function AssistantPage() {
 
       <section className="assistant-page">
         <div className="assistant-page-inner">
-          <MessagesList messages={messages} isThinking={isSending} onTypingComplete={handleTypingComplete} />
+          <MessagesList
+            messages={messages}
+            isThinking={isSending}
+            onTypingComplete={handleTypingComplete}
+          />
           <div className="assistant-topbar">
             <button
               type="button"

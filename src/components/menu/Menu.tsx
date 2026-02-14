@@ -19,8 +19,6 @@ type Props = {
   children?: React.ReactNode;
   align?: Align;
   minWidth?: number;
-
-  // NEW
   anchorRef: React.RefObject<HTMLElement | null>
   offset?: number;
 };
@@ -44,8 +42,6 @@ export default function Menu({
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<Pos>({ top: 0, left: 0 });
 
-
-  // Positioning
   useLayoutEffect(() => {
     if (!open) return;
     const el = anchorRef.current;
@@ -55,11 +51,7 @@ export default function Menu({
       const r = el.getBoundingClientRect();
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-
-      // Start below the button
       const top = clamp(r.bottom + offset, 8, vh - 8);
-
-      // Left based on align
       const rawLeft = align === "right" ? r.right - minWidth : r.left;
       const left = clamp(rawLeft, 8, vw - minWidth - 8);
 
@@ -68,10 +60,9 @@ export default function Menu({
 
     compute();
 
-    // Recompute on scroll/resize (important because we are fixed)
     const onWin = () => compute();
     window.addEventListener("resize", onWin);
-    window.addEventListener("scroll", onWin, true); // capture scroll inside containers too
+    window.addEventListener("scroll", onWin, true);
 
     return () => {
       window.removeEventListener("resize", onWin);
@@ -79,7 +70,6 @@ export default function Menu({
     };
   }, [open, anchorRef, align, minWidth, offset]);
 
-  // Close handlers
   useEffect(() => {
     if (!open) return;
 
@@ -95,7 +85,6 @@ export default function Menu({
       if (!el) return;
 
       const target = e.target as Node;
-      // click outside closes
       if (!el.contains(target)) onClose();
     };
 

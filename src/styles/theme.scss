@@ -7,12 +7,9 @@
     /* Direct background */
     --panel: #1e1e1e;
     /* Surface level */
-    --card: #242424;
-    /* Elevated surface */
 
     --soft: #2c2c2c;
     --soft-2: #383838;
-    --soft-3: color-mix(in srgb, #66a5eb 25%, var(--bg));
     /* Primary Purple in dark mode */
 
     --white: #ffffff;
@@ -50,12 +47,9 @@
 [data-theme="light"] {
     --bg: #f7f7f8;
     --panel: #ffffff;
-    --card: #ffffff;
 
     --soft: #f1f1f2;
     --soft-2: #e9e9eb;
-
-    --soft-3: #111113c8;
 
     --text: #111113;
     --secondery-text: #111113bb;

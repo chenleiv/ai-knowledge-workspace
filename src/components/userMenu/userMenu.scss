@@ -46,7 +46,7 @@
     top: calc(100% + 8px);
     width: 240px;
 
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--panel);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 
@@ -60,7 +60,7 @@
     animation: menu-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
     [data-theme="dark"] & {
-        background: rgba(30, 41, 59, 0.9);
+        background: var(--panel);
     }
 }
 
@@ -78,7 +78,7 @@
 
 .user-menu__header {
     padding: 16px;
-    background: var(--soft-bg);
+    background: var(--soft);
     /* Use soft background if available, else transparent */
     border-bottom: 1px solid var(--border);
 }

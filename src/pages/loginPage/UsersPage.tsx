@@ -5,7 +5,7 @@ export default function UsersPage() {
 
   return (
     <div className="panel">
-      <h2 style={{ marginTop: 0 }}>Users</h2>
+      <h2>Users</h2>
 
       {!user ? (
         <div className="empty">Not logged in.</div>
@@ -21,7 +21,7 @@ export default function UsersPage() {
           <div className="section">
             <div className="label">Roles</div>
             <div className="text">
-              <ul style={{ marginTop: 8 }}>
+              <ul>
                 <li>
                   <b>admin</b>: can create/update/delete/import/export
                 </li>

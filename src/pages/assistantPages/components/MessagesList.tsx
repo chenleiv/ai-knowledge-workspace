@@ -13,7 +13,6 @@ export default function MessagesList({ messages, isThinking, onTypingComplete }:
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // Best-effort: scroll to bottom on new messages
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length, isThinking]);
 

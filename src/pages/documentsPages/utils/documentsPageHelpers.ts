@@ -18,8 +18,8 @@ export function normalizeImportedDocuments(parsed: unknown): DocumentItem[] {
   const rawArray: unknown = Array.isArray(parsed)
     ? parsed
     : isRecord(parsed) && Array.isArray(parsed.documents)
-    ? parsed.documents
-    : [];
+      ? parsed.documents
+      : [];
 
   if (!Array.isArray(rawArray)) return [];
 
@@ -33,7 +33,6 @@ export function normalizeImportedDocuments(parsed: unknown): DocumentItem[] {
     const summary = asString(item.summary);
     const content = asString(item.content);
 
-    // allow missing id in imported JSON
     const id = asNumber(item.id) ?? Date.now() + out.length;
 
     if (!title || !category || !summary || !content) continue;

@@ -6,18 +6,40 @@ import { chatWithAI } from "../../api/aiClient";
 import type { ChatMessage, SourceRef } from "./types";
 import { CHAT_KEY, CONTEXT_KEY, buildSnippet, scoreDoc, uid } from "./utils";
 import { sameArray } from "../documentsPages/utils/ordering";
-import { Check, PanelRight } from "lucide-react";
+import { Check, PanelLeft, PanelRight } from "lucide-react";
 
 import ContextPanel from "./components/ContextPanel";
 import MessagesList from "./components/MessagesList";
 import Composer from "./components/Composer";
 import { loadJson, saveJson } from "../../utils/storage";
 
-const INITIAL_GREETING =
-  "Select documents on the left to focus my answer on specific sources, or ask me anything to search across your entire library.";
-
 export default function AssistantPage() {
-  const { docs, loading: docsLoading, error: docsError, loadDocuments } = useDocuments();
+  const {
+    docs,
+    loading: docsLoading,
+    error: docsError,
+    loadDocuments,
+  } = useDocuments();
+
+  const INITIAL_GREETING = (
+    <div className="initial-greeting-container">
+      <div className="initial-greeting-mobile">
+        <p className="greeting-title">How can I help you?</p>
+        <p className="greeting-body">
+          To focus my search, you can select specific documents from the list.
+        </p>
+        <button
+          className="greeting-button"
+          onClick={() => setIsContextOpen(true)}
+        >
+          Select documents
+        </button>
+      </div>
+      <div className="initial-greeting-desktop">
+        To focus my search, you can select specific documents from the list.
+      </div>
+    </div>
+  );
 
   const [contextQuery, setContextQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>(
@@ -172,8 +194,9 @@ export default function AssistantPage() {
 
   return (
     <div
-      className={`assistant-shell ${showContextPanel ? "with-context" : "no-context"
-        }`}
+      className={`assistant-shell ${
+        showContextPanel ? "with-context" : "no-context"
+      }`}
     >
       <aside
         className={`context-panel-container ${showContextPanel ? "mobile-open" : ""}`}
@@ -229,7 +252,7 @@ export default function AssistantPage() {
               title="Toggle Context"
             >
               <span>Documents</span>
-              <PanelRight />
+              <PanelLeft />
             </button>
           </div>
 

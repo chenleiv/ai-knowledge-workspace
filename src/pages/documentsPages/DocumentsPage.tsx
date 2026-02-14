@@ -42,9 +42,9 @@ export default function DocumentsPage() {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [showForbidden, setShowForbidden] = useState(false);
   const [activeDocId, setActiveDocId] = useState<number | null>(null);
+  const [isPaneDirty, setIsPaneDirty] = useState(false);
 
   const lastActiveDocIdRef = useRef<number | null>(null);
-
 
   const activeDoc = (() => {
     if (activeDocId == null) return null;
@@ -91,8 +91,6 @@ export default function DocumentsPage() {
 
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
 
-
-
   function handleBackToList() {
     setMobileView("list");
     setActiveDocId(null);
@@ -129,7 +127,18 @@ export default function DocumentsPage() {
     setMobileView("detail");
   }
 
-  function openCreate() {
+  async function openCreate() {
+    if (isPaneDirty) {
+      const ok = await confirm({
+        title: "Unsaved Changes",
+        message:
+          "You have unsaved changes. Are you sure you want to discard them?",
+        confirmLabel: "Discard",
+        cancelLabel: "Stay",
+        variant: "danger",
+      });
+      if (!ok) return;
+    }
     setQuery("");
     lastActiveDocIdRef.current = activeDocId ?? null;
     setIsCreating(true);
@@ -140,9 +149,7 @@ export default function DocumentsPage() {
   function onCancelCreate() {
     setIsCreating(false);
 
-    const fallback =
-      lastActiveDocIdRef.current ??
-      (orderedDocs[0]?.id ?? null);
+    const fallback = lastActiveDocIdRef.current ?? orderedDocs[0]?.id ?? null;
 
     setActiveDocId(fallback);
     if (fallback) {
@@ -152,7 +159,21 @@ export default function DocumentsPage() {
     }
   }
 
-  function openDocument(id: number) {
+  async function openDocument(id: number) {
+    if (id === activeDocId && !isCreating) return;
+
+    if (isPaneDirty) {
+      const ok = await confirm({
+        title: "Unsaved Changes",
+        message:
+          "You have unsaved changes. Are you sure you want to discard them?",
+        confirmLabel: "Discard",
+        cancelLabel: "Stay",
+        variant: "danger",
+      });
+      if (!ok) return;
+    }
+
     setIsCreating(false);
     setActiveDocId(id);
     setMobileView("detail");
@@ -205,7 +226,6 @@ export default function DocumentsPage() {
 
       const wasActive = activeDocId === doc.id;
 
-
       setDocs((prev) => prev.filter((d) => d.id !== doc.id));
 
       setOrder((prev) => {
@@ -216,8 +236,7 @@ export default function DocumentsPage() {
 
       if (wasActive) {
         setActiveDocId(() => {
-          const nextOrdered = orderedDocs
-            .filter((d) => d.id !== doc.id);
+          const nextOrdered = orderedDocs.filter((d) => d.id !== doc.id);
           return nextOrdered[0]?.id ?? null;
         });
         setMobileView("list");
@@ -245,7 +264,7 @@ export default function DocumentsPage() {
         d.title.toLowerCase().includes(q) ||
         d.category.toLowerCase().includes(q) ||
         d.summary.toLowerCase().includes(q) ||
-        d.content.toLowerCase().includes(q)
+        d.content.toLowerCase().includes(q),
     );
   })();
 
@@ -309,7 +328,7 @@ export default function DocumentsPage() {
 
         if (documents.length === 0) {
           setError(
-            'Import file must be a JSON array of documents (or { "documents": [...] }).'
+            'Import file must be a JSON array of documents (or { "documents": [...] }).',
           );
           return;
         }
@@ -334,7 +353,10 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className={`documents-layout ${mobileView === "detail" ? "mobile-view-detail" : "mobile-view-list"}`} role="presentation">
+    <div
+      className={`documents-layout ${mobileView === "detail" ? "mobile-view-detail" : "mobile-view-list"}`}
+      role="presentation"
+    >
       <div className="documents-sidebar">
         <DocumentsSidebar
           isAdmin={isAdmin}
@@ -373,11 +395,14 @@ export default function DocumentsPage() {
           onCreated={handleCreated}
           hasDocs={docs.length > 0}
           onSaved={(updated) => {
-            setDocs((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+            setDocs((prev) =>
+              prev.map((d) => (d.id === updated.id ? updated : d)),
+            );
           }}
           onBack={handleBackToList}
           showMobileHint={showMobileHint}
           onDismissHint={dismissHint}
+          onDirtyChange={setIsPaneDirty}
         />
       </section>
     </div>

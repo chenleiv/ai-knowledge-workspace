@@ -31,6 +31,12 @@
     box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
     transform: translateY(-1px);
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
 }
 
 .secondary-btn {
@@ -41,6 +47,12 @@
   &:hover {
     background: var(--soft);
     border-color: var(--soft-2);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
 }
 
@@ -81,6 +93,12 @@
     &:hover {
       background: var(--danger-bg);
     }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
 }
 

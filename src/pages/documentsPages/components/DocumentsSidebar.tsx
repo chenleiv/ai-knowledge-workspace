@@ -16,6 +16,8 @@ type Props = {
   onNew: () => void;
   onExport: () => void;
   onImport: (mode: "merge" | "replace") => void;
+  showOnlyFavorites: boolean;
+  onToggleFavorites: () => void;
   children: React.ReactNode;
 };
 
@@ -29,6 +31,8 @@ export default function DocumentsSidebar({
   onNew,
   onExport,
   onImport,
+  showOnlyFavorites,
+  onToggleFavorites,
   children,
 }: Props) {
   return (
@@ -51,6 +55,8 @@ export default function DocumentsSidebar({
           onExport={onExport}
           onImport={onImport}
           isAdmin={isAdmin}
+          showOnlyFavorites={showOnlyFavorites}
+          onToggleFavorites={onToggleFavorites}
         />
 
         <div className="search-row">

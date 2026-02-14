@@ -101,6 +101,7 @@ function SortableRow({
         title={doc.title}
         category={doc.category}
         active={active}
+        isFavorite={isFavorite}
         isDragging={isDragging}
         onClick={onOpen}
         onKeyDown={(e) => {

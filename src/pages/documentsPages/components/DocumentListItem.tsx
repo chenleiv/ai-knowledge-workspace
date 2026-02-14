@@ -1,44 +1,52 @@
 import React from "react";
+import { Star } from "lucide-react";
 
 type Props = {
-    title: string;
-    category?: string;
-    active: boolean;
-    isDragging?: boolean;
-    onClick: () => void;
-    onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
-    actions: React.ReactNode;
+  title: string;
+  category?: string;
+  active: boolean;
+  isFavorite?: boolean;
+  isDragging?: boolean;
+  onClick: () => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  actions: React.ReactNode;
 };
 
 export default function DocumentListItem({
-    title,
-    active,
-    isDragging,
-    onClick,
-    onKeyDown,
-    actions,
+  title,
+  active,
+  isFavorite,
+  isDragging,
+  onClick,
+  onKeyDown,
+  actions,
 }: Props) {
-    return (
-        <div
-            className={[
-                "doc-row",
-                active ? "is-active" : "",
-                isDragging ? "is-dragging" : "",
-            ].join(" ")}
-            role="button"
-            tabIndex={0}
-            onClick={onClick}
-            onKeyDown={onKeyDown}
-        >
-            <div className="doc-row-main">
-                <div className="doc-row-title" title={title}>
-                    {title}
-                </div>
-            </div>
-
-            <div className="doc-row-actions" onClick={(e) => e.stopPropagation()}>
-                {actions}
-            </div>
+  return (
+    <div
+      className={[
+        "doc-row",
+        active ? "is-active" : "",
+        isDragging ? "is-dragging" : "",
+      ].join(" ")}
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+    >
+      <div className="doc-row-main">
+        <div className="doc-row-title" title={title}>
+          {title}
         </div>
-    );
+        {isFavorite && (
+          <div className="doc-row-favorite" title="Favorite">
+            <Star size={14} fill="currentColor" />
+          </div>
+        )}
+      </div>
+
+      <div className="doc-row-actions" onClick={(e) => e.stopPropagation()}>
+        {actions}
+      </div>
+    </div>
+  );
 }

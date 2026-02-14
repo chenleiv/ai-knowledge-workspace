@@ -40,7 +40,7 @@ function createAccessToken(email, role) {
     return jwt.sign({ sub: email, role }, JWT_SECRET, { expiresIn: `${ACCESS_TOKEN_MINUTES}m` });
 }
 
-export function getCurrentUser(req, res, next) {
+export async function getCurrentUser(req, res, next) {
     const token = req.cookies[COOKIE_NAME];
     if (!token) {
         return res.status(401).json({ detail: 'Not authenticated' });
@@ -48,7 +48,11 @@ export function getCurrentUser(req, res, next) {
 
     try {
         const payload = jwt.verify(token, JWT_SECRET);
-        req.user = { email: payload.sub, role: payload.role };
+        const user = await User.findOne({ email: payload.sub });
+        if (!user) {
+            return res.status(401).json({ detail: 'User not found' });
+        }
+        req.user = user;
         next();
     } catch (err) {
         return res.status(401).json({ detail: 'Invalid token' });
@@ -98,7 +102,35 @@ router.post('/logout', (req, res) => {
 });
 
 router.get('/me', getCurrentUser, (req, res) => {
-    res.json(req.user);
+    res.json({
+        email: req.user.email,
+        role: req.user.role,
+        favorites: req.user.favorites || []
+    });
+});
+
+router.post('/favorites/toggle', getCurrentUser, async (req, res) => {
+    try {
+        const { documentId } = req.body;
+        if (!documentId) {
+            return res.status(400).json({ detail: 'Document ID is required' });
+        }
+
+        const user = req.user;
+        const index = user.favorites.indexOf(documentId);
+
+        if (index > -1) {
+            user.favorites.splice(index, 1);
+        } else {
+            user.favorites.push(documentId);
+        }
+
+        await user.save();
+        res.json({ favorites: user.favorites });
+    } catch (err) {
+        console.error('Toggle favorite failed:', err);
+        res.status(500).json({ detail: 'Server error' });
+    }
 });
 
 export default router;

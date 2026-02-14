@@ -15,8 +15,9 @@ import { useAuth } from "../../auth/useAuth";
 import { downloadExport } from "../../api/downloadExport";
 import { normalizeImportedDocuments } from "./utils/documentsPageHelpers";
 import { applyOrder, normalizeOrder, sameArray } from "./utils/ordering";
-import { saveJson, scopedKey } from "../../utils/storage";
+import { saveJson, loadJson, scopedKey } from "../../utils/storage";
 import { useStatus } from "../../components/statusBar/useStatus";
+import { toggleFavorite as apiToggleFavorite } from "../../api/authClient";
 import DocumentPane from "./components/DocumentPane";
 import DocumentsSidebar from "./components/DocumentsSidebar";
 import { useDocuments } from "../../context/DocumentsContext";
@@ -49,6 +50,7 @@ export default function DocumentsPage() {
   const [showForbidden, setShowForbidden] = useState(false);
   const [activeDocId, setActiveDocId] = useState<number | null>(null);
   const [isPaneDirty, setIsPaneDirty] = useState(false);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
   const lastActiveDocIdRef = useRef<number | null>(null);
 
@@ -61,6 +63,14 @@ export default function DocumentsPage() {
     setError(null);
     await loadDocuments();
   }, [loadDocuments]);
+
+  useEffect(() => {
+    if (user?.favorites) {
+      const favMap: Record<string | number, boolean> = {};
+      user.favorites.forEach((id) => (favMap[id] = true));
+      setFavorites(favMap);
+    }
+  }, [user]);
 
   useEffect(() => {
     void load();
@@ -202,12 +212,29 @@ export default function DocumentsPage() {
     });
   }
 
-  function toggleFavorite(id: number) {
-    setFavorites((prev) => {
-      const next = { ...prev, [id]: !prev[id] };
-      if (!next[id]) delete next[id];
-      return next;
-    });
+  async function toggleFavorite(id: number) {
+    try {
+      // Optimistic update
+      setFavorites((prev) => {
+        const next = { ...prev, [id]: !prev[id] };
+        if (!next[id]) delete next[id];
+        return next;
+      });
+
+      await apiToggleFavorite(id.toString());
+    } catch (e) {
+      // Rollback on error
+      setFavorites((prev) => {
+        const next = { ...prev, [id]: !prev[id] };
+        if (!next[id]) delete next[id];
+        return next;
+      });
+      status.show({
+        kind: "error",
+        title: "Update failed",
+        message: "Failed to update favorites.",
+      });
+    }
   }
 
   function toggleCardMenu(id: number) {
@@ -262,10 +289,16 @@ export default function DocumentsPage() {
 
   const orderedDocs = applyOrder(docs, order);
   const filteredDocs = (() => {
-    const q = query.toLowerCase().trim();
-    if (!q) return orderedDocs;
+    let result = orderedDocs;
 
-    return orderedDocs.filter(
+    if (showOnlyFavorites) {
+      result = result.filter((d) => favorites[d.id]);
+    }
+
+    const q = query.toLowerCase().trim();
+    if (!q) return result;
+
+    return result.filter(
       (d) =>
         d.title.toLowerCase().includes(q) ||
         d.category.toLowerCase().includes(q) ||
@@ -374,6 +407,8 @@ export default function DocumentsPage() {
           onNew={openCreate}
           onExport={() => void onExport()}
           onImport={(mode) => void requestImport(mode)}
+          showOnlyFavorites={showOnlyFavorites}
+          onToggleFavorites={() => setShowOnlyFavorites((prev) => !prev)}
         >
           <DocumentsList
             docs={regularDocs}

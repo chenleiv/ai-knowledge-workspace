@@ -7,6 +7,8 @@ type Props = {
   onExport: () => Promise<void> | void;
   onImport: (mode: "merge" | "replace") => void;
   isAdmin: boolean;
+  showOnlyFavorites: boolean;
+  onToggleFavorites: () => void;
 };
 
 export default function DocumentsHeader({
@@ -14,6 +16,8 @@ export default function DocumentsHeader({
   onExport,
   onImport,
   isAdmin,
+  showOnlyFavorites,
+  onToggleFavorites,
 }: Props) {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -41,9 +45,14 @@ export default function DocumentsHeader({
           {isExporting ? "Exporting..." : "Export"}
         </button>
       </div>
-      <div className="add-btn favorite-buttons text-btn">
-        <Star />
-      </div>
+      <button
+        className={`add-btn favorite-buttons text-btn ${showOnlyFavorites ? "active" : ""}`}
+        type="button"
+        onClick={onToggleFavorites}
+        title={showOnlyFavorites ? "Show all documents" : "Show only favorites"}
+      >
+        <Star size={20} fill={showOnlyFavorites ? "currentColor" : "none"} />
+      </button>
       <button className="add-btn text-btn" type="button" onClick={onNew}>
         <FilePlusCorner />
       </button>

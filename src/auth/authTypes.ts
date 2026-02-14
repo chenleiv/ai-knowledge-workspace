@@ -1,7 +1,7 @@
 export const AUTH_USER_KEY = "authUser";
 
 export type Role = "admin" | "viewer";
-export type AuthUser = { email: string; role: Role };
+export type AuthUser = { email: string; role: Role; favorites: string[] };
 
 export type AuthContextValue = {
   user: AuthUser | null;

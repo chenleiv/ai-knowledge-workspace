@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 
@@ -32,28 +32,25 @@ export default function UserMenu() {
 
   const isAdmin = user?.role === "admin";
 
-  const items: MenuItem[] = useMemo(
-    () => [
-      { type: "link", label: "Users", to: "/users", show: isAdmin },
-      {
-        type: "action",
-        label: isLoggingOut ? "Logging out..." : "Logout",
-        danger: true,
-        show: true,
-        onClick: async () => {
-          setIsLoggingOut(true);
-          try {
-            await logout();
-            setOpen(false);
-            nav("/login", { replace: true });
-          } finally {
-            setIsLoggingOut(false);
-          }
-        },
+  const items: MenuItem[] = [
+    { type: "link", label: "Users", to: "/users", show: isAdmin },
+    {
+      type: "action",
+      label: isLoggingOut ? "Logging out..." : "Logout",
+      danger: true,
+      show: true,
+      onClick: async () => {
+        setIsLoggingOut(true);
+        try {
+          await logout();
+          setOpen(false);
+          nav("/login", { replace: true });
+        } finally {
+          setIsLoggingOut(false);
+        }
       },
-    ],
-    [isAdmin, isLoggingOut, logout, nav]
-  );
+    },
+  ];
 
   const visible = items.filter((it) => it.show !== false);
 

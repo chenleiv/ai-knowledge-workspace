@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useRef } from "react";
 import {
     DndContext,
     PointerSensor,
@@ -140,7 +140,7 @@ export default function DocumentsList({
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
-    const ids = useMemo(() => docs.map((d) => d.id), [docs]);
+    const ids = docs.map((d) => d.id);
 
     return (
         <DndContext

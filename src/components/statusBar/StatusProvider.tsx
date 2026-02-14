@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { StatusMessage } from "./statusTypes";
 import { StatusContext, type StatusApi } from "./statusContext";
 import StatusBar from "./StatusBar";
@@ -11,33 +11,30 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
   const [msg, setMsg] = useState<StatusMessage | null>(null);
   const timerRef = useRef<number | null>(null);
 
-  const clear = useCallback(() => {
+  function clear() {
     setMsg(null);
     if (timerRef.current != null) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-  }, []);
+  }
 
-  const show = useCallback(
-    (next: Omit<StatusMessage, "id">) => {
-      clear();
+  function show(next: Omit<StatusMessage, "id">) {
+    clear();
 
-      const full: StatusMessage = {
-        id: uid(),
-        timeoutMs: next.kind === "error" ? 0 : 2500,
-        ...next,
-      };
-      setMsg(full);
+    const full: StatusMessage = {
+      id: uid(),
+      timeoutMs: next.kind === "error" ? 0 : 2500,
+      ...next,
+    };
+    setMsg(full);
 
-      if ((full.timeoutMs ?? 0) > 0) {
-        timerRef.current = window.setTimeout(() => clear(), full.timeoutMs);
-      }
-    },
-    [clear]
-  );
+    if ((full.timeoutMs ?? 0) > 0) {
+      timerRef.current = window.setTimeout(() => clear(), full.timeoutMs);
+    }
+  }
 
-  const api: StatusApi = useMemo(() => ({ show, clear }), [show, clear]);
+  const api: StatusApi = { show, clear };
 
   return (
     <StatusContext value={api}>

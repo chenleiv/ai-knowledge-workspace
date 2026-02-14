@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 type Props = {
   open: boolean;
@@ -25,9 +25,7 @@ export default function ConfirmDialog({
   const cancelRef = useRef<HTMLButtonElement | null>(null);
   const lastActiveEl = useRef<HTMLElement | null>(null);
 
-  const confirmClass = useMemo(() => {
-    return variant === "danger" ? "danger-btn" : "primary-btn";
-  }, [variant]);
+  const confirmClass = variant === "danger" ? "danger-btn" : "primary-btn";
 
   useEffect(() => {
     if (!open) return;

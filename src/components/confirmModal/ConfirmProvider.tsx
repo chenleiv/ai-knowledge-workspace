@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import ConfirmDialog from "./ConfirmDialog";
 import {
   ConfirmContext,
@@ -18,7 +18,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
     variant: "danger",
   });
 
-  const confirm = useCallback<ConfirmFn>((opts) => {
+  const confirm: ConfirmFn = (opts) => {
     setOptions({
       title: opts.title ?? "Are you sure?",
       message: opts.message,
@@ -32,16 +32,16 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
     return new Promise<boolean>((resolve) => {
       resolverRef.current = resolve;
     });
-  }, []);
+  }
 
-  const close = useCallback((result: boolean) => {
+  function close(result: boolean) {
     setOpen(false);
     const resolve = resolverRef.current;
     resolverRef.current = null;
     resolve?.(result);
-  }, []);
+  }
 
-  const value = useMemo(() => confirm, [confirm]);
+  const value = confirm;
 
   const title = options.title ?? "Are you sure?";
   const confirmLabel = options.confirmLabel ?? "Confirm";

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DocumentsList from "./components/DocumentList";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -46,12 +46,12 @@ export default function DocumentsPage() {
   const lastActiveDocIdRef = useRef<number | null>(null);
 
 
-  const activeDoc = useMemo(() => {
+  const activeDoc = (() => {
     if (activeDocId == null) return null;
     return docs.find((d) => d.id === activeDocId) ?? null;
-  }, [activeDocId, docs]);
+  })();
 
-  const load = useCallback(async () => {
+  async function load() {
     setError(null);
 
     try {
@@ -73,7 +73,7 @@ export default function DocumentsPage() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load documents");
     }
-  }, [orderKey]);
+  }
 
   useEffect(() => {
     void load();
@@ -232,8 +232,8 @@ export default function DocumentsPage() {
     }
   }
 
-  const orderedDocs = useMemo(() => applyOrder(docs, order), [docs, order]);
-  const filteredDocs = useMemo(() => {
+  const orderedDocs = applyOrder(docs, order);
+  const filteredDocs = (() => {
     const q = query.toLowerCase().trim();
     if (!q) return orderedDocs;
 
@@ -244,7 +244,7 @@ export default function DocumentsPage() {
         d.summary.toLowerCase().includes(q) ||
         d.content.toLowerCase().includes(q)
     );
-  }, [query, orderedDocs]);
+  })();
 
   const regularDocs = filteredDocs;
 

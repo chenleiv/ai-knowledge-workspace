@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { } from "react";
 import type { DocumentItem } from "../../../api/documentsClient";
 
 type Props = {
@@ -32,11 +32,11 @@ export default function ContextPanel({
   onChangeQuery,
   onClearSelection,
 }: Props) {
-  const filteredDocs = useMemo(() => {
+  const filteredDocs = (() => {
     const q = contextQuery.toLowerCase().trim();
     if (!q) return docs;
     return docs.filter((d) => matchesQuery(d, q));
-  }, [docs, contextQuery]);
+  })();
 
   const hasSelection = selectedIds.length > 0;
 
@@ -44,19 +44,17 @@ export default function ContextPanel({
     ? `Use selected documents. (${selectedIds.length} selected)`
     : "No selection — Use all documents.";
 
-  const isSelected = useCallback(
-    (id: number) => selectedIds.includes(id),
-    [selectedIds]
-  );
+  function isSelected(id: number) {
+    return selectedIds.includes(id);
+  }
 
-  const handleToggle = useCallback(
-    (id: number) => onToggleSelected(id),
-    [onToggleSelected]
-  );
+  function handleToggle(id: number) {
+    onToggleSelected(id);
+  }
 
-  const handleClear = useCallback(() => {
+  function handleClear() {
     onClearSelection();
-  }, [onClearSelection]);
+  }
 
   return (
     <aside className="context-panel">

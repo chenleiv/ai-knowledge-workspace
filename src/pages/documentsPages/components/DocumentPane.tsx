@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useActionState, useState } from "react";
 import type { DocumentItem, DocumentInput } from "../../../api/documentsClient";
 import { createDocument, updateDocument } from "../../../api/documentsClient";
 import { useStatus } from "../../../components/statusBar/useStatus";
@@ -32,10 +32,10 @@ function emptyInput(): DocumentInput {
 
 function normalizeInput(i: DocumentInput): DocumentInput {
     return {
-        title: i.title.trim(),
-        category: i.category.trim(),
-        summary: i.summary.trim(),
-        content: i.content.trim(),
+        title: (i.title || "").trim(),
+        category: (i.category || "").trim(),
+        summary: (i.summary || "").trim(),
+        content: (i.content || "").trim(),
     };
 }
 
@@ -70,65 +70,61 @@ export default function DocumentPane({
         return emptyInput();
     });
 
-    const [saving, setSaving] = useState(false);
-
-    const baseline = useMemo(() => {
+    const baseline = (() => {
         if (isCreating) return emptyInput();
         if (doc) return toInput(doc);
         return emptyInput();
-    }, [isCreating, doc]);
+    })();
 
-    const isDirty = useMemo(() => {
-        return !isSameInput(normalizeInput(form), normalizeInput(baseline));
-    }, [form, baseline]);
+    const isDirty = !isSameInput(normalizeInput(form), normalizeInput(baseline));
 
-    const canSave = canEdit && !saving && isDirty;
-
-    async function handleSave() {
-        if (!canEdit) {
-            status.show({ kind: "error", title: "Forbidden", message: "Admins only." });
-            return;
-        }
-
-        const cleaned = normalizeInput(form);
-
-        if (!cleaned.title || !cleaned.category || !cleaned.summary || !cleaned.content) {
-            status.show({
-                kind: "error",
-                title: "Missing fields",
-                message: "Please fill all fields.",
-            });
-            return;
-        }
-
-        setSaving(true);
-        try {
-            if (isCreating) {
-                const created = await createDocument(cleaned);
-                onCreated(created);
-                status.show({ kind: "success", message: "Document created." });
-                return;
+    const [error, saveAction, isPending] = useActionState(
+        async (_prev: string | null, formData: FormData) => {
+            if (!canEdit) {
+                const msg = "Admins only.";
+                status.show({ kind: "error", title: "Forbidden", message: msg });
+                return msg;
             }
 
-            if (!doc) return;
+            const cleaned: DocumentInput = {
+                title: (formData.get("title") as string).trim(),
+                category: (formData.get("category") as string).trim(),
+                summary: (formData.get("summary") as string).trim(),
+                content: (formData.get("content") as string).trim(),
+            };
 
-            const updated = await updateDocument(doc.id, cleaned);
-            onSaved(updated);
-            setForm(toInput(updated));
-            setMode("view");
+            if (!cleaned.title || !cleaned.category || !cleaned.summary || !cleaned.content) {
+                const msg = "Please fill all fields.";
+                status.show({ kind: "error", title: "Missing fields", message: msg });
+                return msg;
+            }
 
-            status.show({ kind: "success", message: "Saved." });
-        } catch (e) {
-            status.show({
-                kind: "error",
-                title: "Save failed",
-                message: e instanceof Error ? e.message : "Save failed.",
-                timeoutMs: 0,
-            });
-        } finally {
-            setSaving(false);
-        }
-    }
+            try {
+                if (isCreating) {
+                    const created = await createDocument(cleaned);
+                    onCreated(created);
+                    status.show({ kind: "success", message: "Document created." });
+                    return null;
+                }
+
+                if (!doc) return "No document selected";
+
+                const updated = await updateDocument(doc.id, cleaned);
+                onSaved(updated);
+                setForm(toInput(updated));
+                setMode("view");
+                status.show({ kind: "success", message: "Saved." });
+                return null;
+            } catch (e) {
+                const msg = e instanceof Error ? e.message : "Save failed.";
+                status.show({ kind: "error", title: "Save failed", message: msg, timeoutMs: 0 });
+                return msg;
+            }
+        },
+        null
+    );
+
+    const canSave = canEdit && !isPending && isDirty;
 
     function handleCancel() {
         if (isCreating) {
@@ -167,7 +163,7 @@ export default function DocumentPane({
     const paneCategory = isCreating ? "" : (doc?.category ?? "");
 
     return (
-        <div className="doc-pane">
+        <form className="doc-pane" action={saveAction}>
             {onBack && (
                 <div className="mobile-back-wrapper">
                     <button
@@ -215,19 +211,18 @@ export default function DocumentPane({
                     ) : (
                         <>
                             <button
-                                type="button"
+                                type="submit"
                                 className="primary-btn"
-                                onClick={handleSave}
                                 disabled={!canSave}
                             >
-                                {saving ? "Saving..." : "Save"}
+                                {isPending ? "Saving..." : "Save"}
                             </button>
 
                             <button
                                 type="button"
                                 className="primary-btn"
                                 onClick={handleCancel}
-                                disabled={saving}
+                                disabled={isPending}
                             >
                                 Cancel
                             </button>
@@ -250,9 +245,11 @@ export default function DocumentPane({
                 </div>
             ) : (
                 <div className="doc-pane-body">
+                    {error && <div className="error-banner">{error}</div>}
                     <label className="doc-pane-label">
                         Title
                         <input
+                            name="title"
                             value={form.title}
                             onChange={(e) => setForm({ ...form, title: e.target.value })}
                         />
@@ -261,6 +258,7 @@ export default function DocumentPane({
                     <label className="doc-pane-label">
                         Category
                         <input
+                            name="category"
                             value={form.category}
                             onChange={(e) => setForm({ ...form, category: e.target.value })}
                         />
@@ -269,6 +267,7 @@ export default function DocumentPane({
                     <label className="doc-pane-label">
                         Summary
                         <textarea
+                            name="summary"
                             rows={4}
                             value={form.summary}
                             onChange={(e) => setForm({ ...form, summary: e.target.value })}
@@ -278,6 +277,7 @@ export default function DocumentPane({
                     <label className="doc-pane-label">
                         Content
                         <textarea
+                            name="content"
                             rows={16}
                             value={form.content}
                             onChange={(e) => setForm({ ...form, content: e.target.value })}
@@ -285,6 +285,6 @@ export default function DocumentPane({
                     </label>
                 </div>
             )}
-        </div>
+        </form>
     );
 }

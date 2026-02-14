@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import "./assistantPage.scss";
 
 import { listDocuments, type DocumentItem } from "../../api/documentsClient";
@@ -41,10 +41,10 @@ export default function AssistantPage() {
   const [isSending, setIsSending] = useState(false);
   const [isContextOpen, setIsContextOpen] = useState(false);
 
-  const onClearSelection = useCallback(() => {
+  function onClearSelection() {
     setSelectedIds([]);
     saveJson(CONTEXT_KEY, []);
-  }, []);
+  }
   async function load() {
     setDocsLoading(true);
     setDocsError(null);
@@ -88,11 +88,11 @@ export default function AssistantPage() {
     });
   }
 
-  const selectedDocs = useMemo(() => {
+  const selectedDocs = (() => {
     if (selectedIds.length === 0) return [];
     const set = new Set(selectedIds);
     return docs.filter((d) => set.has(d.id));
-  }, [docs, selectedIds]);
+  })();
 
   function clearChat() {
     setMessages([
@@ -173,11 +173,11 @@ export default function AssistantPage() {
     }
   }
 
-  const handleTypingComplete = useCallback((id: string) => {
+  function handleTypingComplete(id: string) {
     setMessages((prev) =>
       prev.map((m) => (m.id === id ? { ...m, isTyped: true } : m)),
     );
-  }, []);
+  }
 
   return (
     <div

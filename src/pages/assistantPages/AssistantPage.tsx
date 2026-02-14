@@ -21,38 +21,19 @@ export default function AssistantPage() {
     loadDocuments,
   } = useDocuments();
 
-  const INITIAL_GREETING = (
-    <div className="initial-greeting-container">
-      <div className="initial-greeting-mobile">
-        <p className="greeting-title">How can I help you?</p>
-        <p className="greeting-body">
-          To focus my search, you can select specific documents from the list.
-        </p>
-        <button
-          className="greeting-button"
-          onClick={() => setIsContextOpen(true)}
-        >
-          Select documents
-        </button>
-      </div>
-      <div className="initial-greeting-desktop">
-        <p className="greeting-title">How can I help you?</p>
-        To focus my search, you can select specific documents from the list.
-      </div>
-    </div>
-  );
+  const GREETING_TEXT = "How can I help you?";
 
   const [contextQuery, setContextQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>(
     loadJson<number[]>(CONTEXT_KEY, []),
   );
 
-  const [messages, setMessages] = useState<ChatMessage[]>(
+  const [messages, setMessages] = useState<ChatMessage[]>(() =>
     loadJson<ChatMessage[]>(CHAT_KEY, [
       {
         id: uid(),
         role: "assistant",
-        text: INITIAL_GREETING,
+        text: GREETING_TEXT,
         isTyped: true,
         isGreeting: true,
       },
@@ -113,7 +94,7 @@ export default function AssistantPage() {
       {
         id: uid(),
         role: "assistant",
-        text: INITIAL_GREETING,
+        text: GREETING_TEXT,
         isTyped: true,
         isGreeting: true,
       },
@@ -125,10 +106,7 @@ export default function AssistantPage() {
     if (!question) return;
 
     setMessages((prev) => {
-      const isInitial =
-        prev.length === 1 &&
-        prev[0].role === "assistant" &&
-        prev[0].text === INITIAL_GREETING;
+      const isInitial = prev.length === 1 && prev[0].isGreeting;
       const history = isInitial ? [] : prev;
 
       return [...history, { id: uid(), role: "user", text: question }];
@@ -235,6 +213,7 @@ export default function AssistantPage() {
             messages={messages}
             isThinking={isSending}
             onTypingComplete={handleTypingComplete}
+            onSelectDocuments={() => setIsContextOpen(true)}
           />
           <div className="assistant-topbar">
             <button

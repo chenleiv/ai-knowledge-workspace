@@ -9,7 +9,7 @@ export type SourceRef = {
 export type ChatMessage = {
   id: string;
   role: Role;
-  text: React.ReactNode;
+  text: string;
   sources?: SourceRef[];
   isTyped?: boolean;
   isGreeting?: boolean;

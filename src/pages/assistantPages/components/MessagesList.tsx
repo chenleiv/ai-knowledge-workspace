@@ -1,17 +1,20 @@
 import { useEffect, useRef } from "react";
 import type { ChatMessage } from "../types";
 import TypewriterText from "./TypewriterText";
+import InitialGreeting from "./InitialGreeting";
 
 type Props = {
   messages: ChatMessage[];
   isThinking?: boolean;
   onTypingComplete?: (id: string) => void;
+  onSelectDocuments: () => void;
 };
 
 export default function MessagesList({
   messages,
   isThinking,
   onTypingComplete,
+  onSelectDocuments,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
@@ -32,9 +35,11 @@ export default function MessagesList({
             className={`message ${m.role} ${m.isGreeting ? "greeting" : ""}`}
           >
             <div className="bubble">
-              {isLastAssistantMessage &&
-              m.isTyped === false &&
-              typeof m.text === "string" ? (
+              {m.isGreeting ? (
+                <InitialGreeting onSelectDocuments={onSelectDocuments} />
+              ) : isLastAssistantMessage &&
+                m.isTyped === false &&
+                typeof m.text === "string" ? (
                 <TypewriterText
                   text={m.text}
                   onComplete={() => onTypingComplete?.(m.id)}

@@ -15,7 +15,7 @@ import { useAuth } from "../../auth/useAuth";
 import { downloadExport } from "../../api/downloadExport";
 import { normalizeImportedDocuments } from "./utils/documentsPageHelpers";
 import { applyOrder, normalizeOrder, sameArray } from "./utils/ordering";
-import { saveJson, loadJson, scopedKey } from "../../utils/storage";
+import { saveJson, scopedKey } from "../../utils/storage";
 import { useStatus } from "../../components/statusBar/useStatus";
 import { toggleFavorite as apiToggleFavorite } from "../../api/authClient";
 import DocumentPane from "./components/DocumentPane";
@@ -223,6 +223,7 @@ export default function DocumentsPage() {
 
       await apiToggleFavorite(id.toString());
     } catch (e) {
+      console.error(e);
       // Rollback on error
       setFavorites((prev) => {
         const next = { ...prev, [id]: !prev[id] };
